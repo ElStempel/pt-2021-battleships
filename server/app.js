@@ -3,11 +3,22 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const mongoose = require('mongoose');
+
+const uri = "mongodb+srv://pt-2021:battleships@cluster0.1sc64.mongodb.net/pt-2021-battleships?retryWrites=true&w=majority";
+mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true});
+
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log("Connected to DB");
+});
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
-var app = express();
+const app = express();
+const port = 9000;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -37,5 +48,10 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+app.listen(port, () => {
+  console.log(`Express server listening at http://localhost:${port}`)
+})
+
 
 module.exports = app;
