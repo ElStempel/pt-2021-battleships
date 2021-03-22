@@ -5,11 +5,17 @@
 ### Zawartość
 
 Obecnie:
-- Brak połączenia z bazą danych
+- Połączenie z docelową bazą danych MongoDB
 - Brak połączenia między klientem a serwerem
 - Serwer uruchamiany na porcie 9000
 - Klient uruchamiany na porcie 3000
 - Ustawiony setup pod React (client) i Express (server)
+- Obsługa bazy danych przez `mongoose`
+
+Work in Progress:
+- Połączenie pomiędzy klientem a serwerem (CORS)
+- Szkielet routingu
+- Szkielet struktury bazy danych
 
 ### Uruchamianie
 
