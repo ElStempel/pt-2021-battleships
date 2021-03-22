@@ -5,7 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
 
-const uri = "mongodb+srv://pt-2021:battleships@cluster0.1sc64.mongodb.net/pt-2021-battleships?retryWrites=true&w=majority";
+const uri = "INSERT MongoDB URI";
+// Useless bez whitelisty IP
 mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true});
 
 const db = mongoose.connection;

@@ -6,6 +6,7 @@
 
 Obecnie:
 - Połączenie z docelową bazą danych MongoDB
+- Po dostęp do bazy zgłaszać się do mnie (bez URI oraz whitelisty IP nie wejdziecie)
 - Brak połączenia między klientem a serwerem
 - Serwer uruchamiany na porcie 9000
 - Klient uruchamiany na porcie 3000
