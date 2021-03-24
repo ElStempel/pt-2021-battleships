@@ -7,7 +7,7 @@
 Obecnie:
 - Połączenie z docelową bazą danych MongoDB
 - Po dostęp do bazy zgłaszać się do mnie (bez URI oraz whitelisty IP nie wejdziecie)
-- CORS działa - można wywołać połączenie z serwerem przez klienta - [URL do testowania](localhost:9000/testing)
+- CORS działa - można wywołać połączenie z serwerem przez klienta - localhost:9000/testing
 - Serwer uruchamiany na porcie 9000
 - Klient uruchamiany na porcie 3000
 - Ustawiony setup pod React (client) i Express (server)
