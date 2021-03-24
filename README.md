@@ -27,4 +27,4 @@ Do pierwszego uruchomieniem klienta:
 Do pierwszego uruchomienia serwera:
 - `cd server`
 - `npm install`
-- `nodemon` (jeśli nie zadziała to `npm install nodemon` i powtórzyć krok)
+- `nodemon` (jeśli nie zadziała to `npm install nodemon -g` i powtórzyć krok)
