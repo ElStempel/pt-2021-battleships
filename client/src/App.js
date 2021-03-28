@@ -1,25 +1,60 @@
 import logo from './logo.svg';
 import './App.css';
+import React, { Component } from "react";
+import { render } from '@testing-library/react';
+import { useState } from "react";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: null,
+      isLoaded: false,
+      items: []
+    };
+  }
+
+  componentDidMount() {
+    fetch("http://localhost:9000/testing")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            isLoaded: true,
+            items: result.items
+          });
+        },
+        // Uwaga: to ważne, żeby obsłużyć błędy tutaj, a
+        // nie w bloku catch(), aby nie przetwarzać błędów
+        // mających swoje źródło w komponencie.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
+  }
+
+  render() {
+    const { error, isLoaded, items } = this.state;
+    if (error) {
+      return <div>Błąd: {error.message}</div>;
+    } else if (!isLoaded) {
+      return <div>Ładowanie...</div>;
+    } else {
+      return (
+        <ul>
+          {items.map(item => (
+            <li key={item.id}>
+              {item.content.name} {item.content.price + 22}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+  }
 }
 
-export default App;
+export default MyComponent;
