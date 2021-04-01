@@ -6,10 +6,12 @@ router.get('/', function(req, res, next) {
   res.send('Stats routing');
 });
 
+// UPDATE STATS
 router.patch('/update', function(req, res, next) {
   res.send('Updating stats');
 });
 
+// CHECK STATS
 router.get('/check', function(req, res, next) {
   res.send('Checking stats');
 });
