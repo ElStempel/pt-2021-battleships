@@ -14,4 +14,12 @@ router.get('/', function(req, res, next) {
   console.log(testObj);
 });
 
+router.post('/bd', function(req, res, next) {
+  res.send('tu bedzie baza');
+});
+
+router.post('/socket', function(req, res, next) {
+  res.send('gniazdko 240V');
+});
+
 module.exports = router;

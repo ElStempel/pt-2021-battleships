@@ -1,24 +1,24 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
+/* GET rooms listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-router.post('/add', function(req, res, next) {
+router.post('/create', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-router.patch('/update', function(req, res, next) {
+router.get('/list', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-router.post('/login', function(req, res, next) {
+router.post('/join', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-router.post('/logout', function(req, res, next) {
+router.post('/leave', function(req, res, next) {
   res.send('respond with a resource');
 });
 
@@ -26,7 +26,15 @@ router.post('/delete', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-router.get('/list', function(req, res, next) {
+router.post('/invite', function(req, res, next) {
+  res.send('respond with a resource');
+});
+
+router.post('/start-game', function(req, res, next) {
+  res.send('respond with a resource');
+});
+
+router.post('/end-game', function(req, res, next) {
   res.send('respond with a resource');
 });
 
