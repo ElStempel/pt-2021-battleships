@@ -41,13 +41,13 @@ class Ship():
 # ship4 = Ship("Destroyer", 3, random.randint(0, 10), random.randint(0, 10), random.randint(0, 10), random.randint(0, 10))
 # ship5 = Ship("Submarine", 3, random.randint(0, 10), random.randint(0, 10), random.randint(0, 10), random.randint(0, 10))
 
+ships = []
+
 ship1 = Ship("Dreadnought", 5, 1, 1, 5, 1)
 ship2 = Ship("Carrier", 5, 3, 5, 3, 5)
 ship3 = Ship("Cruiser", 4, 5, 7, 5, 7)
 ship4 = Ship("Destroyer", 3, 1, 3, 1, 3)
 ship5 = Ship("Submarine", 3, 1, 9, 3, 9)
-
-ships = []
 
 ships.append(ship1)
 ships.append(ship2)
@@ -55,8 +55,8 @@ ships.append(ship3)
 ships.append(ship4)
 ships.append(ship5)
 
-for x in ships:
-    print("Type " + x.shipName + " Length "+ str(x.shipLength) + " Start position X " + str(x.shipStartPosX) + " Start positionY " + str(x.shipStartPosY) + " End position X " + str(x.shipEndPosX) + " End positionY " + str(x.shipEndPosY))
+# for x in ships:
+#     print("Type " + x.shipName + " Length "+ str(x.shipLength) + " Start position X " + str(x.shipStartPosX) + " Start positionY " + str(x.shipStartPosY) + " End position X " + str(x.shipEndPosX) + " End positionY " + str(x.shipEndPosY))
 
 for x in range(10):
     for y in range(10):
@@ -86,17 +86,40 @@ countShots = 0
 countSunkShips = 0
 
 victory = 0
+time = 0
 
 while running:
-
+    ticks = pygame.time.get_ticks()
     x, y = pygame.mouse.get_pos()
+    
+    if ticks % 1000 == 0:
+        pygame.draw.rect(screen, (0, 145, 108), [1000, 180, 400, 400], 0)
+        textTime = myfont.render("Time: " + str(time), False, (0, 0, 0))
+        screen.blit(textTime, (1000, 180))
+        time += 1
+
+    drawButton = myfont.render("Draw", False, (0, 0, 0))
+    screen.blit(drawButton, (1000, 270))
+
+    defeatButton = myfont.render("Defeat", False, (0, 0, 0))
+    screen.blit(defeatButton, (1000, 360))
 
     for event in pygame.event.get():
-        pygame.draw.rect(screen, (0, 145, 108), [1000, 0, 400, 400], 0)
+        pygame.draw.rect(screen, (0, 145, 108), [1000, 180, 400, 90], 0)
+        textTime = myfont.render("Time: " + str(time), False, (0, 0, 0))
+        screen.blit(textTime, (1000, 180))
+
+        drawButton = myfont.render("Draw", False, (0, 0, 0))
+        screen.blit(drawButton, (1000, 270))
+
+        defeatButton = myfont.render("Defeat", False, (0, 0, 0))
+        screen.blit(defeatButton, (1000, 360))      
+
+        pygame.draw.rect(screen, (0, 145, 108), [1000, 0, 400, 90], 0)
         textCount = myfont.render("Shots: " + str(countShots), False, (0, 0, 0))
         screen.blit(textCount, (1000, 0))
 
-        pygame.draw.rect(screen, (0, 145, 108), [1000, 90, 400, 400], 0)
+        pygame.draw.rect(screen, (0, 145, 108), [1000, 90, 400, 90], 0)
         textSunk = myfont.render("Sunk: " + str(countSunkShips), False, (0, 0, 0))
         screen.blit(textSunk, (1000, 90))
 
