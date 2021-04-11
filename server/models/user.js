@@ -6,6 +6,9 @@ var UserSchema = new Schema(
   {
     user_name: {type: String, required: true, maxlength: 50},
     pass_hash: {type: String, required: true, maxlength: 50},
+    logged_in: {type: Boolean, required: false, default: false},
+    playing: {type: Boolean, required: false, default: false},
+    token: {type: String, required: false, defualt: null},
     stats: {
         games_played: {type: Number, required: true, default: 0},
         win_ratio: {type: Number},
