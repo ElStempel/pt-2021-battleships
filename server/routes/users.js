@@ -69,8 +69,12 @@ router.post('/delete', async function(req, res, next) {
 
 function new_Table(json_table){
   var table = []
-  for (var entry in json_table){
-    table.push({'user_name': entry.user_name, 'stats': entry.stats})
+  for (var index in json_table){
+    table.push({
+      'user_name': json_table[index].user_name, 
+      'stats': json_table[index].stats, 
+      'logged_in': json_table[index].logged_in, 
+      'playing': json_table[index].playing})
   }
   return table
 }
@@ -78,15 +82,7 @@ function new_Table(json_table){
 // LIST USERS
 router.get('/list', async function(req, res, next) {
   let all = await User.find()
-  //console.log(all)
   let tabela = await new_Table(all)
-  //let users = omit(all, ['all._id', 'all.__v', 'all.pass_hash'])
-  //let users = []
-  // for (user in all){
-  //   user_new = await omit(all, [user._id, user._v, user.pass_hash])
-  //   users.push()
-  // }
-  //users.push(omit(user, ['_id', '_v', 'pass_hash']))
   res.send(tabela);
 });
 
