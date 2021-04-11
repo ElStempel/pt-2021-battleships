@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Parcel Sandbox</title>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <script src="src/index.js"></script>
+
+    <script>
+      function chooseLogin() {
+        window.location.href = "loginPage.html";
+      }
+
+      function chooseRegister() {
+        window.location.href = "registerPage.html";
+      }
+    </script>
+
+    <br />
+    <h1 style="position: relative; left: 40%;">Battleships Online</h1>
+    <br />
+    <button class="buttonChoose" id="chooseLogin" onclick="chooseLogin()">
+      Login
+    </button>
+    <button class="buttonChoose" id="chooseRegister" onclick="chooseRegister()">
+      Create new Account
+    </button>
+
+    <div id="app"></div>
+  </body>
+</html>

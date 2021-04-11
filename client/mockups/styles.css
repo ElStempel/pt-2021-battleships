@@ -1,0 +1,128 @@
+body {
+  font-family: sans-serif;
+}
+
+.container {
+  height: 400px;
+  position: relative;
+  background-color: #d3d3d3;
+}
+
+.loginMenu {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.buttonChoose {
+  margin: 0;
+  position: relative;
+  left: 30%;
+  cursor: pointer;
+  width: 200px;
+  height: 50px;
+  font-size: 20px;
+}
+
+.buttonChoose:hover {
+  background-color: grey; /* Green */
+  color: white;
+}
+
+.button {
+  margin: 0;
+  position: absolute;
+  left: 15%;
+  cursor: pointer;
+}
+
+.button1 {
+  font-size: 25px;
+  width: 150px;
+}
+
+.button1:hover {
+  background-color: grey;
+  color: white;
+}
+
+.createButton {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.createButton:hover {
+  background-color: grey;
+  color: white;
+}
+
+.joinButton {
+  cursor: pointer;
+}
+
+.joinButton:hover {
+  background-color: grey;
+  color: white;
+}
+
+.pageAfterLogin {
+  margin: 0;
+  position: absolute;
+  left: 5%;
+}
+
+#rooms {
+  width: 350px;
+  float: left;
+  border: 1px solid black;
+  text-align: left;
+  padding: 0px 20px;
+}
+
+#roomsText {
+  float: left;
+}
+
+#createButton {
+  position: relative;
+  left: 20%;
+  transform: translateX(-50%);
+  top: 10%;
+  transform: translateY(70%);
+}
+
+#players {
+  width: 350px;
+  float: left;
+  border: 1px solid black;
+  text-align: left;
+  padding: 0px 20px;
+}
+
+#statistics {
+  width: 350px;
+  float: left;
+  border: 1px solid black;
+  text-align: left;
+  padding: 0px 20px;
+}
+
+#roomName {
+  display: inline-block;
+}
+
+#space {
+  display: inline-block;
+  word-spacing: 220px;
+}
+
+#joinButton {
+  display: inline-block;
+}
+
+input[type="checkbox"] {
+  zoom: 2;
+}
