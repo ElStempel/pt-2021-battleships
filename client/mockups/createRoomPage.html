@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Parcel Sandbox</title>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <script src="src/index.js"></script>
+
+    <script>
+      function cancel(){
+
+      }
+
+      function enableRulesChoice(){
+        document.getElementById("customRule1").disabled = false;
+        document.getElementById("customRule2").disabled = false;
+        document.getElementById("customRule3").disabled = false;
+        document.getElementById("customRule4").disabled = false;
+      }
+    </script>
+    
+    <h1 style="position: relative; left: 5%;">Battleships Online</h1>
+    <div style="position: relative; left: 8%;">
+      <h3>New Room</h3>
+      <form action="/rules.php">
+        <div style="display: inline-block;">
+          <input type="checkbox" id="customRules" name="customRules" value="customRules" onchange="enableRulesChoice();">
+          <label style="font-size: 20px;" for="customRules">Custom Rules</label><br>
+          <br>
+          <input type="checkbox" id="customRule1" name="customRule1" value="customRule1" disabled>
+          <label style="font-size: 20px;" for="customRule1">Rule 1</label><br>
+          <br>
+          <input type="checkbox" id="customRule2" name="customRule2" value="customRule2" disabled>
+          <label style="font-size: 20px;" for="customRule2">Rule 2</label><br>
+          <br>
+          <input type="checkbox" id="customRule3" name="customRule3" value="customRule3" disabled>
+          <label style="font-size: 20px;" for="customRule3">Rule 3</label><br>
+          <br>
+          <input type="checkbox" id="customRule4" name="customRule4" value="customRule4" disabled>
+          <label style="font-size: 20px;" for="customRule4">Rule 4</label><br>
+          <br><br>
+          <label style="font-size: 20px;" for="size">Choose board size</label>
+
+          <select name="size" id="size">
+            <option value="10">10 x 10</option>
+            <option value="16">16 x 16</option>
+            <option value="24">24 x 24</option>
+            <option value="30">30 x 30</option>
+          </select> 
+
+        </div>
+        <div style="display: inline-block; position: absolute; top: 40px; left: 240px;">
+          <input type="checkbox" id="inviteOnly" name="inviteOnly" value="inviteOnly">
+          <label style="font-size: 20px;" for="inviteOnly">Invite Only</label><br>
+          <br>
+          <input type="checkbox" id="otherOption" name="otherOption" value="otherOption">
+          <label style="font-size: 20px;" for="otherOption">Other Option</label><br>
+        </div>
+        <input style="display: inline-block; font-size: 20px; cursor: pointer; position: absolute; right: 120px; top: 125px;" type="submit" value="Create Room">
+        <button style="display: inline-block; font-size: 20px; cursor: pointer; position: absolute; right: 176px; top: 250px;" onclick="cancel();">Cancel</button>
+      </form>
+    </div>
+    
+    <div id="app"></div>
+
+  </body>
+</html>
