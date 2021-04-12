@@ -80,7 +80,24 @@ router.get('/list', async function(req, res, next) {
 
 // JOIN A ROOM
 router.post('/join', async function(req, res, next) {
-  res.send('Joining a room');
+  let user_check = await User.findOne({_id: req.body.player_2_id});
+  let space_in_room = await Room.findOne({_id: req.body.room_id, player_2: null});
+  if (user_check && space_in_room){
+    space_in_room.player_2 = req.body.player_2_id;
+    try {
+      await space_in_room.save()
+      res.status(201).send(space_in_room);
+    } catch (error) {
+      res.status(400).send(error)
+    }
+  } else {
+    if(!space_in_room)
+    {
+      return res.status(400).send("Room is full");
+    } else {
+      return res.status(400).send("User doesn't exist");
+    }
+  }
 });
 
 // LEAVE A ROOM
