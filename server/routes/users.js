@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/user')
-var omit = require('object.omit')
+//var omit = require('object.omit')
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
