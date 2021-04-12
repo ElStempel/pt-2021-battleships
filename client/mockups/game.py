@@ -26,6 +26,7 @@ class Ship():
         self.shipDamage = 0
         self.shipSunk = False
 
+        # if random.randint(1, 2) % 2 == 0:
         while self.shipEndPosY != self.shipStartPosY:
             self.shipStartPosY = random.randint(0, 10)
             self.shipEndPosY = random.randint(0, 10)
@@ -33,6 +34,15 @@ class Ship():
         while abs(self.shipEndPosX - self.shipStartPosX) != self.shipLength:
             self.shipStartPosX = random.randint(0, 10)
             self.shipEndPosX = random.randint(0, 10)
+        
+        # else:
+        #     while self.shipEndPosX != self.shipStartPosX:
+        #         self.shipStartPosX = random.randint(0, 10)
+        #         self.shipEndPosX = random.randint(0, 10)
+
+        #     while abs(self.shipEndPosY - self.shipStartPosY) != self.shipLength:
+        #         self.shipStartPosY = random.randint(0, 10)
+        #         self.shipEndPosY = random.randint(0, 10)
 
 
 # ship1 = Ship("Dreadnought", 5, random.randint(0, 10), random.randint(0, 10), random.randint(0, 10), random.randint(0, 10))
