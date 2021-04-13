@@ -5,7 +5,7 @@ var User = require('../models/user');
 
 /* GET rooms listing. */
 router.get('/', function(req, res, next) {
-  res.send('Rooms routing');
+  res.status(200).send('Rooms routing');
 });
 
 // CREATE A ROOM
