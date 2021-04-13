@@ -102,7 +102,18 @@ router.post('/join', async function(req, res, next) {
 
 // LEAVE A ROOM
 router.post('/leave', async function(req, res, next) {
-  res.send('Leaving a room');
+  let room_to_leave = await Room.findOne({ _id: req.body.room_id, player_2: req.body.player_2_id });
+  if(room_to_leave){
+    room_to_leave.player_2 = null;
+    try {
+      await room_to_leave.save()
+      res.status(200).send("Room left");
+    } catch (error) {
+      res.status(400).send(error)
+    }
+  } else {
+    res.status(400).send('Bad data')
+  }
 });
 
 // DELETE A ROOM
