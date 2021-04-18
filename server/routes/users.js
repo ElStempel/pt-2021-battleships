@@ -1,11 +1,11 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/user')
-var omit = require('object.omit')
+//var omit = require('object.omit')
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  res.send('Users routing');
+  res.status(200).send('Users routing');
 });
 
 // ADD USER
@@ -18,7 +18,7 @@ router.post('/add', async function(req, res, next) {
   })
   try {
     await user.save()
-    res.send(user);
+    res.status(201).send(user);
   } catch (error) {
     res.status(400).send(error)
   }
@@ -32,7 +32,7 @@ router.patch('/update', async function(req, res, next) {
     user_check.pass_hash = req.body.new_pass_hash;
     try {
       await user_check.save()
-      res.send(user_check);
+      res.status(200).send(user_check);
     } catch (error) {
       res.status(400).send(error)
     }
@@ -45,7 +45,7 @@ router.patch('/update', async function(req, res, next) {
 router.post('/login', async function(req, res, next) {
   let user_check = await User.findOne({user_name: req.body.user_name, pass_hash: req.body.pass_hash});
   if (user_check){
-    return res.send(user_check) 
+    return res.status(200).send(user_check) 
   } else {
     res.status(400).send("User doesn't exist")
   }
@@ -53,7 +53,7 @@ router.post('/login', async function(req, res, next) {
 
 // LOGOUT USER
 router.post('/logout', async function(req, res, next) {
-  res.send('Loging out');
+  res.status(200).send('Loging out');
 });
 
 // DELETE USER
@@ -61,7 +61,7 @@ router.post('/delete', async function(req, res, next) {
   let user_check = await User.deleteOne({ _id: req.body._id, pass_hash: req.body.pass_hash });
   //console.log(user_check.deletedCount)
     if (user_check.deletedCount == 1){
-      return res.send("User deleted") 
+      return res.status(200).send("User deleted") 
     } else {
       res.status(400).send("Bad data")
     }
@@ -83,7 +83,7 @@ function new_Table(json_table){
 router.get('/list', async function(req, res, next) {
   let all = await User.find()
   let tabela = await new_Table(all)
-  res.send(tabela);
+  res.status(200).send(tabela);
 });
 
 module.exports = router;
