@@ -1,6 +1,6 @@
 # PT-2021-Battleships
 
-## Działający backend oraz szkielet frontend do rozwoju. Następnie wykoanny zostanie moduł gry.
+## Działający backend oraz szkielet frontend do rozwoju. Następnie wykonany zostanie moduł gry.
 
 ### Zawartość
 
