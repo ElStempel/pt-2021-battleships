@@ -5,6 +5,15 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mongoose = require('mongoose');
+const https = require('https');
+const fs = require('fs')
+
+var key = fs.readFileSync(__dirname + '/certs/selfsigned.key');
+var cert = fs.readFileSync(__dirname + '/certs/selfsigned.crt');
+var options = {
+  key: key,
+  cert: cert
+};
 
 const uri = "mongodb+srv://pt-2021:battleships@cluster0.1sc64.mongodb.net/pt-2021-battleships?retryWrites=true&w=majority";
 // Useless bez whitelisty IP
@@ -58,8 +67,10 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.listen(port, () => {
-  console.log(`Express server listening at http://localhost:${port}`)
+var server = https.createServer(options, app);
+
+server.listen(port, () => {
+  console.log(`Express server listening at https://localhost:${port}`)
 })
 
 
