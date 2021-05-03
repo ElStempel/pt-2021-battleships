@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Parcel Sandbox</title>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <script src="src/index.js"></script>
+
+    <script>
+      var numberOfRooms = 1;
+      function createClicked() {
+        var node = document.createElement("div");
+        node.innerHTML = "<p>Room " + numberOfRooms + "</p><button class='joinButton' id='joinButton' onclick='joinClicked();'>Join</button>";
+        document.getElementById("rooms").appendChild(node);
+      }
+
+      function joinClicked(){
+
+      }
+
+      function addTop(id, wins){
+        var node = document.createElement("div");
+        node.innerHTML = "<p>User" + id + "     " + wins + " wins";
+        document.getElementById("rooms").appendChild(node);
+      }
+
+      function updateStats(){
+        var wins = "60";
+        var loses = "220";
+        var sunk = "340";
+        var other = "abc";
+        var another = "cba";
+        document.getElementById("numberOfWins").innerHTML = "Wins: " + wins;
+        document.getElementById("numberOfLoses").innerHTML = "Loses: " + loses;
+        document.getElementById("numberOfShipsSunk").innerHTML = "Ships sunk: " + sunk;
+        document.getElementById("otherStat").innerHTML = "Other stat: " + other;
+        document.getElementById("anotherStat").innerHTML = "Another stat: " + another;
+      }
+    </script>
+    
+    <h1 style="position: relative; left: 5%;">Battleships Online</h1>
+    <div id="pageAfterLogin" class="pageAfterLogin">
+      <div id="rooms">
+        <h2 id="roomsText">Open Rooms</h2>
+        <button class='createButton' id='createButton' onclick='createClicked();''>Create Room</button>
+        <br>
+        <br>
+        <br>
+        <div class="room">
+          <p id="roomName" class="roomName">Room 13</p>
+          <p id="space">- -</p>
+          <button class='joinButton' id='joinButton' onclick='joinClicked();''>Join</button>
+        </div>
+        <div class="room">
+          <p id="roomName" class="roomName">Room 43</p>
+          <p id="space">- -</p>
+          <button style="opacity: 0.6; cursor: not-allowed;" class='joinButton' id='joinButton' onclick='joinClicked();''>Full</button>
+        </div>
+      </div>
+
+      <div id="players">
+          <h2>Top Players</h2>
+          <p style="word-spacing: 150px;">User333 486-wins</p>
+          <p style="word-spacing: 160px;">User32 354-wins</p>
+      </div>
+
+      <div id="statistics">
+        <h2>My stats</h2>
+        <p id="numberOfWins" style="text-align: center">
+          Wins: 55
+        </p>
+        <p id="numberOfLoses" style="text-align: center">
+          Loses: 210
+        </p>
+        <p id="numberOfShipsSunk" style="text-align: center">
+          Ships sunk: 327
+        </p>
+        <p id="otherStat" style="text-align: center">
+          Another stat: xyz
+        </p>
+        <p id="anotherStat" style="text-align: center">
+          Another stat: zyx
+        </p>
+
+      </div>
+    </div>
+  
+    <div id="app"></div>
+
+  </body>
+</html>
