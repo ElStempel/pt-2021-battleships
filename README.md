@@ -1,6 +1,6 @@
 # PT-2021-Battleships
 
-## Obecnie zawiera szkielet aplikacji do rozwoju.
+## Działający backend oraz szkielet frontend do rozwoju. Następnie wykonany zostanie moduł gry.
 
 ### Zawartość
 
@@ -12,19 +12,26 @@ Obecnie:
 - Klient uruchamiany na porcie 3000
 - Ustawiony setup pod React (client) i Express (server)
 - Obsługa bazy danych przez `mongoose`
+- Routing gotowy
+- Przejście na HTTPS gotowe
+- Komunikacja z bazą danych działa
 
 Work in Progress:
-- Szkielet routingu
-- Szkielet struktury bazy danych
+- Frontend ekrany
+- Łączenie z backend
+
+To do:
+- Moduł gry
+- socket
 
 ### Uruchamianie
 
-Do pierwszego uruchomieniem klienta:
+Przy uruchamianiu klienta:
 - `cd client`
 - `npm install`
 - `npm start`
 
-Do pierwszego uruchomienia serwera:
+Przy uruchamianiu serwera:
 - `cd server`
 - `npm install`
 - `nodemon` (jeśli nie zadziała to `npm install nodemon -g` i powtórzyć krok)
