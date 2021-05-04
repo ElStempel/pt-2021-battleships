@@ -6,14 +6,6 @@ import reportWebVitals from './reportWebVitals';
 import background from "./images/sea.jpg";
 import radar from "./images/radar.jpg";
 
-const backgroundImage = {
-	backgroundImage: 'url("/radar.jfif")',
-	width: '1920px',
-	height: '1200px',
-	margin: 0,
-    padding: 0,
-}
-
 const startPageHeader = {
 	margin: 0,
     padding: 0,
@@ -98,7 +90,7 @@ class Window extends React.Component {
 		this.handleUsernameChange = this.handleUsernameChange.bind(this);
 		this.handlePasswordChange = this.handlePasswordChange.bind(this);
 
-		this.state = { div1Shown: true, div2Shown: true, customRulesDisabled: true, username: '', password: '' };
+		this.state = { div1Shown: true, div2Shown: true, customRulesDisabled: true, username: '', password: '', user_id: '' };
 
 		this.customRule1 = false;
 		this.customRule2 = false;
@@ -131,12 +123,27 @@ class Window extends React.Component {
 	}
 
 	chooseLogin(event){
+		var that = this;
+
 		console.log("Login nacisniety")
 		console.log(this.state.username);
 		console.log(this.state.password);
-		
-		this.setState({
-			div1Shown: !this.state.div1Shown,
+
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "user_name": this.state.username, "pass_hash": this.state.password })
+		};
+
+		fetch('https://localhost:9000/users/login', requestOptions)
+		.then(function(response) { 
+			return response.json(); 
+		})
+		.then(function(data) { 
+			that.setState({
+				div1Shown: !that.state.div1Shown,
+				user_id: data._id,
+			});
 		});
 	}
 
@@ -147,11 +154,18 @@ class Window extends React.Component {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ "user_name": this.state.username, "pass_hash": this.state.password })
 		};
-		fetch('http://localhost:9000/users/add', requestOptions);
+		fetch('https://localhost:9000/users/add', requestOptions);
 	}
 
 	createRoom(){
 		console.log("Room created")
+		console.log(this.state.user_id);
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "player_1_id": this.state.user_id })
+		};
+		fetch('https://localhost:9000/rooms/create', requestOptions);
 		this.setState({
 			div2Shown: !this.state.div2Shown,
 		});
