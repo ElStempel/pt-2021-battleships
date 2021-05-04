@@ -36,11 +36,13 @@ const buttonChooseStyle = {
 };
 
 const createButtonStyle = { 
-	marginLeft: '10px', 
+	// marginLeft: '10px', 
 	// backgroundColor: 'black', 
 	// color: 'white', 
 	display: 'inline-block', 
-	marginLeft: '350px', 
+	float: 'right',
+	marginTop: '20px',
+	marginRight: '20px', 
 	width: '120px', 
 	height: '40px', 
 	cursor: 'pointer', 
@@ -88,11 +90,16 @@ const inputStyle = {
 class Window extends React.Component {
 	constructor(props) {
 		super(props);
+
 		this.chooseLogin = this.chooseLogin.bind(this);
 		this.chooseRegister = this.chooseRegister.bind(this);
 		this.createRoom = this.createRoom.bind(this);
 		this.enableRulesChoice = this.enableRulesChoice.bind(this);
-		this.state = { div1Shown: true, div2Shown: true, customRulesDisabled: true };
+		this.handleUsernameChange = this.handleUsernameChange.bind(this);
+		this.handlePasswordChange = this.handlePasswordChange.bind(this);
+
+		this.state = { div1Shown: true, div2Shown: true, customRulesDisabled: true, username: '', password: '' };
+
 		this.customRule1 = false;
 		this.customRule2 = false;
 		this.customRule3 = false;
@@ -106,6 +113,7 @@ class Window extends React.Component {
 		this.shipsSunk = 0;
 		this.anotherStat = 'xyz';
 		this.nextStat = 'zyx';
+
 		this.top = [
 			{
 				'player': 'Jas', 'score': 4000,
@@ -124,7 +132,8 @@ class Window extends React.Component {
 
 	chooseLogin(event){
 		console.log("Login nacisniety")
-		
+		console.log(this.state.username);
+		console.log(this.state.password);
 		
 		this.setState({
 			div1Shown: !this.state.div1Shown,
@@ -133,6 +142,12 @@ class Window extends React.Component {
 
 	chooseRegister(){
 		console.log("Rejestracja nacisnieta")
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "user_name": this.state.username, "pass_hash": this.state.password })
+		};
+		fetch('http://localhost:9000/users/add', requestOptions);
 	}
 
 	createRoom(){
@@ -149,6 +164,14 @@ class Window extends React.Component {
 		});
 	}
 
+	handleUsernameChange(e) {
+		this.setState({username: e.target.value});
+	}
+
+	handlePasswordChange(e) {
+		this.setState({password: e.target.value});
+	}
+
 	render() {
 		const listNames = this.top.map((d) => <li key={d.player}>Player: {d.player}</li>);
 		const listScore = this.top.map((d) => <li key={d.player}>Current Score: {d.score}</li>);
@@ -161,11 +184,11 @@ class Window extends React.Component {
 				<br />
 					<div id='login' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
 						<p>Username</p>
-						<input type="text" id="usernameInput" name="usernameInput" placeholder="Username" style={inputStyle}/>
+						<input type="text" id="usernameInput" name="usernameInput" placeholder="Username" value={this.state.username} onChange={this.handleUsernameChange} style={inputStyle}/>
 					</div>
 					<div id='password' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
 						<p>Password</p>
-						<input type="password" id="passwordInput" name="passwordInput" placeholder="Password" style={inputStyle}/>
+						<input type="password" id="passwordInput" name="passwordInput" placeholder="Password" value={this.state.password} onChange={this.handlePasswordChange} style={inputStyle}/>
 					</div>
 				<br />
 					<div id="buttons" style={{textAlign: 'center',}}>
@@ -199,7 +222,7 @@ class Window extends React.Component {
 									<div id="playerNames" style={{ marginLeft: '25px', display: 'inline-block', listStyleType: 'none', color: 'white', }}>
 										{listNames}
 									</div>
-									<div id="playerNames" style={{ marginLeft: '250px', display: 'inline-block', listStyleType: 'none', color: 'white', }}>
+									<div id="playerNames" style={{ float: 'right', marginRight: '20px', display: 'inline-block', listStyleType: 'none', color: 'white', }}>
 										{listScore}
 									</div>
 								</div>
