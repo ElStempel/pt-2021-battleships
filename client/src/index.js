@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import background from "./images/sea.jpg";
+import radar from "./images/radar.jpg";
 
 const backgroundImage = {
 	backgroundImage: 'url("/radar.jfif")',
@@ -16,6 +17,7 @@ const backgroundImage = {
 const startPageHeader = {
 	margin: 0,
     padding: 0,
+	// display: 'inline-block',
 	// position: 'relative',
 	// left: '45%',
 	textAlign: 'center',
@@ -33,6 +35,46 @@ const buttonChooseStyle = {
 	fontSize: '30px',
 };
 
+const createButtonStyle = { 
+	marginLeft: '10px', 
+	// backgroundColor: 'black', 
+	// color: 'white', 
+	display: 'inline-block', 
+	marginLeft: '350px', 
+	width: '120px', 
+	height: '40px', 
+	cursor: 'pointer', 
+	fontSize: '15px'
+}
+
+const logoutButtonStyle = { 
+	float: 'right',
+	marginLeft: '20px', 
+	marginTop: '5px',
+	// display: 'flex',
+  	// justifyContent: 'flex-end',
+	// backgroundColor: 'black', 
+	// color: 'white', 
+	width: '120px', 
+	height: '40px', 
+	cursor: 'pointer', 
+	fontSize: '15px'
+}
+
+const cancelButtonStyle = { 
+	float: 'right',
+	marginLeft: '20px', 
+	marginTop: '5px',
+	// display: 'flex',
+  	// justifyContent: 'flex-end',
+	// backgroundColor: 'black', 
+	// color: 'white', 
+	width: '120px', 
+	height: '40px', 
+	cursor: 'pointer', 
+	fontSize: '15px'
+}
+
 const inputStyle = {
 	// margin: '0 auto',
     display: 'inline-block',
@@ -49,7 +91,16 @@ class Window extends React.Component {
 		this.chooseLogin = this.chooseLogin.bind(this);
 		this.chooseRegister = this.chooseRegister.bind(this);
 		this.createRoom = this.createRoom.bind(this);
-		this.state = { div1Shown: true };
+		this.enableRulesChoice = this.enableRulesChoice.bind(this);
+		this.state = { div1Shown: true, div2Shown: true, customRulesDisabled: true };
+		this.customRule1 = false;
+		this.customRule2 = false;
+		this.customRule3 = false;
+		this.customRule4 = false;
+		this.customSize = false;
+		this.boardSize = 10;
+		this.inviteOnly = false;
+
 		this.wins = 0;
 		this.loses = 0;
 		this.shipsSunk = 0;
@@ -74,8 +125,9 @@ class Window extends React.Component {
 	chooseLogin(event){
 		console.log("Login nacisniety")
 		
+		
 		this.setState({
-			div1Shown: false,
+			div1Shown: !this.state.div1Shown,
 		});
 	}
 
@@ -85,6 +137,16 @@ class Window extends React.Component {
 
 	createRoom(){
 		console.log("Room created")
+		this.setState({
+			div2Shown: !this.state.div2Shown,
+		});
+	}
+
+	enableRulesChoice(){
+		console.log("Enabled custom rules")
+		this.setState({
+			customRulesDisabled: !this.state.customRulesDisabled,
+		});
 	}
 
 	render() {
@@ -93,17 +155,17 @@ class Window extends React.Component {
 		return (
 				this.state.div1Shown ?
 				(
-					<div id="startPage" style={{ width: '100%', height: '1010px', fontSize: '60px', background: '#222831', overflowX: 'hidden'}}>
+					<div id="startPage" style={{ width: '100%', height: '1010px', fontSize: '60px', background: '#222831', overflowX: 'hidden', }}>
 				<br />
 					<h1 style={startPageHeader}>Battleships Online</h1>
 				<br />
 					<div id='login' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
 						<p>Username</p>
-						<input type="text" id="passwordInput" name="passwordInput" style={inputStyle}/>
+						<input type="text" id="usernameInput" name="usernameInput" placeholder="Username" style={inputStyle}/>
 					</div>
 					<div id='password' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
 						<p>Password</p>
-						<input type="password" id="passwordInput" name="passwordInput" style={inputStyle}/>
+						<input type="password" id="passwordInput" name="passwordInput" placeholder="Password" style={inputStyle}/>
 					</div>
 				<br />
 					<div id="buttons" style={{textAlign: 'center',}}>
@@ -118,96 +180,104 @@ class Window extends React.Component {
 				)
 				:
 				(
-					<div id="startPage" style={{ backgroundImage: `url(${background})`, width: '100%', height: '1010px', fontSize: '20px', background: '#222831', overflowX: 'hidden'}}>
-				<br />
-					<h1 style={startPageHeader}>Battleships Online</h1>
-				<br />
-					<div id="pageAfterLogin" class="pageAfterLogin" style={{ backgroundImage: `url(${background})`, display: 'flex', flexDirection: 'row', }}>
-						<div id="rooms" style={{display: 'inline-block', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: 'auto'}}>
-							<h2 id="roomsText" style={{ marginLeft: '10px', minHeight: '600px', color: 'white', display: 'inline-block', }}>Rooms</h2>
-							<button class='createButton' id='createButton' onClick={this.createRoom} style={{ marginLeft: '10px', background: 'black', color: 'white', display: 'inline-block', marginLeft: '350px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Create Room</button>
-						</div>
-						<div id="players" style={{display: 'inline-block', minHeight: '600px', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: 'auto', }}>
-          					<h2 style={{ marginLeft: '10px', color: 'white', }}>Top Players</h2>
-							<div id="playerNames" style={{ marginLeft: '25px', display: 'inline-block', listStyleType: 'none', color: 'white', }}>
-								{listNames}
+					this.state.div2Shown ?
+					(
+							<div id="startPage" style={{ backgroundImage: `url(${background})`, width: '100%', height: '1010px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
+						<br />
+							<div id="startHeader" style={{display: 'flex', flexDirection: 'row', marginLeft: '38%', }}>
+								<h1 style={startPageHeader}>Battleships Online</h1>
+								<button class='logoutButton' id='logoutButton' onClick={this.chooseLogin} style={logoutButtonStyle}>Logout</button>
 							</div>
-							<div id="playerNames" style={{ marginLeft: '250px', display: 'inline-block', listStyleType: 'none', color: 'white', }}>
-								{listScore}
+						<br />
+							<div id="pageAfterLogin" class="pageAfterLogin" style={{ backgroundImage: `url(${background})`, display: 'flex', flexDirection: 'row', }}>
+								<div id="rooms" style={{display: 'inline-block', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: 'auto'}}>
+									<h2 id="roomsText" style={{ marginLeft: '10px', minHeight: '600px', color: 'white', display: 'inline-block', }}>Rooms</h2>
+									<button class='createButton' id='createButton' onClick={this.createRoom} style={createButtonStyle}>Create Room</button>
+								</div>
+								<div id="players" style={{display: 'inline-block', minHeight: '600px', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: 'auto', }}>
+									<h2 style={{ marginLeft: '10px', color: 'white', }}>Top Players</h2>
+									<div id="playerNames" style={{ marginLeft: '25px', display: 'inline-block', listStyleType: 'none', color: 'white', }}>
+										{listNames}
+									</div>
+									<div id="playerNames" style={{ marginLeft: '250px', display: 'inline-block', listStyleType: 'none', color: 'white', }}>
+										{listScore}
+									</div>
+								</div>
+								<div id="statistics" style={{display: 'inline-block', marginTop: '0px', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: 'auto'}}>
+									<h2 style={{ marginLeft: '10px', color: 'white', }}>My statistics</h2>
+								<br />
+									<p id="numberOfWins" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
+										Wins: {this.wins}
+									</p>
+								<br />
+									<p id="numberOfLoses" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
+										Loses: {this.loses}
+									</p>
+								<br />
+									<p id="numberOfShipsSunk" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
+										Ships sunk: {this.shipsSunk}
+									</p>
+								<br />
+									<p id="otherStat" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
+										Another stat: {this.anotherStat}
+									</p>
+								<br />
+									<p id="anotherStat" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
+										Another stat: {this.nextStat}
+									</p>
+								</div>
 							</div>
 						</div>
-						<div id="statistics" style={{display: 'inline-block', marginTop: '0px', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: 'auto'}}>
-          					<h2 style={{ marginLeft: '10px', color: 'white', }}>My statistics</h2>
+					)
+					:
+					(
+						<div id="createRoomPage" style={{ backgroundImage: `url(${radar})`, width: '100%', height: '1010px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
 						<br />
-							<p id="numberOfWins" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
-								Wins: {this.wins}
-							</p>
-						<br />
-							<p id="numberOfLoses" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
-								Loses: {this.loses}
-							</p>
-						<br />
-							<p id="numberOfShipsSunk" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
-								Ships sunk: {this.shipsSunk}
-							</p>
-						<br />
-							<p id="otherStat" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
-								Another stat: {this.anotherStat}
-							</p>
-						<br />
-							<p id="anotherStat" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
-								Another stat: {this.nextStat}
-							</p>
+							<div id="startHeader" style={{display: 'flex', flexDirection: 'row', marginLeft: '38%', }}>
+								<h1 style={startPageHeader}>Battleships Online</h1>
+								<button class='cancelButton' id='cancelButton' onClick={this.createRoom} style={cancelButtonStyle}>Cancel</button>
+							</div>
+							<div style={{ marginLeft: '50px', backgroundColor: 'grey', width: '1930px', height: '800px', }}>
+								<h3 style={{marginLeft: '50px', color: 'white', }}>New Room</h3>
+								<div>
+									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" id="customRules" name="customRules" value="customRules" onChange={this.enableRulesChoice}/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRules">Custom Rules</label><br/>
+									<br/>
+									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" id="customRule1" name="customRule1" value="customRule1" disabled={this.state.customRulesDisabled}/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule1">Rule 1</label><br/>
+									<br/>
+									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" id="customRule2" name="customRule2" value="customRule2" disabled={this.state.customRulesDisabled}/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule2">Rule 2</label><br/>
+									<br/>
+									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" id="customRule3" name="customRule3" value="customRule3" disabled={this.state.customRulesDisabled}/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule3">Rule 3</label><br/>
+									<br/>
+									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" id="customRule4" name="customRule4" value="customRule4" disabled={this.state.customRulesDisabled}/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule4">Rule 4</label><br/>
+									<br/>
+									<br/>
+
+									<select style={{fontSize: '30px', fontWeight: 'bold', width: '140px', height: '40px', marginLeft: '10px' }} name="size" id="size" disabled={this.state.customRulesDisabled}>
+										<option value="10">10 x 10</option>
+										<option value="16">16 x 16</option>
+										<option value="24">24 x 24</option>
+										<option value="30">30 x 30</option>
+									</select> 
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="size">Choose board size</label>
+									<br/>
+									<br/>
+									<br/>
+									<br/>
+									<br/>
+									<br/>
+									
+									<div style={{ textAlign: 'center' }}>
+										<button class='newRoomButton' id='newRoomButton' onClick={this.createRoom} style={{ width: '1200px', height: '80px', fontSize: '50px', textAlign: 'center', cursor: 'pointer' }}>Create room with specified rules</button>
+									</div>
+								</div>
+							</div>
 						</div>
-					</div>
-
-				{/* <h1 style="position: relative; left: 5%;">Battleships Online</h1>
-    <div id="pageAfterLogin" class="pageAfterLogin">
-      <div id="rooms">
-        <h2 id="roomsText">Open Rooms</h2>
-        <button class='createButton' id='createButton' onclick='createClicked();''>Create Room</button>
-        <br>
-        <br>
-        <br>
-        <div class="room">
-          <p id="roomName" class="roomName">Room 13</p>
-          <p id="space">- -</p>
-          <button class='joinButton' id='joinButton' onclick='joinClicked();''>Join</button>
-        </div>
-        <div class="room">
-          <p id="roomName" class="roomName">Room 43</p>
-          <p id="space">- -</p>
-          <button style="opacity: 0.6; cursor: not-allowed;" class='joinButton' id='joinButton' onclick='joinClicked();''>Full</button>
-        </div>
-      </div>
-
-      <div id="players">
-          <h2>Top Players</h2>
-          <p style="word-spacing: 150px;">User333 486-wins</p>
-          <p style="word-spacing: 160px;">User32 354-wins</p>
-      </div>
-
-      <div id="statistics">
-        <h2>My stats</h2>
-        <p id="numberOfWins" style="text-align: center">
-          Wins: 55
-        </p>
-        <p id="numberOfLoses" style="text-align: center">
-          Loses: 210
-        </p>
-        <p id="numberOfShipsSunk" style="text-align: center">
-          Ships sunk: 327
-        </p>
-        <p id="otherStat" style="text-align: center">
-          Another stat: xyz
-        </p>
-        <p id="anotherStat" style="text-align: center">
-          Another stat: zyx
-        </p>
-
-      </div>
-    </div> */}
-					</div>
+					)
 				)
 		);
 	}

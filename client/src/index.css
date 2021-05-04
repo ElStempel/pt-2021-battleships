@@ -11,3 +11,28 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.buttonChoose:hover {
+  background-color: grey;
+  color: white;
+}
+
+.createButton:hover {
+  background-color: black;
+  color: white;
+}
+
+.logoutButton:hover {
+  background-color: black;
+  color: white;
+}
+
+.cancelButton:hover {
+  background-color: grey;
+  color: white;
+}
+
+.newRoomButton:hover {
+  background-color: black;
+  color: white;
+}
