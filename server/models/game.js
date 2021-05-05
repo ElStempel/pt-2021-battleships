@@ -9,6 +9,7 @@ var GameSchema = new Schema(
     player_2: {type: Schema.Types.ObjectId, ref: 'User'},
     map_size: {type: Number, required: true, default: 10, min: 7, max: 20},
     force_gap: {type: Boolean, required: true, default: false},
+    turn: {type: Number, required: true, default: 2, min: 1, max: 2},
     p1_map: {type: Array},
     p2_map: {type: Array},
     p1: {
