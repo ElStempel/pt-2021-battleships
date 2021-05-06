@@ -109,11 +109,16 @@ router.post('/leave', async function(req, res, next) {
 
 // DELETE A ROOM
 router.post('/delete', async function(req, res, next) {
-  let room_to_delete = await Room.deleteOne({ _id: req.body.room_id, player_1: req.body.owner_id });
-  if(room_to_delete.deletedCount == 1){
-    res.status(200).send('Room deleted')
+  let game = await Game.findOne({room: req.body.room_id})
+  if(game){
+    res.status(403).send('Game in progress')
   } else {
-    res.status(400).send('Bad data')
+    let room_to_delete = await Room.deleteOne({ _id: req.body.room_id, player_1: req.body.owner_id });
+    if(room_to_delete.deletedCount == 1){
+      res.status(200).send('Room deleted')
+    } else {
+      res.status(400).send('Bad data')
+    }
   }
 });
 

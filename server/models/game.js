@@ -12,6 +12,7 @@ var GameSchema = new Schema(
     turn: {type: Number, required: true, default: 2, min: 1, max: 2},
     p1_map: {type: Array},
     p2_map: {type: Array},
+    maps_ready: {type: Number, required: true, default: 0, min: 0, max: 2},
     p1: {
         attack1: {type: Boolean, default: false},
         attack2: {type: Boolean, default: false},
