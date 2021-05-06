@@ -92,6 +92,9 @@ class Window extends React.Component {
 		this.handleSubmitDeletePopup = this.handleSubmitDeletePopup.bind(this);
 		this.handleClickDeletePopup = this.handleClickDeletePopup.bind(this);
 		this.joinGame = this.joinGame.bind(this);
+		this.handlePlayerBoardClick = this.handlePlayerBoardClick.bind(this);
+		this.handleEnemyBoardClick = this.handleEnemyBoardClick.bind(this);
+		this.handleConfirmShips = this.handleConfirmShips.bind(this);
 
 		this.state = { 
 			div1Shown: true, 
@@ -126,6 +129,7 @@ class Window extends React.Component {
 			],
 			deleteAccountModal: true,
 			inputValue: '',
+			enemyBoardButtons: true,
 
 		};
 		
@@ -420,6 +424,22 @@ class Window extends React.Component {
 		this.setState({ gameShown: !this.state.gameShown });
 	}
 
+	handlePlayerBoardClick(event){
+		event.preventDefault();
+		event.target.style.backgroundColor = 'black'
+	}
+
+	handleEnemyBoardClick(event){
+		event.preventDefault();
+		event.target.style.backgroundColor = 'red'
+	}
+
+	handleConfirmShips(){
+		this.setState({
+			enemyBoardButtons: false
+		});
+	}
+
 	render() {
 		const listNames = this.top.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Player: {d.player}</li>);
 		const listScore = this.top.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Current Score: {d.score}</li>);
@@ -433,7 +453,7 @@ class Window extends React.Component {
         for (let y = 0; y < 10; y++) {
             const cellsPlayer = [];
             for (let x = 0; x < 10; x++) {
-                cellsPlayer.push(<th><button class='but' id='but' disabled='false'></button></th>);
+                cellsPlayer.push(<th><button class='but' id='but' onClick={this.handlePlayerBoardClick}></button></th>);
             }
             rowsPlayer.push(<tr>{cellsPlayer}</tr>);
         }
@@ -442,7 +462,8 @@ class Window extends React.Component {
         for (let y = 0; y < 10; y++) {
             const cellsEnemy = [];
             for (let x = 0; x < 10; x++) {
-                cellsEnemy.push(<th><button class='but' id='but' style={noHover} disabled='true'></button></th>);
+				// this.state.enemyBoardButtons
+                cellsEnemy.push(<th><button class='but' id='but' onClick={this.handleEnemyBoardClick}></button></th>);
             }
             rowsEnemy.push(<tr>{cellsEnemy}</tr>);
         }
@@ -502,11 +523,19 @@ class Window extends React.Component {
 									<br></br>
 									<br></br>
 									<br></br>
-									<button id='confirmShips' class="confirmShips" disabled='true' style={noHover}>Confirm Setup</button>
+									<button id='confirmShips' class="confirmShips" disabled='true' onClick={this.handleConfirmShips} >Confirm Setup</button>
 									<br></br>
 									<br></br>
 									<br></br>
 									<button id='confirmShot' class="confirmShot" disabled='true' style={noHover}>Confirm Shot</button>
+									<br></br>
+									<br></br>
+									<br></br>
+									<button id='defeat' class="defeat" disabled='true' style={noHover}>Give up</button>
+									<br></br>
+									<br></br>
+									<br></br>
+									<button id='draw' class="draw" disabled='true' style={noHover}>Propose a draw</button>
 								</div>
 
 							</div>
