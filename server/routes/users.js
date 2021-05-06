@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/user')
-//var omit = require('object.omit')
+var Room = require('../models/room')
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -58,13 +58,17 @@ router.post('/logout', async function(req, res, next) {
 
 // DELETE USER
 router.post('/delete', async function(req, res, next) {
-  let user_check = await User.deleteOne({ _id: req.body._id, pass_hash: req.body.pass_hash });
-  //console.log(user_check.deletedCount)
+  let inRoom = await Room.findOne({player_1: req.body._id});
+  if(inRoom){
+    res.status(403).send("User is in a game room")
+  } else {
+    let user_check = await User.deleteOne({ _id: req.body._id, pass_hash: req.body.pass_hash });
     if (user_check.deletedCount == 1){
       return res.status(200).send("User deleted") 
     } else {
       res.status(400).send("Bad data")
     }
+  }
 });
 
 function new_Table(json_table){
