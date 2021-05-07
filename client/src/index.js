@@ -470,7 +470,12 @@ class Window extends React.Component {
 			if(((coordsList[0].X + 1 == coords.x || coordsList[0].X - 1 == coords.x) && coordsList[0].Y == coords.y) || ((coordsList[0].Y + 1 == coords.y || coordsList[0].Y - 1 == coords.y) && coordsList[0].X == coords.x) ||
 			((coordsList[1].X + 1 == coords.x || coordsList[1].X - 1 == coords.x) && coordsList[1].Y == coords.y) || ((coordsList[1].Y + 1 == coords.y || coordsList[1].Y - 1 == coords.y) && coordsList[1].X == coords.x) &&
 			(shipName == 'dredanought' || shipName == 'cruiser' || shipName == 'submarine' || shipName == 'destroyer')){
-				return true;
+				if((coords.x == coordsList[1].X && coordsList[1].X == coordsList[0].X) || (coords.y == coordsList[1].Y && coordsList[1].Y == coordsList[0].Y)){
+					return true;
+				}
+				else{
+					return false;
+				}
 			}
 			else{
 				return false;
@@ -481,7 +486,12 @@ class Window extends React.Component {
 			((coordsList[1].X + 1 == coords.x || coordsList[1].X - 1 == coords.x) && coordsList[1].Y == coords.y) || ((coordsList[1].Y + 1 == coords.y || coordsList[1].Y - 1 == coords.y) && coordsList[1].X == coords.x) ||
 			((coordsList[2].X + 1 == coords.x || coordsList[2].X - 1 == coords.x) && coordsList[2].Y == coords.y) || ((coordsList[2].Y + 1 == coords.y || coordsList[2].Y - 1 == coords.y) && coordsList[2].X == coords.x) &&
 			(shipName == 'dredanought' || shipName == 'cruiser')){
-				return true;
+				if((coords.x == coordsList[2].X && coordsList[2].X == coordsList[1].X == coordsList[1].X == coordsList[0].X) || (coords.y == coordsList[2].Y && coordsList[2].Y == coordsList[1].Y && coordsList[1].Y == coordsList[0].Y)){
+					return true;
+				}
+				else{
+					return false;
+				}
 			}
 			else{
 				return false;
@@ -493,7 +503,12 @@ class Window extends React.Component {
 			((coordsList[2].X + 1 == coords.x || coordsList[2].X - 1 == coords.x) && coordsList[2].Y == coords.y) || ((coordsList[2].Y + 1 == coords.y || coordsList[2].Y - 1 == coords.y) && coordsList[2].X == coords.x) ||
 			((coordsList[3].X + 1 == coords.x || coordsList[3].X - 1 == coords.x) && coordsList[3].Y == coords.y) || ((coordsList[3].Y + 1 == coords.y || coordsList[3].Y - 1 == coords.y) && coordsList[3].X == coords.x) &&
 			(shipName == 'dredanought')){
-				return true;
+				if((coords.x == coordsList[3].X && coordsList[3].X == coordsList[2].X && coordsList[2].X == coordsList[1].X == coordsList[1].X == coordsList[0].X) || (coords.y == coordsList[3].Y && coordsList[3].Y == coordsList[2].Y && coordsList[2].Y == coordsList[1].Y && coordsList[1].Y == coordsList[0].Y)){
+					return true;
+				}
+				else{
+					return false;
+				}
 			}
 			else{
 				return false;
@@ -552,6 +567,10 @@ class Window extends React.Component {
 			}
 		}
 		console.log(this.state.dreadnoughtCoordsList)
+		console.log(this.state.cruiserCoordsList)
+		console.log(this.state.submarineCoordsList)
+		console.log(this.state.destroyerCoordsList)
+		console.log(this.state.reconCoordsList)
 	}
 
 	handleEnemyBoardClick(event){
@@ -587,7 +606,7 @@ class Window extends React.Component {
 		console.log(event.target.id + ' clicked')
 		console.log(this.state.availableFields + ' fields')
 		
-		if(event.target.disabled == false && this.state[shipDeployed] == 0){
+		if(this.state[shipDeployed] == 0){
 			event.target.style.backgroundColor = 'green';
 		}
 		else{
@@ -678,7 +697,7 @@ class Window extends React.Component {
 									<br></br>
 									<button id='destroyer' class="ship" disabled={!this.state.destroyerEnabled} onClick={this.handleShipButtonClick}>Destroyer</button>
 									<br></br>
-									<button id='recon' class="ship" disabled={!this.state.cruiserEnabled} onClick={this.handleShipButtonClick}>Recon</button>
+									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon</button>
 									<br></br>
 									<br></br>
 									<br></br>
