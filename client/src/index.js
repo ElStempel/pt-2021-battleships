@@ -95,6 +95,7 @@ class Window extends React.Component {
 		this.handlePlayerBoardClick = this.handlePlayerBoardClick.bind(this);
 		this.handleEnemyBoardClick = this.handleEnemyBoardClick.bind(this);
 		this.handleConfirmShips = this.handleConfirmShips.bind(this);
+		this.handleShipButtonClick = this.handleShipButtonClick.bind(this);
 
 		this.state = { 
 			div1Shown: true, 
@@ -130,6 +131,34 @@ class Window extends React.Component {
 			deleteAccountModal: true,
 			inputValue: '',
 			enemyBoardButtons: true,
+
+			dreadnoughtEnabled: true,
+			cruiserEnabled: true,
+			submarineEnabled: true,
+			destroyerEnabled: true,
+			reconEnabled: true,
+
+			dreadnoughtFields: 5,
+			cruiserFields: 4,
+			submarineFields: 3,
+			destroyerFields: 3,
+			reconFields: 2,
+
+			availableFields: 0,
+
+			dreadnoughtCoordsList: [],
+			cruiserCoordsList: [],
+			submarineCoordsList: [],
+			destroyerCoordsList: [],
+			reconCoordsList: [],
+
+			dreadnoughtSet: false,
+			cruiserSet: false,
+			submarineSet: false,
+			destroyerSet: false,
+			reconSet: false,
+
+			playerBoardEnabled: false,
 
 		};
 		
@@ -424,9 +453,105 @@ class Window extends React.Component {
 		this.setState({ gameShown: !this.state.gameShown });
 	}
 
+	checkCoords(shipName, coordsList, coords){
+		if(coordsList.length == 0){
+			return true;
+		}
+		else if(coordsList.length == 1){
+			if(((coordsList[0].X + 1 == coords.x || coordsList[0].X - 1 == coords.x) && coordsList[0].Y == coords.y) || ((coordsList[0].Y + 1 == coords.y || coordsList[0].Y - 1 == coords.y) && coordsList[0].X == coords.x) &&
+			(shipName == 'dredanought' || shipName == 'cruiser' || shipName == 'submarine' || shipName == 'destroyer' || shipName == 'recon')){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+		else if(coordsList.length == 2){
+			if(((coordsList[0].X + 1 == coords.x || coordsList[0].X - 1 == coords.x) && coordsList[0].Y == coords.y) || ((coordsList[0].Y + 1 == coords.y || coordsList[0].Y - 1 == coords.y) && coordsList[0].X == coords.x) ||
+			((coordsList[1].X + 1 == coords.x || coordsList[1].X - 1 == coords.x) && coordsList[1].Y == coords.y) || ((coordsList[1].Y + 1 == coords.y || coordsList[1].Y - 1 == coords.y) && coordsList[1].X == coords.x) &&
+			(shipName == 'dredanought' || shipName == 'cruiser' || shipName == 'submarine' || shipName == 'destroyer')){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+		else if(coordsList.length == 3){
+			if(((coordsList[0].X + 1 == coords.x || coordsList[0].X - 1 == coords.x) && coordsList[0].Y == coords.y) || ((coordsList[0].Y + 1 == coords.y || coordsList[0].Y - 1 == coords.y) && coordsList[0].X == coords.x) ||
+			((coordsList[1].X + 1 == coords.x || coordsList[1].X - 1 == coords.x) && coordsList[1].Y == coords.y) || ((coordsList[1].Y + 1 == coords.y || coordsList[1].Y - 1 == coords.y) && coordsList[1].X == coords.x) ||
+			((coordsList[2].X + 1 == coords.x || coordsList[2].X - 1 == coords.x) && coordsList[2].Y == coords.y) || ((coordsList[2].Y + 1 == coords.y || coordsList[2].Y - 1 == coords.y) && coordsList[2].X == coords.x) &&
+			(shipName == 'dredanought' || shipName == 'cruiser')){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+		else if(coordsList.length == 4){
+			if(((coordsList[0].X + 1 == coords.x || coordsList[0].X - 1 == coords.x) && coordsList[0].Y == coords.y) || ((coordsList[0].Y + 1 == coords.y || coordsList[0].Y - 1 == coords.y) && coordsList[0].X == coords.x) ||
+			((coordsList[1].X + 1 == coords.x || coordsList[1].X - 1 == coords.x) && coordsList[1].Y == coords.y) || ((coordsList[1].Y + 1 == coords.y || coordsList[1].Y - 1 == coords.y) && coordsList[1].X == coords.x) ||
+			((coordsList[2].X + 1 == coords.x || coordsList[2].X - 1 == coords.x) && coordsList[2].Y == coords.y) || ((coordsList[2].Y + 1 == coords.y || coordsList[2].Y - 1 == coords.y) && coordsList[2].X == coords.x) ||
+			((coordsList[3].X + 1 == coords.x || coordsList[3].X - 1 == coords.x) && coordsList[3].Y == coords.y) || ((coordsList[3].Y + 1 == coords.y || coordsList[3].Y - 1 == coords.y) && coordsList[3].X == coords.x) &&
+			(shipName == 'dredanought')){
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+	}
+
 	handlePlayerBoardClick(event){
-		event.preventDefault();
-		event.target.style.backgroundColor = 'black'
+		event.preventDefault()
+		console.log(event.target.id)
+		if(this.state.availableFields > 0){
+			if(this.state.dreadnoughtEnabled == true){
+				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
+					this.state.dreadnoughtCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					event.target.style.backgroundColor = 'black'
+					this.setState({
+						availableFields: this.state.availableFields - 1,
+					})
+				}
+			}
+			else if(this.state.cruiserEnabled == true){
+				if(this.checkCoords('cruiser', this.state.cruiserCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
+					this.state.cruiserCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					event.target.style.backgroundColor = 'black'
+					this.setState({
+						availableFields: this.state.availableFields - 1,
+					})
+				}
+			}
+			else if(this.state.submarineEnabled == true){
+				if(this.checkCoords('submarine', this.state.submarineCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
+					this.state.submarineCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					event.target.style.backgroundColor = 'black'
+					this.setState({
+						availableFields: this.state.availableFields - 1,
+					})
+				}
+			}
+			else if(this.state.destroyerEnabled == true){
+				if(this.checkCoords('destroyer', this.state.destroyerCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
+					this.state.destroyerCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					event.target.style.backgroundColor = 'black'
+					this.setState({
+						availableFields: this.state.availableFields - 1,
+					})
+				}
+			}
+			else if(this.state.reconEnabled == true){
+				if(this.checkCoords('recon', this.state.reconCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
+					this.state.reconCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					event.target.style.backgroundColor = 'black'
+					this.setState({
+						availableFields: this.state.availableFields - 1,
+					})
+				}
+			}
+		}
+		console.log(this.state.dreadnoughtCoordsList)
 	}
 
 	handleEnemyBoardClick(event){
@@ -440,6 +565,36 @@ class Window extends React.Component {
 		});
 	}
 
+	handleShipButtonClick(event){
+		event.preventDefault();
+		var buttonEnabled = event.target.id + 'Enabled';
+		var shipDeployed = event.target.id + 'Fields'
+
+		this.setState({
+			dreadnoughtEnabled: !this.state.dreadnoughtEnabled,
+			cruiserEnabled: !this.state.cruiserEnabled,
+			submarineEnabled: !this.state.submarineEnabled,
+			destroyerEnabled: !this.state.destroyerEnabled,
+			reconEnabled: !this.state.reconEnabled,
+			playerBoardEnabled: !this.state.playerBoardEnabled,
+			availableFields: this.state[shipDeployed],
+			[shipDeployed]: 0,
+		});
+		
+		this.setState({
+			[buttonEnabled]: true,
+		});
+		console.log(event.target.id + ' clicked')
+		console.log(this.state.availableFields + ' fields')
+		
+		if(event.target.disabled == false && this.state[shipDeployed] == 0){
+			event.target.style.backgroundColor = 'green';
+		}
+		else{
+			event.target.style.backgroundColor = 'red';
+		}
+	}
+
 	render() {
 		const listNames = this.top.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Player: {d.player}</li>);
 		const listScore = this.top.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Current Score: {d.score}</li>);
@@ -450,20 +605,24 @@ class Window extends React.Component {
 		}
 
 		let rowsPlayer = [];
+		var playerId;
         for (let y = 0; y < 10; y++) {
             const cellsPlayer = [];
             for (let x = 0; x < 10; x++) {
-                cellsPlayer.push(<th><button class='but' id='but' onClick={this.handlePlayerBoardClick}></button></th>);
+				playerId = 'PX' + (x).toString() + 'Y' + (y).toString();
+                cellsPlayer.push(<th><button class='but' id={playerId} disabled={!this.state.playerBoardEnabled} onClick={this.handlePlayerBoardClick}></button></th>);
             }
             rowsPlayer.push(<tr>{cellsPlayer}</tr>);
         }
 
 		let rowsEnemy = [];
+		var enemyId;
         for (let y = 0; y < 10; y++) {
             const cellsEnemy = [];
             for (let x = 0; x < 10; x++) {
 				// this.state.enemyBoardButtons
-                cellsEnemy.push(<th><button class='but' id='but' onClick={this.handleEnemyBoardClick}></button></th>);
+				enemyId = 'PX' + (x + 1).toString() + 'Y' + (y + 1).toString();
+                cellsEnemy.push(<th><button class='but' id={enemyId} onClick={this.handleEnemyBoardClick}></button></th>);
             }
             rowsEnemy.push(<tr>{cellsEnemy}</tr>);
         }
@@ -511,15 +670,15 @@ class Window extends React.Component {
 								</div>
 								<div id='gameButtons' class='gameButtons' style={{ display: 'inline-block', verticalAlign: 'top', marginLeft: '50px', marginTop: '20px', }}>
 									<br></br>
-									<button id='fiveFields' class="ship">Dreadnought</button>
+									<button id='dreadnought' class="ship" disabled={!this.state.dreadnoughtEnabled} onClick={this.handleShipButtonClick}>Dreadnought</button>
 									<br></br>
-									<button id='fourFields' class="ship">Cruiser</button>
+									<button id='cruiser' class="ship" disabled={!this.state.cruiserEnabled} onClick={this.handleShipButtonClick}>Cruiser</button>
 									<br></br>
-									<button id='threeFieldsOne' class="ship">Submarine</button>
+									<button id='submarine' class="ship" disabled={!this.state.submarineEnabled} onClick={this.handleShipButtonClick}>Submarine</button>
 									<br></br>
-									<button id='threeFieldsTwo' class="ship">Destroyer</button>
+									<button id='destroyer' class="ship" disabled={!this.state.destroyerEnabled} onClick={this.handleShipButtonClick}>Destroyer</button>
 									<br></br>
-									<button id='twoFields' class="ship">Recon</button>
+									<button id='recon' class="ship" disabled={!this.state.cruiserEnabled} onClick={this.handleShipButtonClick}>Recon</button>
 									<br></br>
 									<br></br>
 									<br></br>
