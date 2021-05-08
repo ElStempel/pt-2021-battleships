@@ -458,14 +458,39 @@ class Window extends React.Component {
 		this.setState({password: e.target.value});
 	}
 
-	showDeletePopup(){
-		var that = this;
+	showGiveUpPopup(){
 		console.log("Usuwanie konta")
-		document.getElementsByClassName('modal')[0].hidden = false;
+		document.getElementsByClassName('modalGiveUp')[0].hidden = false;
+	}
+
+	handleClickGiveUpPopup() {
+		document.getElementsByClassName('modalGiveUp')[0].hidden = true;
+	};
+
+	handleSubmitGiveUpPopup(event) {
+		
+	}
+
+	showDrawPopup(){
+		console.log("Usuwanie konta")
+		document.getElementsByClassName('modalDraw')[0].hidden = false;
+	}
+
+	handleClickDrawPopup() {
+		document.getElementsByClassName('modalDraw')[0].hidden = true;
+	};
+
+	handleSubmitDrawPopup(event) {
+		
+	}
+
+	showDeletePopup(){
+		console.log("Usuwanie konta")
+		document.getElementsByClassName('modalDelete')[0].hidden = false;
 	}
 
 	handleClickDeletePopup() {
-		document.getElementsByClassName('modal')[0].hidden = true;
+		document.getElementsByClassName('modalDelete')[0].hidden = true;
 	};
 
 	handleSubmitDeletePopup(event) {
@@ -1053,6 +1078,37 @@ class Window extends React.Component {
 									<table class='enemyTable'>{rowsEnemy}</table>
 									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}} disabled={this.state.enemyBoardButtons}>Enemy Board</p>
 								</div>
+
+								<div className="modalDraw" hidden='true'>
+									<div className="modal_content">
+									<span className="close" onClick={this.handleClickDrawPopup}>
+										&times;
+									</span>
+										<h2 style={{textAlign: 'center'}}>Are you sure to propose a Draw?</h2>
+										<br />
+										<div style={{ textAlign: 'center'}}> 
+											<button id="submitButton" class="submitButton" onClick={this.handleSubmitDrawPopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}>Yes</button>
+											<button id="submitButton" class="submitButton" onClick={this.handleClickDrawPopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}>No</button>
+										</div>
+									</div>
+								</div>
+
+								<div className="modalGiveUp" hidden='true'>
+									<div className="modal_content">
+									<span className="close" onClick={this.handleClickGiveUpPopup}>
+										&times;
+									</span>
+										<h2 style={{textAlign: 'center'}}>Are you sure to Give Up?</h2>
+										<div style={{ textAlign: 'center'}}>
+										</div>
+										<br />
+										<div style={{ textAlign: 'center'}}> 
+											<button id="submitButton" class="submitButton" onClick={this.handleSubmitGiveUpPopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}>Yes</button>
+											<button id="submitButton" class="submitButton" onClick={this.handleClickGiveUpPopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}>No</button>
+										</div>
+									</div>
+								</div>
+
 								<div id='gameButtons' class='gameButtons' style={{ display: 'inline-block', verticalAlign: 'top', marginLeft: '50px', marginTop: '20px', }}>
 									<br></br>
 									<button id='dreadnought' class="ship" disabled={!this.state.dreadnoughtEnabled} onClick={this.handleShipButtonClick}>Dreadnought</button>
@@ -1075,10 +1131,10 @@ class Window extends React.Component {
 									<button id='confirmShot' class="confirmShot" onClick={this.handleConfirmShot}>Confirm Shot</button>
 									<br></br>
 									<br></br>
-									<button id='defeat' class="defeat" disabled='true' style={noHover}>Give up</button>
+									<button id='defeat' class="defeat" onClick={this.showGiveUpPopup}>Give up</button>
 									<br></br>
 									<br></br>
-									<button id='draw' class="draw" disabled='true' style={noHover}>Propose a draw</button>
+									<button id='draw' class="draw" onClick={this.showDrawPopup}>Propose a draw</button>
 								</div>
 
 							</div>
@@ -1121,12 +1177,12 @@ class Window extends React.Component {
 									</div>
 
 									{/* {this.state.deleteAccountSeen ? <DeletePopup toggle={this.togglePop} /> : null} */}
-									<div className="modal" hidden='true'>
+									<div className="modalDelete" hidden='true'>
 										<div className="modal_content">
 										<span className="close" onClick={this.handleClickDeletePopup}>
 											&times;
 										</span>
-											<h2>Type in your password to delete Account.</h2>
+											<h2 style={{textAlign: 'center'}}>Type in your password to delete Account.</h2>
 											<div style={{ textAlign: 'center'}}>
 												<label>
 												Password:
