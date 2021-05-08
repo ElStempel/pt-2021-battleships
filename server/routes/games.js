@@ -14,31 +14,39 @@ router.patch('/init-map', async function(req, res, next) {
     let game = await Game.findOne({_id: req.body.game_id})
     if(game){
         if(game.player_1 == req.body.player_id){
-            if(req.body.map.length == game.map_size){
-                game.p1_map = req.body.map;
-                game.maps_ready += 1;
-                try {
-                    await game.save()
-                    res.status(200).send('Map updated');
-                } catch (error) {
-                    res.status(500).send(error)
+            if(game.p1_ready == false){
+                if(req.body.map.length == game.map_size){
+                    game.p1_map = req.body.map;
+                    game.p1_ready = true;
+                    try {
+                        await game.save()
+                        res.status(200).send('Map updated');
+                    } catch (error) {
+                        res.status(500).send(error)
+                    }
+                } else {
+                    res.status(409).send('Improper map size')
                 }
             } else {
-                res.status(409).send('Inproper map size')
+                res.status(405).send("This player has already initialized a map")
             }
             
         } else if(game.player_2 == req.body.player_id){
-            if(req.body.map.length == game.map_size){
-                game.p1_map = req.body.map;
-                game.maps_ready += 1;
-                try {
-                    await game.save()
-                    res.status(200).send('Map updated');
-                } catch (error) {
-                    res.status(500).send(error)
+            if(game.p2_ready == false){
+                if(req.body.map.length == game.map_size){
+                    game.p2_map = req.body.map;
+                    game.p2_ready = true;
+                    try {
+                        await game.save()
+                        res.status(200).send('Map updated');
+                    } catch (error) {
+                        res.status(500).send(error)
+                    }
+                } else {
+                    res.status(409).send('Improper map size')
                 }
             } else {
-                res.status(409).send('Inproper map size')
+                res.status(405).send("This player has already initialized a map")
             }
 
         } else {
@@ -59,7 +67,7 @@ function search_and_destroy(enemyMap, ship, map_size){
         case 41: segments = 3; break;
         case 51: segments = 2; break;     
     }
-    var coordinates = [[]];
+    var coordinates = [];
 
     for(var i = 0; i < map_size; i++){
         for(var j = 0; j < map_size; j++){
@@ -84,68 +92,83 @@ function search_and_destroy(enemyMap, ship, map_size){
 router.post('/shot', async function(req, res, next) {
     let game = await Game.findOne({_id: req.body.game_id})
     if(game){
-        if(game.player_1 == req.body.player_id){
-            if(req.body.coordinates.x >= 0 && req.body.coordinates.x < game.map_size 
-                && req.body.coordinates.y >= 0 && req.body.coordinates.y < game.map_size){
-                if(parseInt(game.p2_map[x][y]/10) > 0){
-                    game.p2_map[x][y]+=1;
-                    snd_info = await search_and_destroy(game.p2_map, game.p2_map[x][y], game.map_size)
-                    game.p2_map = snd_info[0];
-                    if(snd_info[1] == true){
-                        game.p1.ships_sunk += 1;
-                        game.p2.ships_lost += 1;
-                        if(game.p1.ships_sunk == 5){
-                            game.winner = 1;
+        if(game.p1_ready == true && game.p2_ready == true){
+            if(game.player_1 == req.body.player_id){
+                if(game.turn == 1){
+                    if(req.body.coordinates.x >= 0 && req.body.coordinates.x < game.map_size 
+                        && req.body.coordinates.y >= 0 && req.body.coordinates.y < game.map_size){
+                        var x = req.body.coordinates.x;
+                        var y = req.body.coordinates.y;
+                        if(parseInt(game.p2_map[x][y]/10) > 0){
+                            game.p2_map[x][y]+=1;
+                            snd_info = await search_and_destroy(game.p2_map, game.p2_map[x][y], game.map_size)
+                            game.p2_map = snd_info[0];
+                            if(snd_info[1] == true){
+                                game.p1.ships_sunk += 1;
+                                game.p2.ships_lost += 1;
+                                if(game.p1.ships_sunk == 5){
+                                    game.winner = 1;
+                                }
+                            }
+                        } else {
+                            game.p2_map[x][y]=5;
+                            game.turn = 2;
                         }
+                        game.p1.shots_fired += 1;
+                        try {
+                            await game.markModified("p2_map")
+                            await game.save()
+                            res.status(200).send('Shot registered');
+                        } catch (error) {
+                            res.status(500).send(error)
+                        }
+                    } else {
+                        res.status(409).send('Coordinates out of range')
                     }
                 } else {
-                    game.p2_map[x][y]=5;
-                    game.turn = 2;
+                    res.status(405).send("This is other player's turn")
                 }
-                game.p1.shots_fired += 1;
-                try {
-                    await game.save()
-                    res.status(200).send('Shot registered');
-                } catch (error) {
-                    res.status(500).send(error)
-                }
-            } else {
-                res.status(409).send('Coordinates out of range')
-            }
-            
-        } else if(game.player_2 == req.body.player_id){
-            if(req.body.coordinates.x >= 0 && req.body.coordinates.x < game.map_size 
-                && req.body.coordinates.y >= 0 && req.body.coordinates.y < game.map_size){
-                if(parseInt(game.p1_map[x][y]/10) > 0){
-                    game.p1_map[x][y]+=1;
-                    snd_info = await search_and_destroy(game.p1_map, game.p1_map[x][y], game.map_size)
-                    game.p1_map = snd_info[0];
-                    if(snd_info[1] == true){
-                        game.p2.ships_sunk += 1;
-                        game.p1.ships_lost += 1;
-                        if(game.p2.ships_sunk == 5){
-                            game.winner = 2;
+            } else if(game.player_2 == req.body.player_id){
+                if(game.turn == 2){
+                    if(req.body.coordinates.x >= 0 && req.body.coordinates.x < game.map_size 
+                        && req.body.coordinates.y >= 0 && req.body.coordinates.y < game.map_size){
+                        var x = req.body.coordinates.x;
+                        var y = req.body.coordinates.y;
+                        if(parseInt(game.p1_map[x][y]/10) > 0){
+                            game.p1_map[x][y]+=1;
+                            snd_info = await search_and_destroy(game.p1_map, game.p1_map[x][y], game.map_size)
+                            game.p1_map = snd_info[0];
+                            if(snd_info[1] == true){
+                                game.p2.ships_sunk += 1;
+                                game.p1.ships_lost += 1;
+                                if(game.p2.ships_sunk == 5){
+                                    game.winner = 2;
+                                }
+                            }
+                        } else {
+                            game.p1_map[x][y] = 5;
+                            game.turn = 1;
                         }
+                        game.p2.shots_fired += 1;
+                        try {
+                            await game.markModified("p1_map")
+                            await game.save()
+                            res.status(200).send('Shot registered');
+                        } catch (error) {
+                            res.status(500).send(error)
+                        }
+                    } else {
+                        res.status(409).send('Coordinates out of range')
                     }
                 } else {
-                    game.p1_map[x][y]=5;
-                    game.turn = 1;
-                }
-                game.p2.shots_fired += 1;
-                try {
-                    await game.save()
-                    res.status(200).send('Shot registered');
-                } catch (error) {
-                    res.status(500).send(error)
+                    res.status(405).send("This is other player's turn")
                 }
             } else {
-                res.status(409).send('Coordinates out of range')
+                res.status(405).send("This player is not in this game")
             }
-
         } else {
-            res.status(405).send("This player is not in this game")
+            res.status(405).send("Players are not ready yet")
         }
-
     } else {
         res.status(404).send("Game does not exist")
     }
@@ -160,28 +183,37 @@ function censoreMap(map, map_size){
     return map;
 }
 
-function end_game(game){
+async function end_game(game){
     if(game.winner != 0 || game.propose_draw == 3){
-        var p1 = await User.findOne({_id: game.player_1._id})
-        var p2 = await User.findOne({_id: game.player_2._id})
-        if (p1 && p2){
-            p1.stats.games_played += 1;
-            p1.stats.ships_sunk += game_to_end.p1.ships_sunk;
-            p1.stats.ships_lost += game_to_end.p1.ships_lost;
-            p1.stats.shots_fired += game_to_end.p1.shots_fired;
-    
-            p2.stats.games_played += 1;
-            p2.stats.ships_sunk += game_to_end.p2.ships_sunk;
-            p2.stats.ships_lost += game_to_end.p2.ships_lost;
-            p2.stats.shots_fired += game_to_end.p2.shots_fired;
-    
+        if(game.saved == false){
+            game.saved = true;
             try{
-            await p1.save()
-            await p2.save()
+                await game.save()
             } catch (error) {
                 //trudno
             }
-            await Game.deleteOne({_id: game._id});
+            var p1 = await User.findOne({_id: game.player_1._id})
+            var p2 = await User.findOne({_id: game.player_2._id})
+            if (p1 && p2){
+                p1.stats.games_played += 1;
+                p1.stats.ships_sunk += game.p1.ships_sunk;
+                p1.stats.ships_lost += game.p1.ships_lost;
+                p1.stats.shots_fired += game.p1.shots_fired;
+        
+                p2.stats.games_played += 1;
+                p2.stats.ships_sunk += game.p2.ships_sunk;
+                p2.stats.ships_lost += game.p2.ships_lost;
+                p2.stats.shots_fired += game.p2.shots_fired;
+        
+                try{
+                    await p1.save()
+                    await p2.save()
+                } catch (error) {
+                    //trudno
+                }
+                await new Promise(r => setTimeout(r, 10000));
+                await Game.deleteOne({_id: game._id});
+            }
         }
     }
 }
@@ -190,7 +222,7 @@ function end_game(game){
 router.post('/fetch-state', async function(req, res, next) {
     let game = await Game.findOne({_id: req.body.game_id})
     if(game){
-        if(game.maps_ready == 2){
+        if(game.p1_ready == true && game.p2_ready == true){
             if(game.player_1 == req.body.player_id){
                 censoredMap = censoreMap(game.p2_map, game.map_size)
                 var data = {
@@ -230,25 +262,37 @@ router.post('/fetch-state', async function(req, res, next) {
 router.patch('/draw', async function(req, res, next) {
     let game = await Game.findOne({_id: req.body.game_id})
     if(game){
+        if(game.p1_ready == true && game.p2_ready == true){
             if(game.player_1 == req.body.player_id){
-                game.propose_draw += 1;
-                try {
-                    await game.save()
-                    res.status(200).send("Draw proposed")
-                } catch (error) {
-                    res.status(500).send(error)
+                if(game.propose_draw != 1){
+                    game.propose_draw += 1;
+                    try {
+                        await game.save()
+                        res.status(200).send("Draw proposed")
+                    } catch (error) {
+                        res.status(500).send(error)
+                    }
+                } else {
+                    res.status(405).send("Draw is already proposed")
                 }
             } else if(game.player_2 == req.body.player_id){
-                game.propose_draw += 2;
-                try {
-                    await game.save()
-                    res.status(200).send("Draw proposed")
-                } catch (error) {
-                    res.status(500).send(error)
+                if(game.propose_draw != 2){
+                    game.propose_draw += 2;
+                    try {
+                        await game.save()
+                        res.status(200).send("Draw proposed")
+                    } catch (error) {
+                        res.status(500).send(error)
+                    }
+                } else {
+                    res.status(405).send("Draw is already proposed")
                 }
             } else {
                 res.status(405).send("This player is not in this game")
             }
+        } else {
+            res.status(405).send("Players are not ready yet")
+        }
     } else {
         res.status(404).send("Game does not exist")
     }
@@ -258,25 +302,29 @@ router.patch('/draw', async function(req, res, next) {
 router.patch('/give-up', async function(req, res, next) {
     let game = await Game.findOne({_id: req.body.game_id})
     if(game){
-            if(game.player_1 == req.body.player_id){
-                game.winner = 2
-                try {
-                    await game.save()
-                    res.status(200).send("Game given up")
-                } catch (error) {
-                    res.status(500).send(error)
-                }
-            } else if(game.player_2 == req.body.player_id){
-                game.winner = 1
-                try {
-                    await game.save()
-                    res.status(200).send("Game given up")
-                } catch (error) {
-                    res.status(500).send(error)
-                }
-            } else {
-                res.status(405).send("This player is not in this game")
+        if(game.player_1 == req.body.player_id){
+            game.winner = 2
+            game.p1_ready = true;
+            game.p2_ready = true;
+            try {
+                await game.save()
+                res.status(200).send("Game given up")
+            } catch (error) {
+                res.status(500).send(error)
             }
+        } else if(game.player_2 == req.body.player_id){
+            game.winner = 1
+            game.p1_ready = true;
+            game.p2_ready = true;
+            try {
+                await game.save()
+                res.status(200).send("Game given up")
+            } catch (error) {
+                res.status(500).send(error)
+            }
+        } else {
+            res.status(405).send("This player is not in this game")
+        }
     } else {
         res.status(404).send("Game does not exist")
     }

@@ -12,7 +12,8 @@ var GameSchema = new Schema(
     turn: {type: Number, required: true, default: 2, min: 1, max: 2},
     p1_map: {type: Array},
     p2_map: {type: Array},
-    maps_ready: {type: Number, required: true, default: 0, min: 0, max: 2},
+    p1_ready: {type: Boolean, required: true, default: false},
+    p2_ready: {type: Boolean, required: true, default: false},
     p1: {
         attack1: {type: Boolean, default: false},
         attack2: {type: Boolean, default: false},
@@ -30,7 +31,8 @@ var GameSchema = new Schema(
         shots_fired: {type: Number, default: 0},
     },
     propose_draw: {type: Number, required: true, default: 0, min: 0, max: 3},
-    winner: {type: Number, required: true, default: 0, min: 0, max: 2}
+    winner: {type: Number, required: true, default: 0, min: 0, max: 2},
+    saved: {type: Boolean, required: true, default: false},
   }
 );
 
