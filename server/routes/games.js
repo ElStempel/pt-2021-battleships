@@ -4,7 +4,7 @@ var Room = require('../models/room');
 var User = require('../models/user');
 var Game = require('../models/game');
 
-/* GET games listing. */
+//Test games routing
 router.get('/', function(req, res, next) {
     res.status(200).send('Games routing');
 });
@@ -21,7 +21,7 @@ router.patch('/init-map', async function(req, res, next) {
                     await game.save()
                     res.status(200).send('Map updated');
                 } catch (error) {
-                    res.status(400).send(error)
+                    res.status(500).send(error)
                 }
             } else {
                 res.status(409).send('Inproper map size')
@@ -35,18 +35,18 @@ router.patch('/init-map', async function(req, res, next) {
                     await game.save()
                     res.status(200).send('Map updated');
                 } catch (error) {
-                    res.status(400).send(error)
+                    res.status(500).send(error)
                 }
             } else {
                 res.status(409).send('Inproper map size')
             }
 
         } else {
-            res.status(400).send("This player is not in this game")
+            res.status(405).send("This player is not in this game")
         }
 
     } else {
-        res.status(400).send("Game does not exist")
+        res.status(404).send("Game does not exist")
     }
 });
 
@@ -73,9 +73,11 @@ function search_and_destroy(enemyMap, ship, map_size){
         for(var i = 0; i < segments; i++){
             enemyMap[coordinates[i][0]][coordinates[i][1]] += 1;
         }
+        //pass sunken ship to update game stats
+        return [enemyMap, true];
+    } else {
+        return [enemyMap, false];
     }
-
-    return enemyMap;
 }
 
 //shot (game_id, player_id, coordinates:{x, y})
@@ -87,16 +89,25 @@ router.post('/shot', async function(req, res, next) {
                 && req.body.coordinates.y >= 0 && req.body.coordinates.y < game.map_size){
                 if(parseInt(game.p2_map[x][y]/10) > 0){
                     game.p2_map[x][y]+=1;
-                    game.p2_map = await search_and_destroy(game.p2_map, game.p2_map[x][y], game.map_size)
+                    snd_info = await search_and_destroy(game.p2_map, game.p2_map[x][y], game.map_size)
+                    game.p2_map = snd_info[0];
+                    if(snd_info[1] == true){
+                        game.p1.ships_sunk += 1;
+                        game.p2.ships_lost += 1;
+                        if(game.p1.ships_sunk == 5){
+                            game.winner = 1;
+                        }
+                    }
                 } else {
                     game.p2_map[x][y]=5;
                     game.turn = 2;
-                } 
+                }
+                game.p1.shots_fired += 1;
                 try {
                     await game.save()
                     res.status(200).send('Shot registered');
                 } catch (error) {
-                    res.status(400).send(error)
+                    res.status(500).send(error)
                 }
             } else {
                 res.status(409).send('Coordinates out of range')
@@ -107,27 +118,167 @@ router.post('/shot', async function(req, res, next) {
                 && req.body.coordinates.y >= 0 && req.body.coordinates.y < game.map_size){
                 if(parseInt(game.p1_map[x][y]/10) > 0){
                     game.p1_map[x][y]+=1;
-                    game.p1_map = await search_and_destroy(game.p1_map, game.p1_map[x][y], game.map_size)
+                    snd_info = await search_and_destroy(game.p1_map, game.p1_map[x][y], game.map_size)
+                    game.p1_map = snd_info[0];
+                    if(snd_info[1] == true){
+                        game.p2.ships_sunk += 1;
+                        game.p1.ships_lost += 1;
+                        if(game.p2.ships_sunk == 5){
+                            game.winner = 2;
+                        }
+                    }
                 } else {
                     game.p1_map[x][y]=5;
                     game.turn = 1;
                 }
+                game.p2.shots_fired += 1;
                 try {
                     await game.save()
                     res.status(200).send('Shot registered');
                 } catch (error) {
-                    res.status(400).send(error)
+                    res.status(500).send(error)
                 }
             } else {
                 res.status(409).send('Coordinates out of range')
             }
 
         } else {
-            res.status(400).send("This player is not in this game")
+            res.status(405).send("This player is not in this game")
         }
 
     } else {
-        res.status(400).send("Game does not exist")
+        res.status(404).send("Game does not exist")
+    }
+});
+
+function censoreMap(map, map_size){
+    for(var i = 0; i < map_size; i++){
+        for(var j = 0; j < map_size; j++){
+            map[i][j] = map[i][j]%10
+        }
+    }
+    return map;
+}
+
+function end_game(game){
+    if(game.winner != 0 || game.propose_draw == 3){
+        var p1 = await User.findOne({_id: game.player_1._id})
+        var p2 = await User.findOne({_id: game.player_2._id})
+        if (p1 && p2){
+            p1.stats.games_played += 1;
+            p1.stats.ships_sunk += game_to_end.p1.ships_sunk;
+            p1.stats.ships_lost += game_to_end.p1.ships_lost;
+            p1.stats.shots_fired += game_to_end.p1.shots_fired;
+    
+            p2.stats.games_played += 1;
+            p2.stats.ships_sunk += game_to_end.p2.ships_sunk;
+            p2.stats.ships_lost += game_to_end.p2.ships_lost;
+            p2.stats.shots_fired += game_to_end.p2.shots_fired;
+    
+            try{
+            await p1.save()
+            await p2.save()
+            } catch (error) {
+                //trudno
+            }
+            await Game.deleteOne({_id: game._id});
+        }
+    }
+}
+
+//fetch-state (game_id, player_id)
+router.post('/fetch-state', async function(req, res, next) {
+    let game = await Game.findOne({_id: req.body.game_id})
+    if(game){
+        if(game.maps_ready == 2){
+            if(game.player_1 == req.body.player_id){
+                censoredMap = censoreMap(game.p2_map, game.map_size)
+                var data = {
+                    winner: game.winner,
+                    turn: game.turn,
+                    stats: game.p1,
+                    draw: game.propose_draw,
+                    playerMap: game.p1_map,
+                    enemyMap: censoredMap
+                }
+                res.status(200).send(data)
+                end_game(game);
+            } else if(game.player_2 == req.body.player_id){
+                censoredMap = censoreMap(game.p1_map, game.map_size)
+                var data = {
+                    winner: game.winner,
+                    turn: game.turn,
+                    stats: game.p2,
+                    draw: game.propose_draw,
+                    playerMap: game.p2_map,
+                    enemyMap: censoredMap
+                }
+                res.status(200).send(data)
+                end_game(game);
+            } else {
+                res.status(405).send("This player is not in this game")
+            }
+        } else {
+            res.status(405).send("Players are not ready yet")
+        }
+    } else {
+        res.status(404).send("Game does not exist")
+    }
+});
+
+//draw (game_id, player_id)
+router.patch('/draw', async function(req, res, next) {
+    let game = await Game.findOne({_id: req.body.game_id})
+    if(game){
+            if(game.player_1 == req.body.player_id){
+                game.propose_draw += 1;
+                try {
+                    await game.save()
+                    res.status(200).send("Draw proposed")
+                } catch (error) {
+                    res.status(500).send(error)
+                }
+            } else if(game.player_2 == req.body.player_id){
+                game.propose_draw += 2;
+                try {
+                    await game.save()
+                    res.status(200).send("Draw proposed")
+                } catch (error) {
+                    res.status(500).send(error)
+                }
+            } else {
+                res.status(405).send("This player is not in this game")
+            }
+    } else {
+        res.status(404).send("Game does not exist")
+    }
+});
+
+//give-up (game_id, player_id)
+router.patch('/give-up', async function(req, res, next) {
+    let game = await Game.findOne({_id: req.body.game_id})
+    if(game){
+            if(game.player_1 == req.body.player_id){
+                game.winner = 2
+                try {
+                    await game.save()
+                    res.status(200).send("Game given up")
+                } catch (error) {
+                    res.status(500).send(error)
+                }
+            } else if(game.player_2 == req.body.player_id){
+                game.winner = 1
+                try {
+                    await game.save()
+                    res.status(200).send("Game given up")
+                } catch (error) {
+                    res.status(500).send(error)
+                }
+            } else {
+                res.status(405).send("This player is not in this game")
+            }
+    } else {
+        res.status(404).send("Game does not exist")
     }
 });
 module.exports = router;

@@ -29,7 +29,8 @@ var GameSchema = new Schema(
         ships_lost: {type: Number, default: 0},
         shots_fired: {type: Number, default: 0},
     },
-    propose_draw: {type: Number, required: true, default: 0}
+    propose_draw: {type: Number, required: true, default: 0, min: 0, max: 3},
+    winner: {type: Number, required: true, default: 0, min: 0, max: 2}
   }
 );
 
