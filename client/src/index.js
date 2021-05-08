@@ -96,6 +96,7 @@ class Window extends React.Component {
 		this.handleEnemyBoardClick = this.handleEnemyBoardClick.bind(this);
 		this.handleConfirmShips = this.handleConfirmShips.bind(this);
 		this.handleShipButtonClick = this.handleShipButtonClick.bind(this);
+		this.handleConfirmShot = this.handleConfirmShot.bind(this);
 
 		this.state = { 
 			div1Shown: true, 
@@ -675,7 +676,7 @@ class Window extends React.Component {
 		}
 		else if(coordsList.length == 1){
 			if(((coordsList[0].X + 1 == coords.x || coordsList[0].X - 1 == coords.x) && coordsList[0].Y == coords.y) || ((coordsList[0].Y + 1 == coords.y || coordsList[0].Y - 1 == coords.y) && coordsList[0].X == coords.x) &&
-			(shipName == 'dredanought' || shipName == 'cruiser' || shipName == 'submarine' || shipName == 'destroyer' || shipName == 'recon')){
+			(shipName == 'dreadnought' || shipName == 'cruiser' || shipName == 'submarine' || shipName == 'destroyer' || shipName == 'recon')){
 				return true;
 			}
 			else{
@@ -685,7 +686,7 @@ class Window extends React.Component {
 		else if(coordsList.length == 2){
 			if(((coordsList[0].X + 1 == coords.x || coordsList[0].X - 1 == coords.x) && coordsList[0].Y == coords.y) || ((coordsList[0].Y + 1 == coords.y || coordsList[0].Y - 1 == coords.y) && coordsList[0].X == coords.x) ||
 			((coordsList[1].X + 1 == coords.x || coordsList[1].X - 1 == coords.x) && coordsList[1].Y == coords.y) || ((coordsList[1].Y + 1 == coords.y || coordsList[1].Y - 1 == coords.y) && coordsList[1].X == coords.x) &&
-			(shipName == 'dredanought' || shipName == 'cruiser' || shipName == 'submarine' || shipName == 'destroyer')){
+			(shipName == 'dreadnought' || shipName == 'cruiser' || shipName == 'submarine' || shipName == 'destroyer')){
 				if((coords.x == coordsList[1].X && coordsList[1].X == coordsList[0].X) || (coords.y == coordsList[1].Y && coordsList[1].Y == coordsList[0].Y)){
 					return true;
 				}
@@ -701,8 +702,8 @@ class Window extends React.Component {
 			if(((coordsList[0].X + 1 == coords.x || coordsList[0].X - 1 == coords.x) && coordsList[0].Y == coords.y) || ((coordsList[0].Y + 1 == coords.y || coordsList[0].Y - 1 == coords.y) && coordsList[0].X == coords.x) ||
 			((coordsList[1].X + 1 == coords.x || coordsList[1].X - 1 == coords.x) && coordsList[1].Y == coords.y) || ((coordsList[1].Y + 1 == coords.y || coordsList[1].Y - 1 == coords.y) && coordsList[1].X == coords.x) ||
 			((coordsList[2].X + 1 == coords.x || coordsList[2].X - 1 == coords.x) && coordsList[2].Y == coords.y) || ((coordsList[2].Y + 1 == coords.y || coordsList[2].Y - 1 == coords.y) && coordsList[2].X == coords.x) &&
-			(shipName == 'dredanought' || shipName == 'cruiser')){
-				if((coords.x == coordsList[2].X && coordsList[2].X == coordsList[1].X == coordsList[1].X == coordsList[0].X) || (coords.y == coordsList[2].Y && coordsList[2].Y == coordsList[1].Y && coordsList[1].Y == coordsList[0].Y)){
+			(shipName == 'dreadnought' || shipName == 'cruiser')){
+				if((coords.x == coordsList[2].X && coordsList[2].X == coordsList[1].X && coordsList[1].X == coordsList[0].X) || (coords.y == coordsList[2].Y && coordsList[2].Y == coordsList[1].Y && coordsList[1].Y == coordsList[0].Y)){
 					return true;
 				}
 				else{
@@ -718,8 +719,8 @@ class Window extends React.Component {
 			((coordsList[1].X + 1 == coords.x || coordsList[1].X - 1 == coords.x) && coordsList[1].Y == coords.y) || ((coordsList[1].Y + 1 == coords.y || coordsList[1].Y - 1 == coords.y) && coordsList[1].X == coords.x) ||
 			((coordsList[2].X + 1 == coords.x || coordsList[2].X - 1 == coords.x) && coordsList[2].Y == coords.y) || ((coordsList[2].Y + 1 == coords.y || coordsList[2].Y - 1 == coords.y) && coordsList[2].X == coords.x) ||
 			((coordsList[3].X + 1 == coords.x || coordsList[3].X - 1 == coords.x) && coordsList[3].Y == coords.y) || ((coordsList[3].Y + 1 == coords.y || coordsList[3].Y - 1 == coords.y) && coordsList[3].X == coords.x) &&
-			(shipName == 'dredanought')){
-				if((coords.x == coordsList[3].X && coordsList[3].X == coordsList[2].X && coordsList[2].X == coordsList[1].X == coordsList[1].X == coordsList[0].X) || (coords.y == coordsList[3].Y && coordsList[3].Y == coordsList[2].Y && coordsList[2].Y == coordsList[1].Y && coordsList[1].Y == coordsList[0].Y)){
+			(shipName == 'dreadnought')){
+				if((coords.x == coordsList[3].X && coordsList[3].X == coordsList[2].X && coordsList[2].X == coordsList[1].X && coordsList[1].X == coordsList[0].X) || (coords.y == coordsList[3].Y && coordsList[3].Y == coordsList[2].Y && coordsList[2].Y == coordsList[1].Y && coordsList[1].Y == coordsList[0].Y)){
 					return true;
 				}
 				else{
@@ -791,13 +792,25 @@ class Window extends React.Component {
 
 	handleEnemyBoardClick(event){
 		event.preventDefault();
-		event.target.style.backgroundColor = 'red'
+		if(this.state.enemyBoardButtons == false){
+			event.target.style.backgroundColor = 'red'
+		}
 	}
 
 	handleConfirmShips(){
 		this.setState({
 			enemyBoardButtons: false
 		});
+		console.log("Confirm ships")
+		var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
+		confirmShotBut.style.backgroundColor = 'blue'
+		console.log(confirmShotBut)
+	}
+
+	handleConfirmShot(event){
+		console.log("Shots fired!")
+		event.preventDefault()
+		event.target.style.backgroundColor = 'red'
 	}
 
 	handleShipButtonClick(event){
@@ -901,7 +914,7 @@ class Window extends React.Component {
 								</div>
 								<div id='enemyBoard' class='enemyBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
 									<table class='enemyTable'>{rowsEnemy}</table>
-									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}}>Enemy Board</p>
+									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}} disabled={this.state.enemyBoardButtons}>Enemy Board</p>
 								</div>
 								<div id='gameButtons' class='gameButtons' style={{ display: 'inline-block', verticalAlign: 'top', marginLeft: '50px', marginTop: '20px', }}>
 									<br></br>
@@ -917,11 +930,11 @@ class Window extends React.Component {
 									<br></br>
 									<br></br>
 									<br></br>
-									<button id='confirmShips' class="confirmShips" disabled='true' onClick={this.handleConfirmShips} >Confirm Setup</button>
+									<button id='confirmShips' class="confirmShips" onClick={this.handleConfirmShips} >Confirm Setup</button>
 									<br></br>
 									<br></br>
 									<br></br>
-									<button id='confirmShot' class="confirmShot" disabled='true' style={noHover}>Confirm Shot</button>
+									<button id='confirmShot' class="confirmShot" onClick={this.handleConfirmShot}>Confirm Shot</button>
 									<br></br>
 									<br></br>
 									<br></br>
