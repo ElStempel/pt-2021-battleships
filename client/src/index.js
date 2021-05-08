@@ -453,8 +453,224 @@ class Window extends React.Component {
 		this.setState({ gameShown: !this.state.gameShown });
 	}
 
-	checkCoords(shipName, coordsList, coords){
-		if(coordsList.length == 0){
+	checkCoords(shipName, coordsList, coordsPass){
+		var coords = { x: parseInt(coordsPass.x), y: parseInt(coordsPass.y) }
+		// console.log('X: ' + coords.x + ' Y: ' + coords.y)
+		// console.log('X + 1: ' + coords.x + 1 + ' ' + coords.y)
+		// console.log('X - 1: ' + coords.x - 1 + ' ' + coords.y)
+		// console.log('Y + 1: ' + coords.x + ' ' + coords.y + 1)
+		// console.log('Y 1 1: ' + coords.x + ' ' + coords.y - 1)
+		// console.log('X + 1, Y + 1: ' + coords.x + 1 + ' ' + coords.y + 1)
+		// console.log('X - 1, Y - 1: ' + coords.x - 1 + ' ' + coords.y - 1)
+		// console.log('X - 1, Y + 1: ' + coords.x - 1 + ' ' + coords.y + 1)
+		// console.log('X + 1, Y - 1: ' + coords.x + 1 + ' ' + coords.y - 1)
+		var coordsTaken = false;
+		for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
+			console.log(typeof(this.state.dreadnoughtCoordsList[i].X))
+			console.log(typeof(this.state.dreadnoughtCoordsList[i].Y))
+			console.log(typeof(coords.x))
+			console.log(typeof(coords.y))
+			if(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y){
+				coordsTaken = true;
+			}
+		}
+		for(var i = 0; i < this.state.cruiserCoordsList.length; i++){
+			if(coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y){
+				coordsTaken = true;
+			}
+		}
+		for(var i = 0; i < this.state.submarineCoordsList.length; i++){
+			if(coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y){
+				coordsTaken = true;
+			}
+		}
+		for(var i = 0; i < this.state.destroyerCoordsList.length; i++){
+			if(coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y){
+				coordsTaken = true;
+			}
+		}
+		for(var i = 0; i < this.state.reconCoordsList.length; i++){
+			if(coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y){
+				coordsTaken = true;
+			}
+		}
+		var neighbourCoordsTaken = false;
+		if(shipName == 'dreadnought'){
+			for(var i = 0; i < this.state.cruiserCoordsList.length; i++){
+				if((coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y) ||
+				(coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.submarineCoordsList.length; i++){
+				if((coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y) ||
+				(coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.destroyerCoordsList.length; i++){
+				if((coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y) ||
+				(coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.reconCoordsList.length; i++){
+				if((coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y) ||
+				(coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		if(shipName == 'cruiser'){
+			for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
+				if((coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.submarineCoordsList.length; i++){
+				if((coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y) ||
+				(coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.destroyerCoordsList.length; i++){
+				if((coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y) ||
+				(coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.reconCoordsList.length; i++){
+				if((coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y) ||
+				(coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		if(shipName == 'submarine'){
+			for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
+				if((coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.cruiserCoordsList.length; i++){
+				if((coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y) ||
+				(coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.destroyerCoordsList.length; i++){
+				if((coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y) ||
+				(coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.reconCoordsList.length; i++){
+				if((coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y) ||
+				(coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		if(shipName == 'destroyer'){
+			for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
+				if((coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.cruiserCoordsList.length; i++){
+				if((coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y) ||
+				(coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.submarineCoordsList.length; i++){
+				if((coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y) ||
+				(coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.reconCoordsList.length; i++){
+				if((coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y) ||
+				(coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		if(shipName == 'recon'){
+			for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
+				if((coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.cruiserCoordsList.length; i++){
+				if((coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y) ||
+				(coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.submarineCoordsList.length; i++){
+				if((coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y) ||
+				(coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < this.state.destroyerCoordsList.length; i++){
+				if((coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y) ||
+				(coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		console.log('Taken: ' + coordsTaken);
+		console.log('Neighbour: ' + neighbourCoordsTaken);
+		if(coordsTaken == true || neighbourCoordsTaken == true){
+			return false;
+		}
+		else if(coordsList.length == 0){
 			return true;
 		}
 		else if(coordsList.length == 1){
@@ -522,7 +738,7 @@ class Window extends React.Component {
 		if(this.state.availableFields > 0){
 			if(this.state.dreadnoughtEnabled == true){
 				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.dreadnoughtCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					this.state.dreadnoughtCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
 					event.target.style.backgroundColor = 'black'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -531,7 +747,7 @@ class Window extends React.Component {
 			}
 			else if(this.state.cruiserEnabled == true){
 				if(this.checkCoords('cruiser', this.state.cruiserCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.cruiserCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					this.state.cruiserCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
 					event.target.style.backgroundColor = 'black'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -540,7 +756,7 @@ class Window extends React.Component {
 			}
 			else if(this.state.submarineEnabled == true){
 				if(this.checkCoords('submarine', this.state.submarineCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.submarineCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					this.state.submarineCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
 					event.target.style.backgroundColor = 'black'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -549,7 +765,7 @@ class Window extends React.Component {
 			}
 			else if(this.state.destroyerEnabled == true){
 				if(this.checkCoords('destroyer', this.state.destroyerCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.destroyerCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					this.state.destroyerCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
 					event.target.style.backgroundColor = 'black'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -558,7 +774,7 @@ class Window extends React.Component {
 			}
 			else if(this.state.reconEnabled == true){
 				if(this.checkCoords('recon', this.state.reconCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.reconCoordsList.push({X: event.target.id[2], Y: event.target.id[4]})
+					this.state.reconCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
 					event.target.style.backgroundColor = 'black'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
