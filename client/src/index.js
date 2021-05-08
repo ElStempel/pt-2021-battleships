@@ -97,8 +97,11 @@ class Window extends React.Component {
 		this.handlePlayerBoardClick = this.handlePlayerBoardClick.bind(this);
 		this.handleEnemyBoardClick = this.handleEnemyBoardClick.bind(this);
 		this.handleConfirmShips = this.handleConfirmShips.bind(this);
+		this.handleResetBoard = this.handleResetBoard.bind(this);
 		this.handleShipButtonClick = this.handleShipButtonClick.bind(this);
 		this.handleConfirmShot = this.handleConfirmShot.bind(this);
+		this.updatePlayers = this.updatePlayers.bind(this);
+		this.updateRooms = this.updateRooms.bind(this);
 
 		this.state = { 
 			div1Shown: true, 
@@ -150,17 +153,13 @@ class Window extends React.Component {
 
 			availableFields: 0,
 
+			shipDeployed: false,
+
 			dreadnoughtCoordsList: [],
 			cruiserCoordsList: [],
 			submarineCoordsList: [],
 			destroyerCoordsList: [],
 			reconCoordsList: [],
-
-			dreadnoughtSet: false,
-			cruiserSet: false,
-			submarineSet: false,
-			destroyerSet: false,
-			reconSet: false,
 
 			playerBoardEnabled: false,
 
@@ -190,6 +189,18 @@ class Window extends React.Component {
 		});
 	};
 
+	updateRooms(){
+		var that = this;
+		that.clearRoomList();
+		that.getRoomsList();
+	}
+
+	updatePlayers(){
+		var that = this;
+		that.clearPlayersList();
+		that.getPlayersList();
+	}
+
 	chooseLogin(event){
 		var that = this;
 		console.log("Login nacisniety")
@@ -215,7 +226,7 @@ class Window extends React.Component {
 				});
 			}
 			return response.json(); 
-		})
+		}, )
 		.then(function(data) { 
 			if(stat == 200){
 				that.setState({
@@ -230,14 +241,12 @@ class Window extends React.Component {
 					loses: 0,
 				});
 			}
-		}).then(() => {
-			that.clearRoomList();
-			that.clearPlayersList();
-		}).then(() => {
-			that.getPlayersList();
-		}).then(() => {
-			that.getRoomsList();
 		})
+		that.clearRoomList();
+		that.clearPlayersList();
+
+		that.getRoomsList();
+		that.getPlayersList();
 
 
 	}
@@ -296,30 +305,6 @@ class Window extends React.Component {
 		});
 	}
 
-	showDeletePopup(){
-		var that = this;
-		console.log("Usuwanie konta")
-		that.setState({
-			deleteAccountModal: false,
-		});
-		// if(that.state.inputValue == that.state.password){
-		// 	const requestOptions = {
-		// 		method: 'POST',
-		// 		headers: { 'Content-Type': 'application/json' },
-		// 		body: JSON.stringify({ "_id": that.state.user_id, "pass_hash": that.state.password })
-		// 	};
-		// 	var stat = 0;
-		// 	fetch('https://localhost:9000/users/delete', requestOptions)
-		// 	.then(function(response) { 
-		// 		stat = response.status;
-		// 		console.log(stat)
-		// 		if(stat == 202){
-
-		// 		}
-		// 	})
-		// }
-	}
-
 	getRoomsList(){
 		var that = this;
 		console.log("Getting list of rooms")
@@ -352,14 +337,6 @@ class Window extends React.Component {
 				}
 			}
 		})
-
-		console.log("pokoje")
-		console.log(that.state.rooms)
-
-
-		// this.setState({
-		// 	rooms: this.state.rooms.concat({ room: 'Room 1', full: false })
-		// });
 	}
 
 	clearRoomList(){
@@ -389,13 +366,10 @@ class Window extends React.Component {
 			console.log(receivedPlayers)
 			for(var i = 0; i < receivedPlayers.length; i++){
 				that.setState({
-					rooms: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: 10 - i })
+					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: 10 - i })
 				});
 			}
 		})
-
-		console.log("gracz")
-		console.log(that.state.playersList)
 	}
 
 	clearPlayersList(){
@@ -484,11 +458,14 @@ class Window extends React.Component {
 		this.setState({password: e.target.value});
 	}
 
-	handleClickDeletePopup = () => {
+	showDeletePopup(){
 		var that = this;
-		that.setState({
-			deleteAccountModal: true,
-		});
+		console.log("Usuwanie konta")
+		document.getElementsByClassName('modal')[0].hidden = false;
+	}
+
+	handleClickDeletePopup() {
+		document.getElementsByClassName('modal')[0].hidden = true;
 	};
 
 	handleSubmitDeletePopup(event) {
@@ -521,10 +498,6 @@ class Window extends React.Component {
 						loses: 0,
 					});
 				}
-			}).then(() => {
-				that.setState({
-					deleteAccountModal: true,
-				});
 			})
 		}
 	}
@@ -541,10 +514,6 @@ class Window extends React.Component {
 		var coords = { x: parseInt(coordsPass.x), y: parseInt(coordsPass.y) }
 		var coordsTaken = false;
 		for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
-			console.log(typeof(this.state.dreadnoughtCoordsList[i].X))
-			console.log(typeof(this.state.dreadnoughtCoordsList[i].Y))
-			console.log(typeof(coords.x))
-			console.log(typeof(coords.y))
 			if(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y){
 				coordsTaken = true;
 			}
@@ -866,14 +835,105 @@ class Window extends React.Component {
 		}
 	}
 
+	prepareBoardToSend(){
+		var that = this;
+		var board = [];
+		for(var i = 0; i < 10; i++){
+			var temp = [];
+			for(var j = 0; j < 10; j++){
+				temp.push(0)
+			}
+			board.push(temp)
+		}
+		for(var i = 0; i < that.state.dreadnoughtCoordsList.length; i++){
+			board[that.state.dreadnoughtCoordsList[i].X][that.state.dreadnoughtCoordsList[i].Y] = 10;
+		}
+		for(var i = 0; i < that.state.cruiserCoordsList.length; i++){
+			board[that.state.cruiserCoordsList[i].X][that.state.cruiserCoordsList[i].Y] = 20;
+		}
+		for(var i = 0; i < that.state.submarineCoordsList.length; i++){
+			board[that.state.submarineCoordsList[i].X][that.state.submarineCoordsList[i].Y] = 30;
+		}
+		for(var i = 0; i < that.state.destroyerCoordsList.length; i++){
+			board[that.state.destroyerCoordsList[i].X][that.state.destroyerCoordsList[i].Y] = 40;
+		}
+		for(var i = 0; i < that.state.reconCoordsList.length; i++){
+			board[that.state.reconCoordsList[i].X][that.state.reconCoordsList[i].Y] = 50;
+		}
+
+		return JSON.stringify(board);
+	}
+
 	handleConfirmShips(){
-		this.setState({
-			enemyBoardButtons: false
-		});
+		// var boardToSend = this.prepareBoardToSend();
+		console.log(this.prepareBoardToSend())
 		console.log("Confirm ships")
-		var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
-		confirmShotBut.style.backgroundColor = 'blue'
-		console.log(confirmShotBut)
+		var shipsBut = document.getElementsByClassName('ship');
+		var allSet = true;
+		for(var i = 0; i < shipsBut.length; i++)
+		{
+			if(shipsBut[i].style.backgroundColor != 'green'){
+				allSet = false;
+			}
+		}
+		if(allSet == true){
+			this.setState({
+				enemyBoardButtons: false,
+				shipDeployed: true,
+			});
+			var confirmBut = document.getElementsByClassName('confirmShips');
+			var resetBut = document.getElementsByClassName('resetBoard');
+			confirmBut[0].style.backgroundColor = 'green';
+			confirmBut[0].disabled = true;
+			resetBut[0].style.backgroundColor = 'green';
+			resetBut[0].disabled = true;
+			var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
+			confirmShotBut.style.backgroundColor = 'red'
+
+			// var stat = 0;
+			// const requestOptions = {
+			// 	method: 'POST',
+			// 	headers: { 'Content-Type': 'application/json' },
+			// 	body: JSON.stringify({ game_id: idgry, player_id: that.state.user_id, board: boardToSend})
+			// };
+
+			// fetch('https://localhost:9000/games/init-map', requestOptions)
+			// .then(function(response) { 
+			// 	stat = response.status;
+			// 	console.log(stat)
+			// });
+
+		}
+	}
+
+	handleResetBoard(){
+		var shipsButtons = document.getElementsByClassName('ship');
+		var boardButtons = document.getElementsByClassName('but');
+		for(var i = 0; i < shipsButtons.length; i++){
+			shipsButtons[i].style.backgroundColor = 'grey';
+			shipsButtons[i].disabled = false;
+		}
+		for(var j = 0; j < boardButtons.length; j++){
+			boardButtons[j].style.backgroundColor = 'blue';
+		}
+		this.setState({
+			dreadnoughtCoordsList: [],
+			cruiserCoordsList: [],
+			submarineCoordsList: [],
+			destroyerCoordsList: [],
+			reconCoordsList: [],
+			dreadnoughtFields: 5,
+			cruiserFields: 4,
+			submarineFields: 3,
+			submarineFields: 3,
+			reconFields: 2,
+			dreadnoughtEnabled: true, 
+			cruiserEnabled: true,
+			submarineEnabled: true,
+			destroyerEnabled: true,
+			reconEnabled: true,
+			playerBoardEnabled: false
+		})
 	}
 
 	handleConfirmShot(event){
@@ -913,10 +973,18 @@ class Window extends React.Component {
 	}
 
 	render() {
-		const listNames = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Player: {d.player}</li>);
-		const listScore = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Current Score: {d.score}</li>);
+		const listNames = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.player}</li>);
+		const listScore = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.score}</li>);
 		const listRooms = this.state.rooms.map((r) => <li style={{ height: '80px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id='joinButton' class='joinButton' disabled={r.full} onClick={this.joinGame} style={{display: 'inline-block', float: 'right', marginRight: '20px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px', pointerEvents: [r.hover]}}> {r.text} </button></li>)
+
+		// function yourFunction(){
+		// 	// do whatever you like here
+		// 	console.log("5 sekund")
+		// 	setTimeout(yourFunction, 5000);
+		// }
 		
+		// yourFunction();
+
 		const noHover = {
 			pointerEvents: 'none',
 		}
@@ -998,17 +1066,16 @@ class Window extends React.Component {
 									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon</button>
 									<br></br>
 									<br></br>
+									<button id='resetBoard' class="resetBoard" onClick={this.handleResetBoard} >Reset Board</button>
+									<br></br>
 									<br></br>
 									<button id='confirmShips' class="confirmShips" onClick={this.handleConfirmShips} >Confirm Setup</button>
-									<br></br>
 									<br></br>
 									<br></br>
 									<button id='confirmShot' class="confirmShot" onClick={this.handleConfirmShot}>Confirm Shot</button>
 									<br></br>
 									<br></br>
-									<br></br>
 									<button id='defeat' class="defeat" disabled='true' style={noHover}>Give up</button>
-									<br></br>
 									<br></br>
 									<br></br>
 									<button id='draw' class="draw" disabled='true' style={noHover}>Propose a draw</button>
@@ -1026,32 +1093,39 @@ class Window extends React.Component {
 								</div>
 							<br />
 								<div id="pageAfterLogin" class="pageAfterLogin" style={{ backgroundImage: `url(${background})`, display: 'flex', flexDirection: 'row', }}>
-									<div id="rooms" style={{display: 'inline-block', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: 'auto'}}>
+									<div id="rooms" style={{display: 'inline-block', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
 										<h2 id="roomsText" style={{ marginLeft: '10px', minHeight: '40px', color: 'white', display: 'inline-block', }}>Rooms</h2>
 										<button class='createButton' id='createButton' onClick={this.createRoom} style={createButtonStyle}>Create Room</button>
+										<hr></hr>
+										<button class='updateButton' id='updateButton' onClick={this.updateRooms} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh Rooms list</button>
 										<hr></hr>
 										<div id="roomsEntrys" style={{ marginLeft: '25px', listStyleType: 'none', color: 'white', }}>
 											{listRooms}
 										</div>
 									</div>
-									<div id="players" style={{display: 'inline-block', minHeight: '600px', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: 'auto', }}>
+									<div id="players" style={{display: 'inline-block', minHeight: '600px', marginLeft: '70px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto', }}>
 										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px',}}>Top Players</h2>
 										<hr></hr>
-										<div id="playerNames" style={{ marginLeft: '25px', display: 'inline-block', listStyleType: 'none', color: 'white', }}>
+										<button class='updateButton' id='updateButton' onClick={this.updatePlayers} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh Top Players list</button>
+										<hr></hr>
+										<div id="playerNames" style={{ marginLeft: '25px', display: 'inline-block', listStyleType: 'none', color: 'white', fontSize: '30px', fontWeight: 'bold' }}>
+											Player
+											<hr></hr>
 											{listNames}
 										</div>
-										<div id="playerNames" style={{ float: 'right', marginRight: '20px', display: 'inline-block', listStyleType: 'none', color: 'white', }}>
+										<div id="playerNames" style={{ float: 'right', marginRight: '20px', display: 'inline-block', listStyleType: 'none', color: 'white', fontSize: '30px', fontWeight: 'bold' }}>
+											Score
+											<hr></hr>
 											{listScore}
 										</div>
 									</div>
 
 									{/* {this.state.deleteAccountSeen ? <DeletePopup toggle={this.togglePop} /> : null} */}
-									<div className="modal" hidden={this.state.deleteAccountModal}>
+									<div className="modal" hidden='true'>
 										<div className="modal_content">
 										<span className="close" onClick={this.handleClickDeletePopup}>
 											&times;
 										</span>
-										<form>
 											<h2>Type in your password to delete Account.</h2>
 											<div style={{ textAlign: 'center'}}>
 												<label>
@@ -1061,13 +1135,12 @@ class Window extends React.Component {
 											</div>
 											<br />
 											<div style={{ textAlign: 'center'}}> 
-												<input id="submitButton" class="submitButton" type="submit" value='Confirm' onSubmit={this.handleSubmitDeletePopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}/>
+												<button id="submitButton" class="submitButton" onClick={this.handleSubmitDeletePopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}>Confirm</button>
 											</div>
-										</form>
 										</div>
 									</div>
 
-									<div id="statistics" style={{display: 'inline-block', marginTop: '0px', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: 'auto'}}>
+									<div id="statistics" style={{display: 'inline-block', marginTop: '0px', marginRight: '50px', marginLeft: '70px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
 										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px',}}>My statistics</h2>
 										<hr></hr>
 										<p id="games_played" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
@@ -1159,5 +1232,51 @@ class Window extends React.Component {
 		);
 	}
 }
+
+// class Timer extends React.Component {
+// 	constructor(props) {
+// 	  super(props);
+// 	  this.state = {
+// 		seconds: parseInt(props.startTimeInSeconds, 10) || 0
+// 	  };
+// 	}
+  
+// 	tick() {
+// 	  this.setState(state => ({
+// 		seconds: state.seconds + 1
+// 	  }));
+// 	}
+  
+// 	componentDidMount() {
+// 	  this.interval = setInterval(() => this.tick(), 1000);
+// 	}
+  
+// 	componentWillUnmount() {
+// 	  clearInterval(this.interval);
+// 	}
+  
+// 	formatTime(secs) {
+// 	  let hours   = Math.floor(secs / 3600);
+// 	  let minutes = Math.floor(secs / 60) % 60;
+// 	  let seconds = secs % 60;
+// 	  return [hours, minutes, seconds]
+// 		  .map(v => ('' + v).padStart(2, '0'))
+// 		  .filter((v,i) => v !== '00' || i > 0)
+// 		  .join(':');
+// 	}
+  
+// 	render() {
+// 	  return (
+// 		<div>
+// 		  Timer: {this.formatTime(this.state.seconds)}
+// 		</div>
+// 	  );
+// 	}
+//   }
+  
+//   ReactDOM.render(
+// 	<Timer startTimeInSeconds="300" />,
+// 	document.getElementById('root')
+//   );
 
 ReactDOM.render(<Window />, document.getElementById('root'));
