@@ -88,6 +88,8 @@ class Window extends React.Component {
 		this.showDeletePopup = this.showDeletePopup.bind(this);
 		this.getRoomsList = this.getRoomsList.bind(this);
 		this.clearRoomList = this.clearRoomList.bind(this);
+		this.getPlayersList = this.getPlayersList.bind(this);
+		this.clearPlayersList = this.clearPlayersList.bind(this);
 		this.handleChangeDeletePopup = this.handleChangeDeletePopup.bind(this);
 		this.handleSubmitDeletePopup = this.handleSubmitDeletePopup.bind(this);
 		this.handleClickDeletePopup = this.handleClickDeletePopup.bind(this);
@@ -122,13 +124,14 @@ class Window extends React.Component {
 			customSize: false,
 			boardSize: 10,
 			inviteOnly: false,
+
 			rooms: [
-				{ room: 'Room 1', full: false },
-				{ room: 'Room 2', full: false },
-				{ room: 'Room 3', full: false },
-				{ room: 'Room 4', full: false },
-				{ room: 'Room 5', full: false },
+
 			],
+			playersList:[
+
+			],
+
 			deleteAccountModal: true,
 			inputValue: '',
 			enemyBoardButtons: true,
@@ -189,10 +192,6 @@ class Window extends React.Component {
 
 	chooseLogin(event){
 		var that = this;
-
-		// that.clearRoomList();
-		that.getRoomsList();
-
 		console.log("Login nacisniety")
 
 		const requestOptions = {
@@ -223,15 +222,24 @@ class Window extends React.Component {
 					div1Shown: !that.state.div1Shown,
 					user_id: data._id,
 					startText: '',
-					games_played: 0, 
-					ships_sunk: 0, 
-					ships_lost: 0,
-					shots_fired: 0,
+					games_played: data.stats.games_played, 
+					ships_sunk: data.stats.ships_sunk, 
+					ships_lost: data.stats.ships_lost,
+					shots_fired: data.stats.shots_fired,
 					wins: 0,
 					loses: 0,
 				});
 			}
-		});
+		}).then(() => {
+			that.clearRoomList();
+			that.clearPlayersList();
+		}).then(() => {
+			that.getPlayersList();
+		}).then(() => {
+			that.getRoomsList();
+		})
+
+
 	}
 
 	chooseRegister(){
@@ -294,24 +302,60 @@ class Window extends React.Component {
 		that.setState({
 			deleteAccountModal: false,
 		});
+		// if(that.state.inputValue == that.state.password){
+		// 	const requestOptions = {
+		// 		method: 'POST',
+		// 		headers: { 'Content-Type': 'application/json' },
+		// 		body: JSON.stringify({ "_id": that.state.user_id, "pass_hash": that.state.password })
+		// 	};
+		// 	var stat = 0;
+		// 	fetch('https://localhost:9000/users/delete', requestOptions)
+		// 	.then(function(response) { 
+		// 		stat = response.status;
+		// 		console.log(stat)
+		// 		if(stat == 202){
+
+		// 		}
+		// 	})
+		// }
 	}
 
 	getRoomsList(){
+		var that = this;
 		console.log("Getting list of rooms")
-		var receivedRooms = '';
+		var receivedRooms;
 		const requestOptions = {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' },
 		};
 		var stat = 0;
 		fetch('https://localhost:9000/rooms/list', requestOptions)
-		// .then(function(response) { 
-		// 	stat = response.status;
-		// 	if(stat == 200){
-		// 		receivedRooms = response.json();
-		// 	}
-		// 	console.log(receivedRooms)
-		// });
+		.then(function(response) { 
+			stat = response.status;
+			console.log(stat)
+			if(stat == 200){
+				receivedRooms = response.json();
+			}
+			return receivedRooms;
+		}).then(function(receivedRooms){
+			console.log(receivedRooms)
+			for(var i = 0; i < receivedRooms.length; i++){
+				if(receivedRooms[i].player_2 == null){
+					that.setState({
+						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: false, hover: 'auto', text: 'Join' })
+					});
+				}
+				else{
+					that.setState({
+						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Full' })
+					});
+				}
+			}
+		})
+
+		console.log("pokoje")
+		console.log(that.state.rooms)
+
 
 		// this.setState({
 		// 	rooms: this.state.rooms.concat({ room: 'Room 1', full: false })
@@ -321,6 +365,42 @@ class Window extends React.Component {
 	clearRoomList(){
 		this.setState({
 			rooms: [],
+		});
+	}
+
+	getPlayersList(){
+		var that = this;
+		console.log("Getting list of players")
+		var receivedPlayers;
+		const requestOptions = {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+		};
+		var stat = 0;
+		fetch('https://localhost:9000/users/list', requestOptions)
+		.then(function(response) { 
+			stat = response.status;
+			console.log(stat)
+			if(stat == 200){
+				receivedPlayers = response.json();
+			}
+			return receivedPlayers;
+		}).then(function(receivedPlayers){
+			console.log(receivedPlayers)
+			for(var i = 0; i < receivedPlayers.length; i++){
+				that.setState({
+					rooms: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: 10 - i })
+				});
+			}
+		})
+
+		console.log("gracz")
+		console.log(that.state.playersList)
+	}
+
+	clearPlayersList(){
+		this.setState({
+			playersList: [],
 		});
 	}
 
@@ -413,9 +493,7 @@ class Window extends React.Component {
 
 	handleSubmitDeletePopup(event) {
 		var that = this;
-		that.setState({
-			deleteAccountModal: true,
-		});
+		console.log(this.state.inputValue)
 		if(that.state.password = that.state.inputValue){
 			var stat = 0;
 			const requestOptions = {
@@ -427,6 +505,7 @@ class Window extends React.Component {
 			fetch('https://localhost:9000/users/delete', requestOptions)
 			.then(function(response) { 
 				stat = response.status;
+				console.log(stat)
 				if(stat == 200){
 					that.setState({
 						div1Shown: !that.state.div1Shown,
@@ -442,7 +521,11 @@ class Window extends React.Component {
 						loses: 0,
 					});
 				}
-			});
+			}).then(() => {
+				that.setState({
+					deleteAccountModal: true,
+				});
+			})
 		}
 	}
 
@@ -456,15 +539,6 @@ class Window extends React.Component {
 
 	checkCoords(shipName, coordsList, coordsPass){
 		var coords = { x: parseInt(coordsPass.x), y: parseInt(coordsPass.y) }
-		// console.log('X: ' + coords.x + ' Y: ' + coords.y)
-		// console.log('X + 1: ' + coords.x + 1 + ' ' + coords.y)
-		// console.log('X - 1: ' + coords.x - 1 + ' ' + coords.y)
-		// console.log('Y + 1: ' + coords.x + ' ' + coords.y + 1)
-		// console.log('Y 1 1: ' + coords.x + ' ' + coords.y - 1)
-		// console.log('X + 1, Y + 1: ' + coords.x + 1 + ' ' + coords.y + 1)
-		// console.log('X - 1, Y - 1: ' + coords.x - 1 + ' ' + coords.y - 1)
-		// console.log('X - 1, Y + 1: ' + coords.x - 1 + ' ' + coords.y + 1)
-		// console.log('X + 1, Y - 1: ' + coords.x + 1 + ' ' + coords.y - 1)
 		var coordsTaken = false;
 		for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
 			console.log(typeof(this.state.dreadnoughtCoordsList[i].X))
@@ -783,11 +857,6 @@ class Window extends React.Component {
 				}
 			}
 		}
-		console.log(this.state.dreadnoughtCoordsList)
-		console.log(this.state.cruiserCoordsList)
-		console.log(this.state.submarineCoordsList)
-		console.log(this.state.destroyerCoordsList)
-		console.log(this.state.reconCoordsList)
 	}
 
 	handleEnemyBoardClick(event){
@@ -844,9 +913,9 @@ class Window extends React.Component {
 	}
 
 	render() {
-		const listNames = this.top.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Player: {d.player}</li>);
-		const listScore = this.top.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Current Score: {d.score}</li>);
-		const listRooms = this.state.rooms.map((r) => <li style={{ height: '80px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id='joinButton' class='joinButton' onClick={this.joinGame} style={{display: 'inline-block', float: 'right', marginRight: '20px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Join</button></li>)
+		const listNames = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Player: {d.player}</li>);
+		const listScore = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>Current Score: {d.score}</li>);
+		const listRooms = this.state.rooms.map((r) => <li style={{ height: '80px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id='joinButton' class='joinButton' disabled={r.full} onClick={this.joinGame} style={{display: 'inline-block', float: 'right', marginRight: '20px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px', pointerEvents: [r.hover]}}> {r.text} </button></li>)
 		
 		const noHover = {
 			pointerEvents: 'none',
