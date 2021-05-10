@@ -199,11 +199,23 @@ async function end_game(game){
                 p1.stats.ships_sunk += game.p1.ships_sunk;
                 p1.stats.ships_lost += game.p1.ships_lost;
                 p1.stats.shots_fired += game.p1.shots_fired;
-        
+                p1.stats.shots_missed += game.p1.shots_missed;
+
+                switch(game.winner){
+                    case 0: break;
+                    case 1: p1.stats.wins += 1;
+                        p2.stats.defeats += 1;
+                        break;
+                    case 2: p2.stats.wins += 1;
+                        p1.stats.defeats += 1;
+                        break;
+                }
+
                 p2.stats.games_played += 1;
                 p2.stats.ships_sunk += game.p2.ships_sunk;
                 p2.stats.ships_lost += game.p2.ships_lost;
                 p2.stats.shots_fired += game.p2.shots_fired;
+                p2.stats.shots_missed += game.p1.shots_missed;
         
                 try{
                     await p1.save()

@@ -21,6 +21,7 @@ var GameSchema = new Schema(
         ships_sunk: {type: Number, default: 0},
         ships_lost: {type: Number, default: 0},
         shots_fired: {type: Number, default: 0},
+        shots_missed: {type: Number, default: 0},
     },
     p2: {
         attack1: {type: Boolean, default: false},
@@ -29,6 +30,7 @@ var GameSchema = new Schema(
         ships_sunk: {type: Number, default: 0},
         ships_lost: {type: Number, default: 0},
         shots_fired: {type: Number, default: 0},
+        shots_missed: {type: Number, default: 0},
     },
     propose_draw: {type: Number, required: true, default: 0, min: 0, max: 3},
     winner: {type: Number, required: true, default: 0, min: 0, max: 2},
