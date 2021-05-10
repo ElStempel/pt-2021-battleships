@@ -109,11 +109,16 @@ router.post('/leave', async function(req, res, next) {
 
 // DELETE A ROOM
 router.post('/delete', async function(req, res, next) {
-  let room_to_delete = await Room.deleteOne({ _id: req.body.room_id, player_1: req.body.owner_id });
-  if(room_to_delete.deletedCount == 1){
-    res.status(200).send('Room deleted')
+  let game = await Game.findOne({room: req.body.room_id})
+  if(game){
+    res.status(403).send('Game in progress')
   } else {
-    res.status(400).send('Bad data')
+    let room_to_delete = await Room.deleteOne({ _id: req.body.room_id, player_1: req.body.owner_id });
+    if(room_to_delete.deletedCount == 1){
+      res.status(200).send('Room deleted')
+    } else {
+      res.status(400).send('Bad data')
+    }
   }
 });
 
@@ -225,7 +230,7 @@ router.post('/end-game', async function(req, res, next) {
   let game_to_end = await Game.findOne({_id: req.body.game_id, player_1: req.body.player_1_id});
   if (game_to_end){
     var p1 = await User.findOne({_id: req.body.player_1_id})
-    var p2 = await User.findOne({_id: game_to_end.player_1._id})
+    var p2 = await User.findOne({_id: game_to_end.player_2._id})
     if (p1 && p2){
       p1.stats.games_played += 1;
       p1.stats.ships_sunk += game_to_end.p1.ships_sunk;
@@ -241,7 +246,7 @@ router.post('/end-game', async function(req, res, next) {
         await p1.save()
         await p2.save()
       } catch (error) {
-        res.status(400).send(error)
+        res.status(500).send(error)
       }
     }
   }
