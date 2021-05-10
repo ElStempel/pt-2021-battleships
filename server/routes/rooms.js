@@ -74,8 +74,8 @@ router.get('/list', async function(req, res, next) {
 router.post('/join', async function(req, res, next) {
   let user_check = await User.findOne({_id: req.body.player_2_id});
   let space_in_room = await Room.findOne({_id: req.body.room_id, player_2: null});
-  let user_owner_of_room_check = await Room.findOne({player_1: req.body.player_1_id});
-  let user_in_another_room_check = await Room.findOne({player_2: req.body.player_1_id});
+  let user_owner_of_room_check = await Room.findOne({player_1: req.body.player_2_id});
+  let user_in_another_room_check = await Room.findOne({player_2: req.body.player_2_id});
   if (user_check && space_in_room){
     if(user_owner_of_room_check || user_in_another_room_check){
       return res.status(405).send("User already in another room")
