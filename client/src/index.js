@@ -102,6 +102,9 @@ class Window extends React.Component {
 		this.handleConfirmShot = this.handleConfirmShot.bind(this);
 		this.updatePlayers = this.updatePlayers.bind(this);
 		this.updateRooms = this.updateRooms.bind(this);
+		this.startGame = this.startGame.bind(this);
+		this.deleteYourRoom = this.deleteYourRoom.bind(this);
+		this.leaveRoom = this.leaveRoom.bind(this);
 
 		this.state = { 
 			div1Shown: true, 
@@ -127,6 +130,10 @@ class Window extends React.Component {
 			customSize: false,
 			boardSize: 10,
 			inviteOnly: false,
+
+			createButtonDisabled: false,
+			joinRoomHidden: 'hidden',
+			deleteRoomHidden: 'hidde',
 
 			rooms: [
 
@@ -163,6 +170,7 @@ class Window extends React.Component {
 
 			playerBoardEnabled: false,
 
+			room_id: 0,
 			game_id: 0,
 
 		};
@@ -216,6 +224,7 @@ class Window extends React.Component {
 		}, )
 		.then(function(data) { 
 			if(stat == 200){
+				console.log(data._id)
 				that.setState({
 					div1Shown: !that.state.div1Shown,
 					user_id: data._id,
@@ -235,6 +244,7 @@ class Window extends React.Component {
 		that.getRoomsList();
 		that.getPlayersList();
 
+		console.log(that.state.user_id)
 
 	}
 
@@ -312,14 +322,34 @@ class Window extends React.Component {
 		}).then(function(receivedRooms){
 			console.log(receivedRooms)
 			for(var i = 0; i < receivedRooms.length; i++){
-				if(receivedRooms[i].player_2 == null){
+				if(receivedRooms[i].player_1 == that.state.username){
 					that.setState({
-						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: false, hover: 'auto', text: 'Join' })
+						room_id: receivedRooms[i]._id,
+						joinRoomHidden: 'hidden',
+						deleteRoomHidden: 'visible',
+						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Created Room', roomId: receivedRooms[i]._id })
 					});
 				}
+				else if(receivedRooms[i].player_2 == null && that.state.room_id == 0){
+					that.setState({
+						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: false, hover: 'auto', text: 'Join', roomId: receivedRooms[i]._id })
+					});
+				}
+				else if(receivedRooms[i].player_2 == null){
+					that.setState({
+						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Join', roomId: receivedRooms[i]._id  })
+					});
+				}
+				else if(receivedRooms[i].player_2 == that.state.username){
+					that.setState({
+						room_id: receivedRooms[i]._id,
+						joinRoomHidden: 'visible',
+						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id })
+					});
+				}	
 				else{
 					that.setState({
-						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Full' })
+						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Full', roomId: receivedRooms[i]._id })
 					});
 				}
 			}
@@ -350,10 +380,19 @@ class Window extends React.Component {
 			}
 			return receivedPlayers;
 		}).then(function(receivedPlayers){
-			console.log(receivedPlayers)
+			// console.log(receivedPlayers)
+			for(var i = 0; i < receivedPlayers.length; i++){
+				for(var j = 0; j < receivedPlayers.length - 1; j++){
+					if(receivedPlayers[j].stats.games_played < receivedPlayers[j + 1].stats.games_played){
+						var temp = receivedPlayers[j]
+						receivedPlayers[j] = receivedPlayers[j + 1];
+						receivedPlayers[j + 1] = temp;
+					}
+				}
+			}
 			for(var i = 0; i < receivedPlayers.length; i++){
 				that.setState({
-					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: 10 - i })
+					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: receivedPlayers[i].stats.games_played })
 				});
 			}
 		})
@@ -367,31 +406,47 @@ class Window extends React.Component {
 
 	createRoom(){
 		console.log("Creating room")
-		console.log(this.state.user_id);
+		this.updateRooms();
 		this.setState({
 			div2Shown: !this.state.div2Shown,
 		});
 	}
 
 	confirmRoomCreation(){
+		var that = this;
 		console.log("Room created")
-		console.log(this.state.user_id);
+		// var createButton = document.getElementsByClassName('createButton')[0];
+		// var joinButton = document.getElementsByClassName('joinRoomButton')[0];
 
 		const requestOptions = {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ "player_1_id": this.state.user_id })
 		};
-		fetch('https://localhost:9000/rooms/create', requestOptions);
-		this.setState({
-			div2Shown: !this.state.div2Shown,
-		});
-
-		console.log(activeForRules.state.customRule1);
-		console.log(activeForRules.state.customRule2);
-		console.log(activeForRules.state.customRule3);
-		console.log(activeForRules.state.customRule4);
-		console.log(activeForRules.state.inviteOnly);
+		var stat = 0;
+		var roomDetails;
+		fetch('https://localhost:9000/rooms/create', requestOptions)
+		.then(function(response){
+			stat = response.status;
+			if(stat == 201){
+				roomDetails = response.json();
+				// createButton.disabled = 'true';
+				// createButton.style.pointerEvents = 'none'
+				// joinButton.hidden = 'false';
+			}
+			return roomDetails;
+		})
+		.then(function(roomDetails){
+			that.setState({
+				div2Shown: !that.state.div2Shown,
+				room_id: roomDetails._id,
+				createButtonDisabled: true,
+				joinRoomHidden: 'visible',
+			});
+		})
+		.then(function(){
+			that.updateRooms();
+		})
 	}
 
 	enableRulesChoice(){
@@ -434,6 +489,81 @@ class Window extends React.Component {
 		activeForRules.setState({
 			inviteOnly: !activeForRules.state.inviteOnly,
 		});
+	}
+
+	startGame(){
+		var that = this;
+		console.log('Starting Game')
+
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "room_id": that.state.room_id, "player_1_id": that.state.user_id })
+		};
+		var stat = 0;
+		fetch('https://localhost:9000/rooms/start-game', requestOptions)
+		.then(function(response){
+			stat = response.status;
+			if(stat == 200){
+				that.setState({
+					gameShown: !that.state.gameShown,
+				})
+			}
+		})
+	}
+
+	leaveRoom(){
+		console.log("Leaving")
+		var that = this;;
+
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "room_id": that.state.room_id, "player_2_id": that.state.user_id })
+		};
+		var stat = 0;
+		fetch('https://localhost:9000/rooms/leave', requestOptions)
+		.then(function(response){
+			stat = response.status;
+			if(stat == 200){
+				that.setState({
+					createButtonDisabled: false,
+					room_id: 0,
+					joinRoomHidden: 'hidden',
+					room_id: 0,
+				})
+			}
+		})
+		.then(function(){
+			that.updateRooms();
+		})
+	}
+
+	deleteYourRoom(){
+		var that = this;
+		console.log('Delete Your Room');
+
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "room_id": that.state.room_id, "owner_id": that.state.user_id })
+		};
+		var stat = 0;
+		fetch('https://localhost:9000/rooms/delete', requestOptions)
+		.then(function(response){
+			stat = response.status;
+			if(stat == 200){
+				that.setState({
+					createButtonDisabled: false,
+					room_id: 0,
+					joinRoomHidden: 'hidden',
+					deleteRoomHidden: 'hidden',
+				})
+			}
+		})
+		.then(function(){
+			that.updateRooms();
+		})
 	}
 
 
@@ -518,8 +648,38 @@ class Window extends React.Component {
 		this.setState({ inputValue: event.target.value });
 	}
 
-	joinGame(){
-		this.setState({ gameShown: !this.state.gameShown });
+	joinGame(event){
+		var that = this;
+		var room = event.target.id;
+		var roomIdToJoin = 0;
+		console.log(room)
+		for(var i = 0; i < that.state.rooms.length; i++){
+			console.log(that.state.rooms[i].room)
+			if(room == that.state.rooms[i].room){
+				roomIdToJoin = that.state.rooms[i].roomId;
+			}
+		}
+
+		var stat = 0;
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ room_id: roomIdToJoin, player_2_id: that.state.user_id})
+		};
+
+		fetch('https://localhost:9000/rooms/join', requestOptions)
+		.then(function(response) { 
+			stat = response.status;
+			console.log(stat)
+			if(stat == 201){
+				that.setState({ 
+					room_id: roomIdToJoin,
+				});
+			}
+		})
+		.then(function(){
+			that.updateRooms();
+		})
 	}
 
 	checkCoords(shipName, coordsList, coordsPass){
@@ -987,7 +1147,7 @@ class Window extends React.Component {
 	render() {
 		const listNames = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.player}</li>);
 		const listScore = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.score}</li>);
-		const listRooms = this.state.rooms.map((r) => <li style={{ height: '80px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id='joinButton' class='joinButton' disabled={r.full} onClick={this.joinGame} style={{display: 'inline-block', float: 'right', marginRight: '20px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px', pointerEvents: [r.hover]}}> {r.text} </button></li>)
+		const listRooms = this.state.rooms.map((r) => <li style={{ height: '80px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id={r.room} class='joinButton' disabled={r.full} onClick={this.joinGame} style={{display: 'inline-block', float: 'right', marginRight: '20px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px', pointerEvents: [r.hover]}}> {r.text} </button></li>)
 
 		// function yourFunction(){
 		// 	// do whatever you like here
@@ -1138,7 +1298,7 @@ class Window extends React.Component {
 								<div id="pageAfterLogin" class="pageAfterLogin" style={{ backgroundImage: `url(${background})`, display: 'flex', flexDirection: 'row', }}>
 									<div id="rooms" style={{display: 'inline-block', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
 										<h2 id="roomsText" style={{ marginLeft: '10px', minHeight: '40px', color: 'white', display: 'inline-block', }}>Rooms</h2>
-										<button class='createButton' id='createButton' onClick={this.createRoom} style={createButtonStyle}>Create Room</button>
+										<button class='createButton' id='createButton' disabled={this.state.createButtonDisabled} onClick={this.createRoom} style={createButtonStyle}>Create Room</button>
 										<hr></hr>
 										<button class='updateButton' id='updateButton' onClick={this.updateRooms} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh Rooms list</button>
 										<hr></hr>
@@ -1217,7 +1377,9 @@ class Window extends React.Component {
 									</div>
 								</div>
 								<div class='joinRoomButtonDiv'>
-									<button class='joinRoomButton'>Join Active Game</button>
+									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '50px' }} onClick={this.startGame} class='joinRoomButton'>Start Game</button>
+									<button style={{ visibility: this.state.joinRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.leaveRoom} class='joinRoomButton'>Leave Room</button>
+									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.deleteYourRoom} class='joinRoomButton'>Delete Your Room</button>
 								</div>
 							</div>
 						)
