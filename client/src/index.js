@@ -106,6 +106,9 @@ class Window extends React.Component {
 		this.deleteYourRoom = this.deleteYourRoom.bind(this);
 		this.leaveRoom = this.leaveRoom.bind(this);
 		this.fetchGameStart = this.fetchGameStart.bind(this);
+		this.handleSubmitGiveUpPopup = this.handleSubmitGiveUpPopup.bind(this);
+		this.fetchGameState = this.fetchGameState.bind(this);
+		this.fetchGameStateOngoing = this.fetchGameStateOngoing.bind(this);
 
 		this.state = { 
 			div1Shown: true, 
@@ -173,6 +176,16 @@ class Window extends React.Component {
 
 			room_id: 0,
 			game_id: 0,
+
+			playerBoard: [
+
+			],
+			enemyBoard: [
+
+			],
+
+			shotX: 0,
+			shotY: 0,
 
 		};
 
@@ -537,7 +550,8 @@ class Window extends React.Component {
 		var stat = 0;
 		fetch('https://localhost:9000/rooms/fetch-game', requestOptions)
 		.then(function(response){
-			var data
+			var data;
+			console.log(response)
 			stat = response.status;
 			if(stat == 200){
 				data = response.json();
@@ -545,12 +559,167 @@ class Window extends React.Component {
 			return data;
 		})
 		.then(function(data){
-			that.setState({
-				gameShown: !that.state.gameShown,
-				game_id: data._id,
-			})
-			console.log(that.state.game_id)
+			if(stat == 200){
+				that.setState({
+					gameShown: !that.state.gameShown,
+					game_id: data._id,
+				})
+				console.log(that.state.game_id)
+			}
 		})
+	}
+
+	async fetchGameStateOngoing(){
+		var that = this;
+
+		await new Promise(r => setTimeout(r, 50));
+
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "game_id": that.state.game_id, "player_id": that.state.user_id })
+		};
+		var stat = 0
+		var data
+		fetch('https://localhost:9000/games/fetch-state', requestOptions)
+		.then(function(response){
+			stat = response.status;
+			if(stat == 200){
+				data = response.json();
+			}
+			return data;
+		})
+		.then(function(data){
+			if(stat == 200){
+				that.setState({
+					playerBoard: data.playerMap,
+					enemyBoard: data.enemyMap
+				})
+				console.log(that.state.game_id)
+			}
+		})
+		.then(function(){
+			if(stat == 200){
+				var enemy = document.getElementsByClassName('butEnemy');
+				for(var i = 0; i < 10; i++){
+					for(var j = 0; j < 10; j++){
+						if(that.state.enemyBoard[i][j] == 1){
+							enemy[j + i * 10].style.backgroundColor = 'red'
+						}
+						else if(that.state.enemyBoard[i][j] == 2){
+							enemy[j + i * 10].style.backgroundColor = 'black'
+						}
+						else if(that.state.enemyBoard[i][j] == 5){
+							enemy[j + i * 10].style.backgroundColor = 'white'
+						}
+						else if(that.state.enemyBoard[i][j] == 0){
+							enemy[j + i * 10].style.backgroundColor = 'darkblue'
+						}
+					}
+				}
+				var player = document.getElementsByClassName('butPlayer');
+				for(var i = 0; i < 10; i++){
+					for(var j = 0; j < 10; j++){
+						if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+							// trafienie
+							player[j + i * 10].style.backgroundColor = 'red'
+							console.log(that.state.playerBoard[i][j] % 10)
+							console.log(that.state.playerBoard[i][j])
+						}
+						if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+							// zatopienie
+							player[j + i * 10].style.backgroundColor = 'black'
+							console.log(that.state.playerBoard[i][j] % 10)
+							console.log(that.state.playerBoard[i][j])
+						}
+						if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+							// pudlo
+							player[j + i * 10].style.backgroundColor = 'white'
+							console.log(that.state.playerBoard[i][j] % 10)
+							console.log(that.state.playerBoard[i][j])
+						}
+					}
+				}
+				
+			}
+		})
+	}
+
+	async fetchGameState(){
+		var that = this;
+
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "game_id": that.state.game_id, "player_id": that.state.user_id })
+		};
+		var stat = 0
+		var data
+		while(stat != 200){
+			await new Promise(r => setTimeout(r, 200));
+			fetch('https://localhost:9000/games/fetch-state', requestOptions)
+			.then(function(response){
+				stat = response.status;
+				if(stat == 200){
+					data = response.json();
+				}
+				return data;
+			})
+			.then(function(data){
+				if(stat == 200){
+					that.setState({
+						playerBoard: data.playerMap,
+						enemyBoard: data.enemyMap
+					})
+					console.log(that.state.game_id)
+				}
+			})
+			.then(function(){
+				if(stat == 200){
+					var enemy = document.getElementsByClassName('butEnemy');
+					for(var i = 0; i < 10; i++){
+						for(var j = 0; j < 10; j++){
+							if(that.state.enemyBoard[i][j] == 1){
+								enemy[j + i * 10].style.backgroundColor = 'red'
+							}
+							else if(that.state.enemyBoard[i][j] == 2){
+								enemy[j + i * 10].style.backgroundColor = 'black'
+							}
+							else if(that.state.enemyBoard[i][j] == 5){
+								enemy[j + i * 10].style.backgroundColor = 'white'
+							}
+							else if(that.state.enemyBoard[i][j] == 0){
+								enemy[j + i * 10].style.backgroundColor = 'darkblue'
+							}
+						}
+					}
+					var player = document.getElementsByClassName('butPlayer');
+					for(var i = 0; i < 10; i++){
+						for(var j = 0; j < 10; j++){
+							if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+								// trafienie
+								player[j + i * 10].style.backgroundColor = 'red'
+								console.log(that.state.playerBoard[i][j] % 10)
+								console.log(that.state.playerBoard[i][j])
+							}
+							if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+								// zatopienie
+								player[j + i * 10].style.backgroundColor = 'black'
+								console.log(that.state.playerBoard[i][j] % 10)
+								console.log(that.state.playerBoard[i][j])
+							}
+							if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+								// pudlo
+								player[j + i * 10].style.backgroundColor = 'white'
+								console.log(that.state.playerBoard[i][j] % 10)
+								console.log(that.state.playerBoard[i][j])
+							}
+						}
+					}
+					
+				}
+			})
+		}
 	}
 
 	leaveRoom(){
@@ -595,8 +764,8 @@ class Window extends React.Component {
 			stat = response.status;
 			if(stat == 200){
 				that.setState({
+					gameShown: false,
 					createButtonDisabled: false,
-					room_id: 0,
 					joinRoomHidden: 'hidden',
 					deleteRoomHidden: 'hidden',
 				})
@@ -617,7 +786,7 @@ class Window extends React.Component {
 	}
 
 	showGiveUpPopup(){
-		console.log("Usuwanie konta")
+		console.log("Give Up")
 		document.getElementsByClassName('modalGiveUp')[0].hidden = false;
 	}
 
@@ -626,6 +795,31 @@ class Window extends React.Component {
 	};
 
 	handleSubmitGiveUpPopup(event) {
+		console.log('Give Up')
+
+		var that = this;
+
+		const requestOptions = {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "game_id": that.state.game_id, "player_id": that.state.user_id })
+		};
+		var stat = 0;
+		fetch('https://localhost:9000/games/give-up', requestOptions)
+		.then(function(response){
+			stat = response.status;
+			if(stat == 200){
+				that.setState({
+					createButtonDisabled: false,
+					room_id: 0,
+					joinRoomHidden: 'hidden',
+					deleteRoomHidden: 'hidden',
+				})
+			}
+		})
+		.then(function(){
+			that.updateRooms();
+		})
 		
 	}
 
@@ -693,9 +887,7 @@ class Window extends React.Component {
 		var that = this;
 		var room = event.target.id;
 		var roomIdToJoin = 0;
-		console.log(room)
 		for(var i = 0; i < that.state.rooms.length; i++){
-			console.log(that.state.rooms[i].room)
 			if(room == that.state.rooms[i].room){
 				roomIdToJoin = that.state.rooms[i].roomId;
 			}
@@ -1046,8 +1238,16 @@ class Window extends React.Component {
 
 	handleEnemyBoardClick(event){
 		event.preventDefault();
-		if(this.state.enemyBoardButtons == false){
-			event.target.style.backgroundColor = 'red'
+		var that = this;
+		if(that.state.enemyBoardButtons == false){
+			event.target.style.backgroundColor = 'yellow'
+			that.setState({
+				shotX: parseInt(event.target.id[2]),
+				shotY: parseInt(event.target.id[4]),
+			})
+			console.log(event.target.id)
+			console.log(that.state.shotX)
+			console.log(that.state.shotY)
 		}
 	}
 
@@ -1062,22 +1262,22 @@ class Window extends React.Component {
 			board.push(temp)
 		}
 		for(var i = 0; i < that.state.dreadnoughtCoordsList.length; i++){
-			board[that.state.dreadnoughtCoordsList[i].X][that.state.dreadnoughtCoordsList[i].Y] = 10;
+			board[that.state.dreadnoughtCoordsList[i].Y][that.state.dreadnoughtCoordsList[i].X] = 10;
 		}
 		for(var i = 0; i < that.state.cruiserCoordsList.length; i++){
-			board[that.state.cruiserCoordsList[i].X][that.state.cruiserCoordsList[i].Y] = 20;
+			board[that.state.cruiserCoordsList[i].Y][that.state.cruiserCoordsList[i].X] = 20;
 		}
 		for(var i = 0; i < that.state.submarineCoordsList.length; i++){
-			board[that.state.submarineCoordsList[i].X][that.state.submarineCoordsList[i].Y] = 30;
+			board[that.state.submarineCoordsList[i].Y][that.state.submarineCoordsList[i].X] = 30;
 		}
 		for(var i = 0; i < that.state.destroyerCoordsList.length; i++){
-			board[that.state.destroyerCoordsList[i].X][that.state.destroyerCoordsList[i].Y] = 40;
+			board[that.state.destroyerCoordsList[i].Y][that.state.destroyerCoordsList[i].X] = 40;
 		}
 		for(var i = 0; i < that.state.reconCoordsList.length; i++){
-			board[that.state.reconCoordsList[i].X][that.state.reconCoordsList[i].Y] = 50;
+			board[that.state.reconCoordsList[i].Y][that.state.reconCoordsList[i].X] = 50;
 		}
 
-		return JSON.stringify(board);
+		return board;
 	}
 
 	handleConfirmShips(){
@@ -1112,23 +1312,27 @@ class Window extends React.Component {
 
 			var stat = 0;
 			const requestOptions = {
-				method: 'POST',
+				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, board: boardToSend})
+				body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, map: boardToSend})
 			};
 
 			fetch('https://localhost:9000/games/init-map', requestOptions)
 			.then(function(response) { 
 				stat = response.status;
 				console.log(stat)
-			});
+				console.log(response)
+			})
+			.then(function(){
+				that.fetchGameState()
+			})
 
 		}
 	}
 
 	handleResetBoard(){
 		var shipsButtons = document.getElementsByClassName('ship');
-		var boardButtons = document.getElementsByClassName('but');
+		var boardButtons = document.getElementsByClassName('butPlayer');
 		for(var i = 0; i < shipsButtons.length; i++){
 			shipsButtons[i].style.backgroundColor = 'grey';
 			shipsButtons[i].disabled = false;
@@ -1157,9 +1361,34 @@ class Window extends React.Component {
 	}
 
 	handleConfirmShot(event){
+		var that = this;
+		var enemyBoard = document.getElementsByClassName('enemyTable')[0];
+		// console.log(enemyBoard)
+		
 		console.log("Shots fired!")
 		event.preventDefault()
 		event.target.style.backgroundColor = 'red'
+		var stat = 0;
+			const requestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
+			};
+
+			fetch('https://localhost:9000/games/shot', requestOptions)
+			.then(function(response) { 
+				stat = response.status;
+				if(stat == 200){
+					// event.target.style.backgroundColor = 'green'
+					console.log( that.state.shotX)
+					console.log( that.state.shotY)
+					that.fetchGameState()
+				}
+				// else{
+				// 	event.target.style.backgroundColor = 'yellow'
+				// }
+				console.log(stat)
+			});
 	}
 
 	handleShipButtonClick(event){
@@ -1214,8 +1443,8 @@ class Window extends React.Component {
         for (let y = 0; y < 10; y++) {
             const cellsPlayer = [];
             for (let x = 0; x < 10; x++) {
-				playerId = 'PX' + (x).toString() + 'Y' + (y).toString();
-                cellsPlayer.push(<th><button class='but' id={playerId} disabled={!this.state.playerBoardEnabled} onClick={this.handlePlayerBoardClick}></button></th>);
+				playerId = 'PX' + x.toString() + 'Y' + y.toString();
+                cellsPlayer.push(<th><button class='butPlayer' id={playerId} disabled={!this.state.playerBoardEnabled} onClick={this.handlePlayerBoardClick}></button></th>);
             }
             rowsPlayer.push(<tr>{cellsPlayer}</tr>);
         }
@@ -1226,8 +1455,8 @@ class Window extends React.Component {
             const cellsEnemy = [];
             for (let x = 0; x < 10; x++) {
 				// this.state.enemyBoardButtons
-				enemyId = 'PX' + (x + 1).toString() + 'Y' + (y + 1).toString();
-                cellsEnemy.push(<th><button class='but' id={enemyId} onClick={this.handleEnemyBoardClick}></button></th>);
+				enemyId = 'EX' + x.toString() + 'Y' + y.toString();
+                cellsEnemy.push(<th><button class='butEnemy' id={enemyId} onClick={this.handleEnemyBoardClick}></button></th>);
             }
             rowsEnemy.push(<tr>{cellsEnemy}</tr>);
         }

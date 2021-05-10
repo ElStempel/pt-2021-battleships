@@ -122,7 +122,7 @@ code {
   background-color: grey;
 }
 
-.but {
+.butPlayer {
   margin-top: 10px;
   width: 60px;
   height: 60px;
@@ -133,9 +133,25 @@ code {
   cursor: pointer;
 }
 
-.but:hover{
+.butPlayer:hover{
   background-color: green;
 }
+
+.butEnemy {
+  margin-top: 10px;
+  width: 60px;
+  height: 60px;
+  border: 2px solid black;
+  border-radius: 6px;
+  text-align: center;
+  background-color: darkblue;
+  cursor: pointer;
+}
+
+.butEnemy:hover{
+  background-color: green;
+}
+
 
 /* .playerTable th:hover {
   background-color: red;
