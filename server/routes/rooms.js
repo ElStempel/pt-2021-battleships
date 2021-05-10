@@ -11,8 +11,9 @@ router.get('/', function(req, res, next) {
 
 router.post('/create', async function(req, res, next) {
   let user_check = await User.findOne({_id: req.body.player_1_id});
-  let user_in_room_check = await Room.findOne({player_1: req.body.player_1_id});
-  if (user_check && !user_in_room_check){
+  let user_owner_of_room_check = await Room.findOne({player_1: req.body.player_1_id});
+  let user_in_another_room_check = await Room.findOne({player_2: req.body.player_1_id});
+  if (user_check && !user_owner_of_room_check && !user_in_another_room_check){
     var new_room = new Room({
       player_1: req.body.player_1_id,
       player_2: null,
@@ -26,9 +27,9 @@ router.post('/create', async function(req, res, next) {
       res.status(400).send(error)
     }
   } else {
-    if(user_in_room_check)
+    if(user_check)
     {
-      return res.status(400).send("User already in room");
+      return res.status(400).send("User already in another room");
     } else {
       return res.status(400).send("User doesn't exist");
     }
@@ -73,13 +74,19 @@ router.get('/list', async function(req, res, next) {
 router.post('/join', async function(req, res, next) {
   let user_check = await User.findOne({_id: req.body.player_2_id});
   let space_in_room = await Room.findOne({_id: req.body.room_id, player_2: null});
+  let user_owner_of_room_check = await Room.findOne({player_1: req.body.player_1_id});
+  let user_in_another_room_check = await Room.findOne({player_2: req.body.player_1_id});
   if (user_check && space_in_room){
-    space_in_room.player_2 = req.body.player_2_id;
-    try {
-      await space_in_room.save()
-      res.status(201).send(space_in_room);
-    } catch (error) {
-      res.status(400).send(error)
+    if(user_owner_of_room_check || user_in_another_room_check){
+      return res.status(405).send("User already in another room")
+    } else {
+      space_in_room.player_2 = req.body.player_2_id;
+      try {
+        await space_in_room.save()
+        res.status(200).send(space_in_room);
+      } catch (error) {
+        res.status(400).send(error)
+      }
     }
   } else {
     if(!space_in_room)
@@ -236,11 +243,13 @@ router.post('/end-game', async function(req, res, next) {
       p1.stats.ships_sunk += game_to_end.p1.ships_sunk;
       p1.stats.ships_lost += game_to_end.p1.ships_lost;
       p1.stats.shots_fired += game_to_end.p1.shots_fired;
+      p1.stats.shots_missed += game.p1.shots_missed;
 
       p2.stats.games_played += 1;
       p2.stats.ships_sunk += game_to_end.p2.ships_sunk;
       p2.stats.ships_lost += game_to_end.p2.ships_lost;
       p2.stats.shots_fired += game_to_end.p2.shots_fired;
+      p2.stats.shots_missed += game.p2.shots_missed;
 
       try{
         await p1.save()
