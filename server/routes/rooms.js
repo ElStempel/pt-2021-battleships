@@ -168,6 +168,10 @@ router.post('/fetch-end', async function(req, res, next) {
 router.post('/start-game', async function(req, res, next) {
   let user_in_room_check = await Room.findOne({_id: req.body.room_id, player_1: req.body.player_1_id});
   if (user_in_room_check){
+    if(user_in_room_check.player_2 == null){
+      //return res.status(405).send("There is ony one player in room");
+      user_in_room_check.player_2._id = '60998131524b284d74362dab'
+    }
     //ważne zmienne
     let size = 10;
     if (user_in_room_check.custom_rules.enabled == true && user_in_room_check.custom_rules.map_size != 10){
