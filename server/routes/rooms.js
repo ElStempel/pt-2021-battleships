@@ -170,7 +170,7 @@ router.post('/start-game', async function(req, res, next) {
   if (user_in_room_check){
     if(user_in_room_check.player_2 == null){
       //return res.status(405).send("There is ony one player in room");
-      user_in_room_check.player_2._id = '60998131524b284d74362dab'
+      user_in_room_check.player_2 = {_id: '60998131524b284d74362dab'};
     }
     //ważne zmienne
     let size = 10;
