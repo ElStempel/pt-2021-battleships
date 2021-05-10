@@ -133,7 +133,7 @@ class Window extends React.Component {
 
 			createButtonDisabled: false,
 			joinRoomHidden: 'hidden',
-			deleteRoomHidden: 'hidde',
+			deleteRoomHidden: 'hidden',
 
 			rooms: [
 
