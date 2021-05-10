@@ -264,3 +264,21 @@ code {
   color: white;
 }
 
+.joinRoomButton {
+  text-align: center;
+  visibility: hidden;
+  margin-top: 20px;
+  margin-left: 400px;
+  width: 1200px;
+  height: 100px;
+  text-align: center;
+  background-color: grey;
+  color: white;
+  font-size: 80px;
+  cursor: pointer;
+}
+
+.joinRoomButton:hover {
+  background-color: black;
+  color: white;
+}

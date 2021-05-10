@@ -163,22 +163,9 @@ class Window extends React.Component {
 
 			playerBoardEnabled: false,
 
+			game_id: 0,
+
 		};
-		
-		this.top = [
-			{
-				'player': 'Jas', 'score': 4000,
-			},
-			{
-				'player': 'Stas', 'score': 3000,
-			},
-			{
-				'player': 'Karl', 'score': 2000,
-			},
-			{
-				'player': 'Ja', 'score': 1000,
-			}
-		];
 
 		activeForRules = this;
 	}
@@ -1229,6 +1216,9 @@ class Window extends React.Component {
 									<br />
 									</div>
 								</div>
+								<div class='joinRoomButtonDiv'>
+									<button class='joinRoomButton'>Join Active Game</button>
+								</div>
 							</div>
 						)
 					)
@@ -1277,7 +1267,7 @@ class Window extends React.Component {
 									<br/>
 									<br/>
 									
-									<div style={{ textAlign: 'center' }}>
+									<div style={{ alignItems: 'center' }}>
 										<button class='newRoomButton' id='newRoomButton' onClick={this.confirmRoomCreation} style={{ width: '1200px', height: '80px', fontSize: '50px', textAlign: 'center', cursor: 'pointer' }}>Create room with specified rules</button>
 									</div>
 								</div>
