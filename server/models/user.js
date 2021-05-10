@@ -11,11 +11,12 @@ var UserSchema = new Schema(
     token: {type: String, required: false, defualt: null},
     stats: {
         games_played: {type: Number, required: true, default: 0},
-        win_ratio: {type: Number},
+        wins: {type: Number, required: true, default: 0},
+        defeats: {type: Number, required: true, default: 0},
         ships_sunk: {type: Number, required: true, default: 0},
         ships_lost: {type: Number, required: true, default: 0},
         shots_fired: {type: Number, required: true, default: 0},
-        hit_ratio: {type: Number},
+        shots_missed: {type: Number, required: true, default: 0},
     },
   }
 );
