@@ -105,6 +105,7 @@ class Window extends React.Component {
 		this.startGame = this.startGame.bind(this);
 		this.deleteYourRoom = this.deleteYourRoom.bind(this);
 		this.leaveRoom = this.leaveRoom.bind(this);
+		this.fetchGameStart = this.fetchGameStart.bind(this);
 
 		this.state = { 
 			div1Shown: true, 
@@ -238,11 +239,14 @@ class Window extends React.Component {
 				});
 			}
 		})
-		that.clearRoomList();
-		that.clearPlayersList();
-
-		that.getRoomsList();
-		that.getPlayersList();
+		.then(function(data) {
+			that.clearRoomList();
+			that.clearPlayersList();
+		})
+		.then(function(data) {
+			that.getRoomsList();
+			that.getPlayersList();
+		})
 
 		console.log(that.state.user_id)
 
@@ -344,6 +348,7 @@ class Window extends React.Component {
 					that.setState({
 						room_id: receivedRooms[i]._id,
 						joinRoomHidden: 'visible',
+						createButtonDisabled: true,
 						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id })
 					});
 				}	
@@ -504,17 +509,42 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/rooms/start-game', requestOptions)
 		.then(function(response){
 			stat = response.status;
+			if(stat == 201){
+				that.setState({
+					gameShown: !that.state.gameShown,
+					game_id: response.json()._id,
+				})
+				console.log(that.state.game_id)
+			}
+		})
+	}
+
+	async fetchGameStart(){
+		await new Promise(r => setTimeout(r, 10000));
+		var that = this;
+
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "room_id": that.state.room_id, "player_2_id": that.state.user_id })
+		};
+		var stat = 0;
+		fetch('https://localhost:9000/rooms/fetch-game', requestOptions)
+		.then(function(response){
+			stat = response.status;
 			if(stat == 200){
 				that.setState({
 					gameShown: !that.state.gameShown,
+					game_id: response.json()._id,
 				})
+				console.log(that.state.game_id)
 			}
 		})
 	}
 
 	leaveRoom(){
 		console.log("Leaving")
-		var that = this;;
+		var that = this;
 
 		const requestOptions = {
 			method: 'POST',
@@ -673,6 +703,7 @@ class Window extends React.Component {
 			console.log(stat)
 			if(stat == 201){
 				that.setState({ 
+					createButtonDisabled: true,
 					room_id: roomIdToJoin,
 				});
 			}
@@ -680,6 +711,8 @@ class Window extends React.Component {
 		.then(function(){
 			that.updateRooms();
 		})
+
+		that.fetchGameStart();
 	}
 
 	checkCoords(shipName, coordsList, coordsPass){
@@ -1037,8 +1070,8 @@ class Window extends React.Component {
 	}
 
 	handleConfirmShips(){
-		// var boardToSend = this.prepareBoardToSend();
-		console.log(this.prepareBoardToSend())
+		var that = this;
+		var boardToSend = that.prepareBoardToSend();
 		console.log("Confirm ships")
 		var shipsBut = document.getElementsByClassName('ship');
 		var allSet = true;
@@ -1049,7 +1082,7 @@ class Window extends React.Component {
 			}
 		}
 		if(allSet == true){
-			this.setState({
+			that.setState({
 				enemyBoardButtons: false,
 				shipDeployed: true,
 			});
@@ -1062,18 +1095,22 @@ class Window extends React.Component {
 			var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
 			confirmShotBut.style.backgroundColor = 'red'
 
-			// var stat = 0;
-			// const requestOptions = {
-			// 	method: 'POST',
-			// 	headers: { 'Content-Type': 'application/json' },
-			// 	body: JSON.stringify({ game_id: idgry, player_id: that.state.user_id, board: boardToSend})
-			// };
+			console.log(that.state.game_id)
+			console.log(that.state.user_id)
+			console.log(boardToSend)
 
-			// fetch('https://localhost:9000/games/init-map', requestOptions)
-			// .then(function(response) { 
-			// 	stat = response.status;
-			// 	console.log(stat)
-			// });
+			var stat = 0;
+			const requestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, board: boardToSend})
+			};
+
+			fetch('https://localhost:9000/games/init-map', requestOptions)
+			.then(function(response) { 
+				stat = response.status;
+				console.log(stat)
+			});
 
 		}
 	}
@@ -1485,6 +1522,6 @@ class Window extends React.Component {
 //   ReactDOM.render(
 // 	<Timer startTimeInSeconds="300" />,
 // 	document.getElementById('root')
-//   );
+// );
 
 ReactDOM.render(<Window />, document.getElementById('root'));
