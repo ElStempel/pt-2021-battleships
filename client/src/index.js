@@ -510,9 +510,10 @@ class Window extends React.Component {
 		.then(function(response){
 			stat = response.status;
 			if(stat == 201){
+				var data = response.json();
 				that.setState({
 					gameShown: !that.state.gameShown,
-					game_id: response.json()._id,
+					game_id: data._id,
 				})
 				console.log(that.state.game_id)
 			}
@@ -533,9 +534,10 @@ class Window extends React.Component {
 		.then(function(response){
 			stat = response.status;
 			if(stat == 200){
+				var data = response.json();
 				that.setState({
 					gameShown: !that.state.gameShown,
-					game_id: response.json()._id,
+					game_id: data._id,
 				})
 				console.log(that.state.game_id)
 			}
