@@ -247,13 +247,13 @@ router.post('/end-game', async function(req, res, next) {
       p1.stats.ships_sunk += game_to_end.p1.ships_sunk;
       p1.stats.ships_lost += game_to_end.p1.ships_lost;
       p1.stats.shots_fired += game_to_end.p1.shots_fired;
-      p1.stats.shots_missed += game.p1.shots_missed;
+      p1.stats.shots_missed += game_to_end.p1.shots_missed;
 
       p2.stats.games_played += 1;
       p2.stats.ships_sunk += game_to_end.p2.ships_sunk;
       p2.stats.ships_lost += game_to_end.p2.ships_lost;
       p2.stats.shots_fired += game_to_end.p2.shots_fired;
-      p2.stats.shots_missed += game.p2.shots_missed;
+      p2.stats.shots_missed += game_to_end.p2.shots_missed;
 
       try{
         await p1.save()
