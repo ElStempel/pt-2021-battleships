@@ -111,6 +111,7 @@ router.post('/shot', async function(req, res, next) {
                                 }
                             }
                         } else {
+                            game.p1.shots_missed += 1;
                             game.p2_map[x][y]=5;
                             game.turn = 2;
                         }
@@ -146,6 +147,7 @@ router.post('/shot', async function(req, res, next) {
                                 }
                             }
                         } else {
+                            game.p2.shots_missed += 1;
                             game.p1_map[x][y] = 5;
                             game.turn = 1;
                         }
