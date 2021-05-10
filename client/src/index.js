@@ -508,15 +508,20 @@ class Window extends React.Component {
 		var stat = 0;
 		fetch('https://localhost:9000/rooms/start-game', requestOptions)
 		.then(function(response){
+			var data;
 			stat = response.status;
 			if(stat == 201){
-				var data = response.json();
-				that.setState({
-					gameShown: !that.state.gameShown,
-					game_id: data._id,
-				})
-				console.log(that.state.game_id)
+				data = response.json();	
 			}
+			return data;
+		})
+		.then(function(data){
+			that.setState({
+				gameShown: !that.state.gameShown,
+				game_id: data._id,
+			})
+			console.log(data)
+			console.log(that.state.game_id)
 		})
 	}
 
@@ -532,15 +537,19 @@ class Window extends React.Component {
 		var stat = 0;
 		fetch('https://localhost:9000/rooms/fetch-game', requestOptions)
 		.then(function(response){
+			var data
 			stat = response.status;
 			if(stat == 200){
-				var data = response.json();
-				that.setState({
-					gameShown: !that.state.gameShown,
-					game_id: data._id,
-				})
-				console.log(that.state.game_id)
+				data = response.json();
 			}
+			return data;
+		})
+		.then(function(data){
+			that.setState({
+				gameShown: !that.state.gameShown,
+				game_id: data._id,
+			})
+			console.log(that.state.game_id)
 		})
 	}
 
