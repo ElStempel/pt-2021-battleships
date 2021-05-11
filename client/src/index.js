@@ -108,7 +108,6 @@ class Window extends React.Component {
 		this.fetchGameStart = this.fetchGameStart.bind(this);
 		this.handleSubmitGiveUpPopup = this.handleSubmitGiveUpPopup.bind(this);
 		this.fetchGameState = this.fetchGameState.bind(this);
-		this.fetchGameStateOngoing = this.fetchGameStateOngoing.bind(this);
 
 		this.state = { 
 			div1Shown: true, 
@@ -575,82 +574,6 @@ class Window extends React.Component {
 		})
 	}
 
-	async fetchGameStateOngoing(){
-		var that = this;
-
-		await new Promise(r => setTimeout(r, 50));
-
-		const requestOptions = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ "game_id": that.state.game_id, "player_id": that.state.user_id })
-		};
-		var stat = 0
-		var data
-		fetch('https://localhost:9000/games/fetch-state', requestOptions)
-		.then(function(response){
-			stat = response.status;
-			if(stat == 200){
-				data = response.json();
-			}
-			return data;
-		})
-		.then(function(data){
-			if(stat == 200){
-				that.setState({
-					playerBoard: data.playerMap,
-					enemyBoard: data.enemyMap
-				})
-				console.log(that.state.game_id)
-			}
-		})
-		.then(function(){
-			if(stat == 200){
-				var enemy = document.getElementsByClassName('butEnemy');
-				for(var i = 0; i < 10; i++){
-					for(var j = 0; j < 10; j++){
-						if(that.state.enemyBoard[i][j] == 1){
-							enemy[j + i * 10].style.backgroundColor = 'red'
-						}
-						else if(that.state.enemyBoard[i][j] == 2){
-							enemy[j + i * 10].style.backgroundColor = 'black'
-						}
-						else if(that.state.enemyBoard[i][j] == 5){
-							enemy[j + i * 10].style.backgroundColor = 'white'
-						}
-						else if(that.state.enemyBoard[i][j] == 0){
-							enemy[j + i * 10].style.backgroundColor = 'darkblue'
-						}
-					}
-				}
-				var player = document.getElementsByClassName('butPlayer');
-				for(var i = 0; i < 10; i++){
-					for(var j = 0; j < 10; j++){
-						if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
-							// trafienie
-							player[j + i * 10].style.backgroundColor = 'red'
-							console.log(that.state.playerBoard[i][j] % 10)
-							console.log(that.state.playerBoard[i][j])
-						}
-						if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
-							// zatopienie
-							player[j + i * 10].style.backgroundColor = 'black'
-							console.log(that.state.playerBoard[i][j] % 10)
-							console.log(that.state.playerBoard[i][j])
-						}
-						if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
-							// pudlo
-							player[j + i * 10].style.backgroundColor = 'white'
-							console.log(that.state.playerBoard[i][j] % 10)
-							console.log(that.state.playerBoard[i][j])
-						}
-					}
-				}
-				
-			}
-		})
-	}
-
 	async fetchGameState(){
 		var that = this;
 
@@ -751,7 +674,6 @@ class Window extends React.Component {
 					createButtonDisabled: false,
 					room_id: 0,
 					joinRoomHidden: 'hidden',
-					room_id: 0,
 				})
 			}
 		})
@@ -779,6 +701,7 @@ class Window extends React.Component {
 					createButtonDisabled: false,
 					joinRoomHidden: 'hidden',
 					deleteRoomHidden: 'hidden',
+          room_id: 0,
 				})
 			}
 		})
@@ -1747,7 +1670,7 @@ class Window extends React.Component {
 									<br/>
 									
 									<div style={{ alignItems: 'center' }}>
-										<button class='newRoomButton' id='newRoomButton' onClick={this.confirmRoomCreation} style={{ width: '1200px', height: '80px', fontSize: '50px', textAlign: 'center', cursor: 'pointer' }}>Create room with specified rules</button>
+										<button class='newRoomButton' id='newRoomButton' onClick={this.confirmRoomCreation} style={{ marginLeft:'300px', width: '1200px', height: '80px', fontSize: '50px', textAlign: 'center', cursor: 'pointer' }}>Create room with specified rules</button>
 									</div>
 								</div>
 							</div>
