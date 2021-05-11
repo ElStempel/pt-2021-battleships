@@ -187,6 +187,12 @@ class Window extends React.Component {
 			shotX: 0,
 			shotY: 0,
 
+			draw: 0,
+			turn: 0,
+			winner: 0,
+			shipsLostGame: 0,
+			shipsSunkGame: 0,
+
 		};
 
 		activeForRules = this;
@@ -667,11 +673,16 @@ class Window extends React.Component {
 			})
 			.then(function(data){
 				if(stat == 200){
+					console.log(data)
 					that.setState({
 						playerBoard: data.playerMap,
-						enemyBoard: data.enemyMap
+						enemyBoard: data.enemyMap,
+						draw: data.draw,
+						turn: data.turn,
+						winner: data.winner,
+						shipsLostGame: data.stats.ships_lost,
+						shipsSunkGame: data.stats.ships_sunk
 					})
-					console.log(that.state.game_id)
 				}
 			})
 			.then(function(){
@@ -1281,6 +1292,7 @@ class Window extends React.Component {
 					}
 				}
 			}
+			that.fetchGameState();
 			event.target.style.backgroundColor = 'yellow'
 		}
 	}
@@ -1489,7 +1501,7 @@ class Window extends React.Component {
 		return (
 				this.state.div1Shown ?
 				(
-					<div id="startPage" style={{ width: '100%', height: '1010px', fontSize: '60px', background: '#222831', overflowX: 'hidden', }}>
+					<div id="startPage" style={{ width: '100%', height: '1200px', fontSize: '60px', background: '#222831', overflowX: 'hidden', }}>
 					<h1 style={startPageHeader}>Battleships Online</h1>
 					<p style={{ height: '50px', textAlign: 'center', fontSize: '60px', color: 'white', fontWeight: 'bold' }}>{this.state.startText}</p>
 					<div id='login' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
@@ -1517,7 +1529,11 @@ class Window extends React.Component {
 					(
 						this.state.gameShown ?
 						(
-							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '1010px', display: 'inline-block', backgroundColor: '#09322E'}}>
+							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '100%', display: 'inline-block', backgroundColor: '#09322E'}}>
+								<div style={{}}>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '60px'}}>Ships Lost: {this.state.shipsLostGame}</p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>Ships Sunk: {this.state.shipsSunkGame}</p>
+								</div>
 								<div id='playerBoard' class='playerBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
 									<table class='playerTable'>{rowsPlayer}</table>
 									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}}>Player Board</p>
@@ -1589,7 +1605,7 @@ class Window extends React.Component {
 						)
 						:
 						(
-								<div id="startPage" style={{ backgroundImage: `url(${background})`, width: '100%', height: '1010px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
+								<div id="startPage" style={{ backgroundImage: `url(${background})`, width: '100%', height: '1200px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
 							<br />
 								<div id="startHeader" style={{display: 'flex', flexDirection: 'row', marginLeft: '38%', }}>
 									<h1 style={startPageHeader}>Battleships Online</h1>
@@ -1687,7 +1703,7 @@ class Window extends React.Component {
 					)
 					:
 					(
-						<div id="createRoomPage" style={{ backgroundImage: `url(${radar})`, width: '100%', height: '1010px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
+						<div id="createRoomPage" style={{ backgroundImage: `url(${radar})`, width: '100%', height: '1200px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
 						<br />
 							<div id="startHeader" style={{display: 'flex', flexDirection: 'row', marginLeft: '38%', }}>
 								<h1 style={startPageHeader}>Battleships Online</h1>
