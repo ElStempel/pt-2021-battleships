@@ -1,5 +1,6 @@
-import React from 'react';
 import ReactDOM from 'react-dom';
+import React,{Component,useEffect,useState} from 'react'
+import axios from 'axios'
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -80,34 +81,41 @@ class Window extends React.Component {
 		this.chooseLogin = this.chooseLogin.bind(this);
 		this.chooseRegister = this.chooseRegister.bind(this);
 		this.chooseLogout = this.chooseLogout.bind(this);
-		this.createRoom = this.createRoom.bind(this);
+		this.showCreateRoomPage = this.showCreateRoomPage.bind(this);
 		this.confirmRoomCreation = this.confirmRoomCreation.bind(this);
 		this.enableRulesChoice = this.enableRulesChoice.bind(this);
-		this.handleUsernameChange = this.handleUsernameChange.bind(this);
-		this.handlePasswordChange = this.handlePasswordChange.bind(this);
+		this.handleUsernameInputChange = this.handleUsernameInputChange.bind(this);
+		this.handlePasswordInputChange = this.handlePasswordInputChange.bind(this);
 		this.showDeletePopup = this.showDeletePopup.bind(this);
 		this.getRoomsList = this.getRoomsList.bind(this);
-		this.clearRoomList = this.clearRoomList.bind(this);
+		this.clearRoomsList = this.clearRoomsList.bind(this);
 		this.getPlayersList = this.getPlayersList.bind(this);
 		this.clearPlayersList = this.clearPlayersList.bind(this);
-		this.handleChangeDeletePopup = this.handleChangeDeletePopup.bind(this);
+		this.handleChangeDeleteInputPopup = this.handleChangeDeleteInputPopup.bind(this);
 		this.handleSubmitDeletePopup = this.handleSubmitDeletePopup.bind(this);
-		this.handleClickDeletePopup = this.handleClickDeletePopup.bind(this);
+		this.handleClickCloseDeletePopup = this.handleClickCloseDeletePopup.bind(this);
 		this.joinGame = this.joinGame.bind(this);
 		this.handlePlayerBoardClick = this.handlePlayerBoardClick.bind(this);
 		this.handleEnemyBoardClick = this.handleEnemyBoardClick.bind(this);
-		this.handleConfirmShips = this.handleConfirmShips.bind(this);
-		this.handleResetBoard = this.handleResetBoard.bind(this);
+		this.handleConfirmShipsClick = this.handleConfirmShipsClick.bind(this);
+		this.handleResetBoardClick = this.handleResetBoardClick.bind(this);
 		this.handleShipButtonClick = this.handleShipButtonClick.bind(this);
-		this.handleConfirmShot = this.handleConfirmShot.bind(this);
-		this.updatePlayers = this.updatePlayers.bind(this);
-		this.updateRooms = this.updateRooms.bind(this);
+		this.handleConfirmShotClick = this.handleConfirmShotClick.bind(this);
+		this.updatePlayersList = this.updatePlayersList.bind(this);
+		this.updateRoomsList = this.updateRoomsList.bind(this);
 		this.startGame = this.startGame.bind(this);
 		this.deleteYourRoom = this.deleteYourRoom.bind(this);
 		this.leaveRoom = this.leaveRoom.bind(this);
 		this.fetchGameStart = this.fetchGameStart.bind(this);
 		this.handleSubmitGiveUpPopup = this.handleSubmitGiveUpPopup.bind(this);
 		this.fetchGameState = this.fetchGameState.bind(this);
+		this.rejoinCurrentGame = this.rejoinCurrentGame.bind(this);
+		this.showGiveUpPopup = this.showGiveUpPopup.bind(this);
+		this.showDrawPopup = this.showDrawPopup.bind(this);
+		this.handleSubmitDrawPopup = this.handleSubmitDrawPopup.bind(this);
+		this.handleSubmitDrawGiveUpPopup = this.handleSubmitDrawGiveUpPopup.bind(this);
+		this.handleClickCloseDrawGiveUpPopup = this.handleClickCloseDrawGiveUpPopup.bind(this);
+
 
 		this.state = { 
 			div1Shown: true, 
@@ -137,6 +145,7 @@ class Window extends React.Component {
 			createButtonDisabled: false,
 			joinRoomHidden: 'hidden',
 			deleteRoomHidden: 'hidden',
+			rejoinCurrentGameHidden: 'hidden',
 
 			rooms: [
 
@@ -192,6 +201,11 @@ class Window extends React.Component {
 			shipsLostGame: 0,
 			shipsSunkGame: 0,
 
+			drawGiveUpPopupText: '',
+			drawGiveUpPopupShown: false,
+
+			gamePlayer: 0,
+
 		};
 
 		activeForRules = this;
@@ -203,13 +217,13 @@ class Window extends React.Component {
 		});
 	};
 
-	updateRooms(){
+	updateRoomsList(){
 		var that = this;
-		that.clearRoomList();
+		that.clearRoomsList();
 		that.getRoomsList();
 	}
 
-	updatePlayers(){
+	updatePlayersList(){
 		var that = this;
 		that.clearPlayersList();
 		that.getPlayersList();
@@ -258,7 +272,7 @@ class Window extends React.Component {
 			}
 		})
 		.then(function(data) {
-			that.clearRoomList();
+			that.clearRoomsList();
 			that.clearPlayersList();
 		})
 		.then(function(data) {
@@ -308,7 +322,10 @@ class Window extends React.Component {
 			stat = response.status;
 			if(stat == 200){
 				that.setState({
-					div1Shown: !that.state.div1Shown,
+					div1Shown: true, 
+					div2Shown: true, 
+					gameShown: false,
+					customRulesDisabled: true, 
 					startText: '',
 					username: '', 
 					password: '', 
@@ -319,6 +336,77 @@ class Window extends React.Component {
 					shots_fired: 0,
 					wins: 0,
 					loses: 0,
+					deleteAccountSeen: false,
+					customRule1: false,
+					customRule2: false,
+					customRule3: false,
+					customRule4: false,
+					inviteOnly: false,
+					customSize: false,
+					boardSize: 10,
+					inviteOnly: false,
+
+					createButtonDisabled: false,
+					joinRoomHidden: 'hidden',
+					deleteRoomHidden: 'hidden',
+					rejoinCurrentGameHidden: 'hidden',
+
+					rooms: [
+
+					],
+					playersList:[
+
+					],
+
+					deleteAccountModal: true,
+					inputValue: '',
+					enemyBoardButtons: true,
+
+					dreadnoughtEnabled: true,
+					cruiserEnabled: true,
+					submarineEnabled: true,
+					destroyerEnabled: true,
+					reconEnabled: true,
+
+					dreadnoughtFields: 5,
+					cruiserFields: 4,
+					submarineFields: 3,
+					destroyerFields: 3,
+					reconFields: 2,
+
+					availableFields: 0,
+
+					shipDeployed: false,
+
+					dreadnoughtCoordsList: [],
+					cruiserCoordsList: [],
+					submarineCoordsList: [],
+					destroyerCoordsList: [],
+					reconCoordsList: [],
+
+					playerBoardEnabled: false,
+
+					room_id: 0,
+					game_id: 0,
+
+					playerBoard: [
+
+					],
+					enemyBoard: [
+
+					],
+
+					shotX: 0,
+					shotY: 0,
+
+					draw: 0,
+					turn: 0,
+					winner: 0,
+					shipsLostGame: 0,
+					shipsSunkGame: 0,
+
+					drawGiveUpPopupText: '',
+					drawGiveUpPopupShown: false
 				});
 			}
 		});
@@ -379,7 +467,7 @@ class Window extends React.Component {
 		})
 	}
 
-	clearRoomList(){
+	clearRoomsList(){
 		this.setState({
 			rooms: [],
 		});
@@ -427,9 +515,9 @@ class Window extends React.Component {
 		});
 	}
 
-	createRoom(){
+	showCreateRoomPage(){
 		console.log("Creating room")
-		this.updateRooms();
+		this.updateRoomsList();
 		this.setState({
 			div2Shown: !this.state.div2Shown,
 		});
@@ -468,7 +556,7 @@ class Window extends React.Component {
 			});
 		})
 		.then(function(){
-			that.updateRooms();
+			that.updateRoomsList();
 		})
 	}
 
@@ -534,17 +622,17 @@ class Window extends React.Component {
 			return data;
 		})
 		.then(function(data){
-			that.setState({
-				gameShown: !that.state.gameShown,
-				game_id: data._id,
-			})
-			console.log(data)
-			console.log(that.state.game_id)
+			if(stat == 201){
+				that.setState({
+					gameShown: !that.state.gameShown,
+					game_id: data._id,
+				})
+			}
 		})
 	}
 
 	async fetchGameStart(){
-		await new Promise(r => setTimeout(r, 10000));
+		await new Promise(r => setTimeout(r, 5000));
 		var that = this;
 
 		const requestOptions = {
@@ -678,8 +766,20 @@ class Window extends React.Component {
 			}
 		})
 		.then(function(){
-			that.updateRooms();
+			that.updateRoomsList();
 		})
+	}
+
+	rejoinCurrentGame(){
+		var that = this;
+		that.setState({
+			gameShown: true,
+			createButtonDisabled: true,
+			joinRoomHidden: 'hidden',
+			deleteRoomHidden: 'hidden',
+			rejoinCurrentGameHidden: 'visible',
+		})
+		that.fetchGameState();
 	}
 
 	deleteYourRoom(){
@@ -701,32 +801,49 @@ class Window extends React.Component {
 					createButtonDisabled: false,
 					joinRoomHidden: 'hidden',
 					deleteRoomHidden: 'hidden',
-          room_id: 0,
+          			room_id: 0,
 				})
+			}
+			if(stat == 403){
+				that.setState({
+					gameShown: false,
+					createButtonDisabled: true,
+					joinRoomHidden: 'hidden',
+					deleteRoomHidden: 'hidden',
+					rejoinCurrentGameHidden: 'visible',
+				})
+				that.rejoinCurrentGame();
 			}
 		})
 		.then(function(){
-			that.updateRooms();
+			that.updateRoomsList();
 		})
 	}
 
 
-	handleUsernameChange(e) {
+	handleUsernameInputChange(e) {
 		this.setState({username: e.target.value});
 	}
 
-	handlePasswordChange(e) {
+	handlePasswordInputChange(e) {
 		this.setState({password: e.target.value});
 	}
 
 	showGiveUpPopup(){
-		console.log("Give Up")
 		document.getElementsByClassName('modalGiveUp')[0].hidden = false;
 	}
 
 	handleClickGiveUpPopup() {
 		document.getElementsByClassName('modalGiveUp')[0].hidden = true;
 	};
+
+	handleClickCloseDrawGiveUpPopup(){
+		document.getElementsByClassName('modalDrawGiveUp')[0].hidden = true;
+	}
+
+	handleSubmitDrawGiveUpPopup(event) {
+		document.getElementsByClassName('modalDrawGiveUp')[0].hidden = true;
+	}
 
 	handleSubmitGiveUpPopup(event) {
 		console.log('Give Up')
@@ -742,17 +859,24 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/games/give-up', requestOptions)
 		.then(function(response){
 			stat = response.status;
+			that.setState({
+				drawGiveUpPopupText: 'You gave up game',
+			})
+		})
+		.then(function(){
 			if(stat == 200){
 				that.setState({
 					createButtonDisabled: false,
 					room_id: 0,
 					joinRoomHidden: 'hidden',
 					deleteRoomHidden: 'hidden',
+					div2Shown: true,
+					gameShown: false,
 				})
 			}
-		})
-		.then(function(){
-			that.updateRooms();
+			document.getElementsByClassName('modalDrawGiveUp')[0].hidden = false;
+			that.updateRoomsList();
+
 		})
 		
 	}
@@ -767,7 +891,24 @@ class Window extends React.Component {
 	};
 
 	handleSubmitDrawPopup(event) {
-		
+		var that = this;
+		var stat = 0;
+		const requestOptions = {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id})
+		};
+
+		fetch('https://localhost:9000/games/draw', requestOptions)
+		.then(function(response) { 
+			stat = response.status;
+			console.log(stat)
+			if(stat == 200){
+				that.setState({
+					div1Shown: !that.state.div1Shown,
+				});
+			}
+		})
 	}
 
 	showDeletePopup(){
@@ -775,7 +916,7 @@ class Window extends React.Component {
 		document.getElementsByClassName('modalDelete')[0].hidden = false;
 	}
 
-	handleClickDeletePopup() {
+	handleClickCloseDeletePopup() {
 		document.getElementsByClassName('modalDelete')[0].hidden = true;
 	};
 
@@ -813,7 +954,7 @@ class Window extends React.Component {
 		}
 	}
 
-	handleChangeDeletePopup(event) {
+	handleChangeDeleteInputPopup(event) {
 		this.setState({ inputValue: event.target.value });
 	}
 
@@ -846,7 +987,7 @@ class Window extends React.Component {
 			}
 		})
 		.then(function(){
-			that.updateRooms();
+			that.updateRoomsList();
 		})
 
 		that.fetchGameStart();
@@ -1178,9 +1319,6 @@ class Window extends React.Component {
 				shotX: parseInt(event.target.id[2]),
 				shotY: parseInt(event.target.id[4]),
 			})
-			console.log(event.target.id)
-			console.log(that.state.shotX)
-			console.log(that.state.shotY)
 			var enemy = document.getElementsByClassName('butEnemy');
 			for(var i = 0; i < 10; i++){
 				for(var j = 0; j < 10; j++){
@@ -1249,7 +1387,7 @@ class Window extends React.Component {
 		return board;
 	}
 
-	handleConfirmShips(){
+	handleConfirmShipsClick(){
 		var that = this;
 		var boardToSend = that.prepareBoardToSend();
 		console.log("Confirm ships")
@@ -1293,13 +1431,20 @@ class Window extends React.Component {
 				console.log(response)
 			})
 			.then(function(){
+				// useEffect(() => {
+				// 	that.fetchGameState()
+				// 	const interval = setInterval(()=>{
+				// 		that.fetchGameState()
+				// 	}, 1000)
+				// 	return() => clearInterval(interval)
+				// })
 				that.fetchGameState()
 			})
 
 		}
 	}
 
-	handleResetBoard(){
+	handleResetBoardClick(){
 		var shipsButtons = document.getElementsByClassName('ship');
 		var boardButtons = document.getElementsByClassName('butPlayer');
 		for(var i = 0; i < shipsButtons.length; i++){
@@ -1329,7 +1474,7 @@ class Window extends React.Component {
 		})
 	}
 
-	handleConfirmShot(event){
+	handleConfirmShotClick(event){
 		var that = this;
 		var enemyBoard = document.getElementsByClassName('enemyTable')[0];
 		// console.log(enemyBoard)
@@ -1429,11 +1574,11 @@ class Window extends React.Component {
 					<p style={{ height: '50px', textAlign: 'center', fontSize: '60px', color: 'white', fontWeight: 'bold' }}>{this.state.startText}</p>
 					<div id='login' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
 						<p>Username</p>
-						<input type="text" id="usernameInput" name="usernameInput" placeholder="Username" value={this.state.username} onChange={this.handleUsernameChange} style={inputStyle}/>
+						<input type="text" id="usernameInput" name="usernameInput" placeholder="Username" value={this.state.username} onChange={this.handleUsernameInputChange} style={inputStyle}/>
 					</div>
 					<div id='password' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
 						<p>Password</p>
-						<input type="password" id="passwordInput" name="passwordInput" placeholder="Password" value={this.state.password} onChange={this.handlePasswordChange} style={inputStyle}/>
+						<input type="password" id="passwordInput" name="passwordInput" placeholder="Password" value={this.state.password} onChange={this.handlePasswordInputChange} style={inputStyle}/>
 					</div>
 				<br />
 					<div id="buttons" style={{textAlign: 'center',}}>
@@ -1453,19 +1598,6 @@ class Window extends React.Component {
 						this.state.gameShown ?
 						(
 							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '100%', display: 'inline-block', backgroundColor: '#09322E'}}>
-								<div style={{}}>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '60px'}}>Ships Lost: {this.state.shipsLostGame}</p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>Ships Sunk: {this.state.shipsSunkGame}</p>
-								</div>
-								<div id='playerBoard' class='playerBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
-									<table class='playerTable'>{rowsPlayer}</table>
-									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}}>Player Board</p>
-								</div>
-								<div id='enemyBoard' class='enemyBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
-									<table class='enemyTable'>{rowsEnemy}</table>
-									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}} disabled={this.state.enemyBoardButtons}>Enemy Board</p>
-								</div>
-
 								<div className="modalDraw" hidden='true'>
 									<div className="modal_content">
 									<span className="close" onClick={this.handleClickDrawPopup}>
@@ -1496,6 +1628,19 @@ class Window extends React.Component {
 									</div>
 								</div>
 
+								<div style={{}}>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '60px'}}>Ships Lost: {this.state.shipsLostGame}</p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>Ships Sunk: {this.state.shipsSunkGame}</p>
+								</div>
+								<div id='playerBoard' class='playerBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
+									<table class='playerTable'>{rowsPlayer}</table>
+									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}}>Player Board</p>
+								</div>
+								<div id='enemyBoard' class='enemyBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
+									<table class='enemyTable'>{rowsEnemy}</table>
+									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}} disabled={this.state.enemyBoardButtons}>Enemy Board</p>
+								</div>
+
 								<div id='gameButtons' class='gameButtons' style={{ display: 'inline-block', verticalAlign: 'top', marginLeft: '50px', marginTop: '20px', }}>
 									<br></br>
 									<button id='dreadnought' class="ship" disabled={!this.state.dreadnoughtEnabled} onClick={this.handleShipButtonClick}>Dreadnought</button>
@@ -1509,13 +1654,13 @@ class Window extends React.Component {
 									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon</button>
 									<br></br>
 									<br></br>
-									<button id='resetBoard' class="resetBoard" onClick={this.handleResetBoard} >Reset Board</button>
+									<button id='resetBoard' class="resetBoard" onClick={this.handleResetBoardClick} >Reset Board</button>
 									<br></br>
 									<br></br>
-									<button id='confirmShips' class="confirmShips" onClick={this.handleConfirmShips} >Confirm Setup</button>
+									<button id='confirmShips' class="confirmShips" onClick={this.handleConfirmShipsClick} >Confirm Setup</button>
 									<br></br>
 									<br></br>
-									<button id='confirmShot' class="confirmShot" onClick={this.handleConfirmShot}>Confirm Shot</button>
+									<button id='confirmShot' class="confirmShot" onClick={this.handleConfirmShotClick}>Confirm Shot</button>
 									<br></br>
 									<br></br>
 									<button id='defeat' class="defeat" onClick={this.showGiveUpPopup}>Give up</button>
@@ -1536,11 +1681,42 @@ class Window extends React.Component {
 								</div>
 							<br />
 								<div id="pageAfterLogin" class="pageAfterLogin" style={{ backgroundImage: `url(${background})`, display: 'flex', flexDirection: 'row', }}>
+									<div className="modalDelete" hidden='true'>
+										<div className="modal_content">
+										<span className="close" onClick={this.handleClickCloseDeletePopup}>
+											&times;
+										</span>
+											<h2 style={{textAlign: 'center'}}>Type in your password to delete Account.</h2>
+											<div style={{ textAlign: 'center'}}>
+												<label>
+												Password:
+												<input type="password" name="name" onChange={this.handleChangeDeleteInputPopup} placeholder='Password' style={{ marginLeft: '20px', height: '30px', width: '300px'}}/>
+												</label>
+											</div>
+											<br />
+											<div style={{ textAlign: 'center'}}> 
+												<button id="submitButton" class="submitButton" onClick={this.handleSubmitDeletePopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}>Confirm</button>
+											</div>
+										</div>
+									</div>
+
+									<div className="modalDrawGiveUp" hidden='true'>
+										<div className="modal_content">
+										<span className="close" onClick={this.handleClickCloseDrawGiveUpPopup}>
+											&times;
+										</span>
+											<h2 style={{textAlign: 'center'}}>{this.state.drawGiveUpPopupText}</h2>
+											<div style={{ textAlign: 'center'}}> 
+												<button id="submitButton" class="submitButton" onClick={this.handleSubmitDrawGiveUpPopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}>OK</button>
+											</div>
+										</div>
+									</div>
+									
 									<div id="rooms" style={{display: 'inline-block', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
 										<h2 id="roomsText" style={{ marginLeft: '10px', minHeight: '40px', color: 'white', display: 'inline-block', }}>Rooms</h2>
-										<button class='createButton' id='createButton' disabled={this.state.createButtonDisabled} onClick={this.createRoom} style={createButtonStyle}>Create Room</button>
+										<button class='createButton' id='createButton' disabled={this.state.createButtonDisabled} onClick={this.showCreateRoomPage} style={createButtonStyle}>Create Room</button>
 										<hr></hr>
-										<button class='updateButton' id='updateButton' onClick={this.updateRooms} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh Rooms list</button>
+										<button class='updateButton' id='updateButton' onClick={this.updateRoomsList} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh Rooms list</button>
 										<hr></hr>
 										<div id="roomsEntrys" style={{ marginLeft: '25px', listStyleType: 'none', color: 'white', }}>
 											{listRooms}
@@ -1549,7 +1725,7 @@ class Window extends React.Component {
 									<div id="players" style={{display: 'inline-block', minHeight: '600px', marginLeft: '70px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto', }}>
 										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px',}}>Top Players</h2>
 										<hr></hr>
-										<button class='updateButton' id='updateButton' onClick={this.updatePlayers} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh Top Players list</button>
+										<button class='updateButton' id='updateButton' onClick={this.updatePlayersList} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh Top Players list</button>
 										<hr></hr>
 										<div id="playerNames" style={{ marginLeft: '25px', display: 'inline-block', listStyleType: 'none', color: 'white', fontSize: '30px', fontWeight: 'bold' }}>
 											Player
@@ -1564,24 +1740,6 @@ class Window extends React.Component {
 									</div>
 
 									{/* {this.state.deleteAccountSeen ? <DeletePopup toggle={this.togglePop} /> : null} */}
-									<div className="modalDelete" hidden='true'>
-										<div className="modal_content">
-										<span className="close" onClick={this.handleClickDeletePopup}>
-											&times;
-										</span>
-											<h2 style={{textAlign: 'center'}}>Type in your password to delete Account.</h2>
-											<div style={{ textAlign: 'center'}}>
-												<label>
-												Password:
-												<input type="text" name="name" onChange={this.handleChangeDeletePopup} placeholder='Password' style={{ marginLeft: '20px', height: '30px', width: '300px'}}/>
-												</label>
-											</div>
-											<br />
-											<div style={{ textAlign: 'center'}}> 
-												<button id="submitButton" class="submitButton" onClick={this.handleSubmitDeletePopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}>Confirm</button>
-											</div>
-										</div>
-									</div>
 
 									<div id="statistics" style={{display: 'inline-block', marginTop: '0px', marginRight: '50px', marginLeft: '70px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
 										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px',}}>My statistics</h2>
@@ -1620,6 +1778,7 @@ class Window extends React.Component {
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '50px' }} onClick={this.startGame} class='joinRoomButton'>Start Game</button>
 									<button style={{ visibility: this.state.joinRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.leaveRoom} class='joinRoomButton'>Leave Room</button>
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.deleteYourRoom} class='joinRoomButton'>Delete Your Room</button>
+									{/* <button style={{ visibility: this.state.rejoinCurrentGameHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.rejoinCurrentGame} class='joinRoomButton'>Rejoin Current Game</button> */}
 								</div>
 							</div>
 						)
