@@ -1191,7 +1191,7 @@ class Window extends React.Component {
 			if(this.state.dreadnoughtEnabled == true){
 				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
 					this.state.dreadnoughtCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
-					event.target.style.backgroundColor = 'black'
+					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 					})
@@ -1200,7 +1200,7 @@ class Window extends React.Component {
 			else if(this.state.cruiserEnabled == true){
 				if(this.checkCoords('cruiser', this.state.cruiserCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
 					this.state.cruiserCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
-					event.target.style.backgroundColor = 'black'
+					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 					})
@@ -1209,7 +1209,7 @@ class Window extends React.Component {
 			else if(this.state.submarineEnabled == true){
 				if(this.checkCoords('submarine', this.state.submarineCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
 					this.state.submarineCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
-					event.target.style.backgroundColor = 'black'
+					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 					})
@@ -1218,7 +1218,7 @@ class Window extends React.Component {
 			else if(this.state.destroyerEnabled == true){
 				if(this.checkCoords('destroyer', this.state.destroyerCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
 					this.state.destroyerCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
-					event.target.style.backgroundColor = 'black'
+					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 					})
@@ -1227,7 +1227,7 @@ class Window extends React.Component {
 			else if(this.state.reconEnabled == true){
 				if(this.checkCoords('recon', this.state.reconCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
 					this.state.reconCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
-					event.target.style.backgroundColor = 'black'
+					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 					})
@@ -1240,7 +1240,6 @@ class Window extends React.Component {
 		event.preventDefault();
 		var that = this;
 		if(that.state.enemyBoardButtons == false){
-			event.target.style.backgroundColor = 'yellow'
 			that.setState({
 				shotX: parseInt(event.target.id[2]),
 				shotY: parseInt(event.target.id[4]),
@@ -1248,6 +1247,41 @@ class Window extends React.Component {
 			console.log(event.target.id)
 			console.log(that.state.shotX)
 			console.log(that.state.shotY)
+			var enemy = document.getElementsByClassName('butEnemy');
+			for(var i = 0; i < 10; i++){
+				for(var j = 0; j < 10; j++){
+					if(that.state.enemyBoard[i][j] == 1){
+						enemy[j + i * 10].style.backgroundColor = 'red'
+					}
+					else if(that.state.enemyBoard[i][j] == 2){
+						enemy[j + i * 10].style.backgroundColor = 'black'
+					}
+					else if(that.state.enemyBoard[i][j] == 5){
+						enemy[j + i * 10].style.backgroundColor = 'white'
+					}
+					else if(that.state.enemyBoard[i][j] == 0){
+						enemy[j + i * 10].style.backgroundColor = 'darkblue'
+					}
+				}
+			}
+			var player = document.getElementsByClassName('butPlayer');
+			for(var i = 0; i < 10; i++){
+				for(var j = 0; j < 10; j++){
+					if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+						// trafienie
+						player[j + i * 10].style.backgroundColor = 'red'
+					}
+					if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+						// zatopienie
+						player[j + i * 10].style.backgroundColor = 'black'
+					}
+					if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+						// pudlo
+						player[j + i * 10].style.backgroundColor = 'white'
+					}
+				}
+			}
+			event.target.style.backgroundColor = 'yellow'
 		}
 	}
 
@@ -1406,14 +1440,12 @@ class Window extends React.Component {
 			availableFields: this.state[shipDeployed],
 			[shipDeployed]: 0,
 		});
-		
+
 		this.setState({
 			[buttonEnabled]: true,
 		});
-		console.log(event.target.id + ' clicked')
-		console.log(this.state.availableFields + ' fields')
 		
-		if(this.state[shipDeployed] == 0){
+		if(this.state[shipDeployed] == 0 && this.state.availableFields == 0){
 			event.target.style.backgroundColor = 'green';
 		}
 		else{
@@ -1425,14 +1457,6 @@ class Window extends React.Component {
 		const listNames = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.player}</li>);
 		const listScore = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.score}</li>);
 		const listRooms = this.state.rooms.map((r) => <li style={{ height: '80px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id={r.room} class='joinButton' disabled={r.full} onClick={this.joinGame} style={{display: 'inline-block', float: 'right', marginRight: '20px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px', pointerEvents: [r.hover]}}> {r.text} </button></li>)
-
-		// function yourFunction(){
-		// 	// do whatever you like here
-		// 	console.log("5 sekund")
-		// 	setTimeout(yourFunction, 5000);
-		// }
-		
-		// yourFunction();
 
 		const noHover = {
 			pointerEvents: 'none',
@@ -1717,51 +1741,5 @@ class Window extends React.Component {
 		);
 	}
 }
-
-// class Timer extends React.Component {
-// 	constructor(props) {
-// 	  super(props);
-// 	  this.state = {
-// 		seconds: parseInt(props.startTimeInSeconds, 10) || 0
-// 	  };
-// 	}
-  
-// 	tick() {
-// 	  this.setState(state => ({
-// 		seconds: state.seconds + 1
-// 	  }));
-// 	}
-  
-// 	componentDidMount() {
-// 	  this.interval = setInterval(() => this.tick(), 1000);
-// 	}
-  
-// 	componentWillUnmount() {
-// 	  clearInterval(this.interval);
-// 	}
-  
-// 	formatTime(secs) {
-// 	  let hours   = Math.floor(secs / 3600);
-// 	  let minutes = Math.floor(secs / 60) % 60;
-// 	  let seconds = secs % 60;
-// 	  return [hours, minutes, seconds]
-// 		  .map(v => ('' + v).padStart(2, '0'))
-// 		  .filter((v,i) => v !== '00' || i > 0)
-// 		  .join(':');
-// 	}
-  
-// 	render() {
-// 	  return (
-// 		<div>
-// 		  Timer: {this.formatTime(this.state.seconds)}
-// 		</div>
-// 	  );
-// 	}
-//   }
-  
-//   ReactDOM.render(
-// 	<Timer startTimeInSeconds="300" />,
-// 	document.getElementById('root')
-// );
 
 ReactDOM.render(<Window />, document.getElementById('root'));
