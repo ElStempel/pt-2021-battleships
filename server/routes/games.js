@@ -247,7 +247,7 @@ router.post('/fetch-state', async function(req, res, next) {
                     playerMap: game.p1_map,
                     enemyMap: censoredMap
                 }
-                res.status(200).send(data)
+                res.status(200).json(data)
                 end_game(game);
             } else if(game.player_2 == req.body.player_id){
                 censoredMap = censoreMap(game.p1_map, game.map_size)
@@ -259,7 +259,7 @@ router.post('/fetch-state', async function(req, res, next) {
                     playerMap: game.p2_map,
                     enemyMap: censoredMap
                 }
-                res.status(200).send(data)
+                res.status(200).json(data)
                 end_game(game);
             } else {
                 res.status(405).send("This player is not in this game")
