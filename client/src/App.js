@@ -1,8 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
-import React, { Component } from "react";
+// import React,{Component,useEffect,useState} from 'react'
+import axios from 'axios'
 import { render } from '@testing-library/react';
-import { useState } from "react";
 
 
 class MyComponent extends React.Component {
