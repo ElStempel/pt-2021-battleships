@@ -270,4 +270,18 @@ router.post('/end-game', async function(req, res, next) {
   }
 });
 
+router.post('/rejoin', async function(req, res, next) {
+  let found_room = await Room.findOne({player_1: req.body.player_id} || {player_2: req.body.player_id})
+  if (found_room) {
+    let found_game = await Game.findOne({room: found_room._id})
+    if (found_game) {
+      res.status(200).send({game_id: found_game._id})
+    } else {
+      res.status(200).send(found_room)
+    }
+  } else {
+    res.status(400).send("No game or room")
+  }
+});
+
 module.exports = router;
