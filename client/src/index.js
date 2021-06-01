@@ -146,6 +146,7 @@ class Window extends React.Component {
 			joinRoomHidden: 'hidden',
 			deleteRoomHidden: 'hidden',
 			rejoinCurrentGameHidden: 'hidden',
+			rejoinRoomHidden: 'hidden',
 
 			rooms: [
 
@@ -271,17 +272,30 @@ class Window extends React.Component {
 				});
 			}
 		})
-		.then(function(data) {
+		.then(function() {
 			that.clearRoomsList();
 			that.clearPlayersList();
 		})
-		.then(function(data) {
+		.then(function() {
 			that.getRoomsList();
 			that.getPlayersList();
 		})
+		.then(function(){
+			const rejoinRequestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ player_id: that.state.user_id })
+			};
+			fetch('https://localhost:9000/rooms/rejoin', rejoinRequestOptions)
+			.then(function(response){
+				if(response.status == 200){
+					that.setState({
+						rejoinRoomHidden: 'visible'
+					})
+				}
+			})
 
-		console.log(that.state.user_id)
-
+		})
 	}
 
 	chooseRegister(){
@@ -600,6 +614,14 @@ class Window extends React.Component {
 		activeForRules.setState({
 			inviteOnly: !activeForRules.state.inviteOnly,
 		});
+	}
+
+	rejoinGame(){
+		var that = this;
+		that.setState({
+			gameShown: !that.state.gameShown,
+		})
+		that.fetchGameState();
 	}
 
 	startGame(){
@@ -1192,8 +1214,6 @@ class Window extends React.Component {
 				}
 			}
 		}
-		console.log('Taken: ' + coordsTaken);
-		console.log('Neighbour: ' + neighbourCoordsTaken);
 		if(coordsTaken == true || neighbourCoordsTaken == true){
 			return false;
 		}
@@ -1778,6 +1798,7 @@ class Window extends React.Component {
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '50px' }} onClick={this.startGame} class='joinRoomButton'>Start Game</button>
 									<button style={{ visibility: this.state.joinRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.leaveRoom} class='joinRoomButton'>Leave Room</button>
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.deleteYourRoom} class='joinRoomButton'>Delete Your Room</button>
+									<button style={{ visibility: this.state.rejoinRoomHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='joinRoomButton'>Rejoin Your Game</button>
 									{/* <button style={{ visibility: this.state.rejoinCurrentGameHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.rejoinCurrentGame} class='joinRoomButton'>Rejoin Current Game</button> */}
 								</div>
 							</div>
