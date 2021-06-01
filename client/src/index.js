@@ -73,6 +73,7 @@ const deleteAccountButton = {
 }
 
 var activeForRules;
+var activeForRejoin;
 
 class Window extends React.Component {
 	constructor(props) {
@@ -210,6 +211,7 @@ class Window extends React.Component {
 		};
 
 		activeForRules = this;
+		activeForRejoin = this;
 	}
 
 	togglePop = () => {
@@ -258,7 +260,6 @@ class Window extends React.Component {
 		}, )
 		.then(function(data) { 
 			if(stat == 200){
-				console.log(data._id)
 				that.setState({
 					div1Shown: !that.state.div1Shown,
 					user_id: data._id,
@@ -290,7 +291,7 @@ class Window extends React.Component {
 			.then(function(response){
 				if(response.status == 200){
 					that.setState({
-						rejoinRoomHidden: 'visible'
+						rejoinRoomHidden: 'visible',
 					})
 				}
 			})
@@ -438,13 +439,11 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/rooms/list', requestOptions)
 		.then(function(response) { 
 			stat = response.status;
-			console.log(stat)
 			if(stat == 200){
 				receivedRooms = response.json();
 			}
 			return receivedRooms;
 		}).then(function(receivedRooms){
-			console.log(receivedRooms)
 			for(var i = 0; i < receivedRooms.length; i++){
 				if(receivedRooms[i].player_1 == that.state.username){
 					that.setState({
@@ -499,7 +498,6 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/users/list', requestOptions)
 		.then(function(response) { 
 			stat = response.status;
-			console.log(stat)
 			if(stat == 200){
 				receivedPlayers = response.json();
 			}
@@ -540,8 +538,6 @@ class Window extends React.Component {
 	confirmRoomCreation(){
 		var that = this;
 		console.log("Room created")
-		// var createButton = document.getElementsByClassName('createButton')[0];
-		// var joinButton = document.getElementsByClassName('joinRoomButton')[0];
 
 		const requestOptions = {
 			method: 'POST',
@@ -555,9 +551,6 @@ class Window extends React.Component {
 			stat = response.status;
 			if(stat == 201){
 				roomDetails = response.json();
-				// createButton.disabled = 'true';
-				// createButton.style.pointerEvents = 'none'
-				// joinButton.hidden = 'false';
 			}
 			return roomDetails;
 		})
@@ -617,7 +610,8 @@ class Window extends React.Component {
 	}
 
 	rejoinGame(){
-		var that = this;
+		var that = activeForRejoin;
+		console.log(that)
 		that.setState({
 			gameShown: !that.state.gameShown,
 		})
@@ -794,6 +788,7 @@ class Window extends React.Component {
 
 	rejoinCurrentGame(){
 		var that = this;
+		console.log(that)
 		that.setState({
 			gameShown: true,
 			createButtonDisabled: true,
