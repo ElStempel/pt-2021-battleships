@@ -240,6 +240,7 @@ router.post('/fetch-state', async function(req, res, next) {
             if(game.player_1 == req.body.player_id){
                 censoredMap = censoreMap(game.p2_map, game.map_size)
                 var data = {
+                    player: 1,
                     winner: game.winner,
                     turn: game.turn,
                     stats: game.p1,
@@ -252,6 +253,7 @@ router.post('/fetch-state', async function(req, res, next) {
             } else if(game.player_2 == req.body.player_id){
                 censoredMap = censoreMap(game.p1_map, game.map_size)
                 var data = {
+                    player: 2,
                     winner: game.winner,
                     turn: game.turn,
                     stats: game.p2,
