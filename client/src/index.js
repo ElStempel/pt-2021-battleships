@@ -119,20 +119,37 @@ class Window extends React.Component {
 
 
 		this.state = { 
+			// Strona po loginie
 			div1Shown: true, 
-			div2Shown: true, 
-			gameShown: false,
-			customRulesDisabled: true, 
+
+			// Tekst na stronie loginu
 			startText: '',
-			username: '', 
-			password: '', 
+
+			// Dane usera
 			user_id: '', 
+			password: '', 
+			username: '', 
+
+			// Staty usera
 			games_played: 0, 
 			ships_sunk: 0, 
 			ships_lost: 0,
 			shots_fired: 0,
+			shots_missed: 0,
 			wins: 0,
 			loses: 0,
+
+			// Dołączanie do pokoi
+			joinRoomHidden: 'hidden',
+			// Usuwanie pokoi i start do gry
+			deleteRoomHidden: 'hidden',
+			// Ponowne łączenie z grą
+			rejoinCurrentGameHidden: 'hidden',
+
+			div2Shown: true, 
+			gameShown: false,
+			customRulesDisabled: true, 
+
 			deleteAccountSeen: false,
 			customRule1: false,
 			customRule2: false,
@@ -147,7 +164,6 @@ class Window extends React.Component {
 			joinRoomHidden: 'hidden',
 			deleteRoomHidden: 'hidden',
 			rejoinCurrentGameHidden: 'hidden',
-			rejoinRoomHidden: 'hidden',
 
 			rooms: [
 
@@ -206,7 +222,9 @@ class Window extends React.Component {
 			drawGiveUpPopupText: '',
 			drawGiveUpPopupShown: false,
 
-			gamePlayer: 0,
+			gamePlayer: 2,
+
+			turn: '',
 
 		};
 
@@ -232,17 +250,17 @@ class Window extends React.Component {
 		that.getPlayersList();
 	}
 
-	chooseLogin(event){
+	chooseLogin(){
 		var that = this;
-		console.log("Login nacisniety")
 
 		const requestOptions = {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ "user_name": this.state.username, "pass_hash": this.state.password })
+			body: JSON.stringify({ "user_name": that.state.username, "pass_hash": that.state.password })
 		};
 
 		var stat = 0;
+		var rejoinStat = 0;
 
 		that.setState({
 			startText: '',
@@ -251,9 +269,9 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/users/login', requestOptions)
 		.then(function(response) { 
 			stat = response.status;
-			if(stat != 200){
+			if(stat == 400){
 				that.setState({
-					startText: 'Invalid Credentials. Please, try again.',
+					startText: "User with such credentials doesn't exist.",
 				});
 			}
 			return response.json(); 
@@ -261,25 +279,35 @@ class Window extends React.Component {
 		.then(function(data) { 
 			if(stat == 200){
 				that.setState({
-					div1Shown: !that.state.div1Shown,
-					user_id: data._id,
 					startText: '',
+
+					div1Shown: !that.state.div1Shown,
+
+					user_id: data._id,
+					username: data.user_name,
+					password: data.pass_hash,
+
 					games_played: data.stats.games_played, 
 					ships_sunk: data.stats.ships_sunk, 
 					ships_lost: data.stats.ships_lost,
 					shots_fired: data.stats.shots_fired,
-					wins: 0,
-					loses: 0,
+					shots_missed: data.stats.shots_missed,
+					wins: data.stats.wins,
+					loses: data.stats.defeats,
 				});
 			}
 		})
 		.then(function() {
-			that.clearRoomsList();
-			that.clearPlayersList();
+			if(stat == 200){
+				that.clearRoomsList();
+				that.clearPlayersList();
+			}
 		})
 		.then(function() {
-			that.getRoomsList();
-			that.getPlayersList();
+			if(stat == 200){
+				that.getRoomsList();
+				that.getPlayersList();
+			}
 		})
 		.then(function(){
 			const rejoinRequestOptions = {
@@ -289,9 +317,26 @@ class Window extends React.Component {
 			};
 			fetch('https://localhost:9000/rooms/rejoin', rejoinRequestOptions)
 			.then(function(response){
-				if(response.status == 200){
+				rejoinStat = response.status
+				if(rejoinStat == 200){
 					that.setState({
-						rejoinRoomHidden: 'visible',
+						rejoinCurrentGameHidden: 'visible',
+						joinRoomHidden: 'hidden',
+						deleteRoomHidden: 'hidden',
+					})
+				}
+				return response.json()
+			})
+			.then(function(data){
+				if(rejoinStat == 200){
+					that.setState({
+						game_id: data.game_id,
+					})
+					console.log(that.state.game_id)
+				}
+				else{
+					that.setState({
+						rejoinCurrentGameHidden: 'hidden',
 					})
 				}
 			})
@@ -338,19 +383,29 @@ class Window extends React.Component {
 			if(stat == 200){
 				that.setState({
 					div1Shown: true, 
-					div2Shown: true, 
-					gameShown: false,
-					customRulesDisabled: true, 
+
 					startText: '',
-					username: '', 
-					password: '', 
+
 					user_id: '', 
+					password: '', 
+					username: '', 
+
 					games_played: 0, 
 					ships_sunk: 0, 
 					ships_lost: 0,
 					shots_fired: 0,
+					shots_missed: 0,
 					wins: 0,
 					loses: 0,
+
+					joinRoomHidden: 'hidden',
+					deleteRoomHidden: 'hidden',
+					rejoinCurrentGameHidden: 'hidden',
+
+					div2Shown: true, 
+					gameShown: false,
+					customRulesDisabled: true, 
+					
 					deleteAccountSeen: false,
 					customRule1: false,
 					customRule2: false,
@@ -362,9 +417,6 @@ class Window extends React.Component {
 					inviteOnly: false,
 
 					createButtonDisabled: false,
-					joinRoomHidden: 'hidden',
-					deleteRoomHidden: 'hidden',
-					rejoinCurrentGameHidden: 'hidden',
 
 					rooms: [
 
@@ -450,17 +502,26 @@ class Window extends React.Component {
 						room_id: receivedRooms[i]._id,
 						joinRoomHidden: 'hidden',
 						deleteRoomHidden: 'visible',
-						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Created Room', roomId: receivedRooms[i]._id })
+						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Created Room', roomId: receivedRooms[i]._id })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Created Room', roomId: receivedRooms[i]._id })
 					});
+					if(that.state.rejoinCurrentGameHidden == 'visible'){
+						that.setState({
+							deleteRoomHidden: 'hidden',
+							joinRoomHidden: 'hidden'
+						})
+					}
 				}
-				else if(receivedRooms[i].player_2 == null && that.state.room_id == 0){
+				else if(receivedRooms[i].player_2 == null && that.state.room_id == 0 && that.state.rejoinCurrentGameHidden == 'hidden'){
 					that.setState({
-						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: false, hover: 'auto', text: 'Join', roomId: receivedRooms[i]._id })
+						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: false, hover: 'auto', text: 'Join', roomId: receivedRooms[i]._id })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: false, hover: 'auto', text: 'Join', roomId: receivedRooms[i]._id })
 					});
 				}
 				else if(receivedRooms[i].player_2 == null){
 					that.setState({
-						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Join', roomId: receivedRooms[i]._id  })
+						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Join', roomId: receivedRooms[i]._id  })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Join', roomId: receivedRooms[i]._id  })
 					});
 				}
 				else if(receivedRooms[i].player_2 == that.state.username){
@@ -468,12 +529,20 @@ class Window extends React.Component {
 						room_id: receivedRooms[i]._id,
 						joinRoomHidden: 'visible',
 						createButtonDisabled: true,
-						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id })
+						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id })
 					});
+					if(that.state.rejoinCurrentGameHidden == 'visible'){
+						that.setState({
+							deleteRoomHidden: 'hidden',
+							joinRoomHidden: 'hidden'
+						})
+					}
 				}	
 				else{
 					that.setState({
-						rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Full', roomId: receivedRooms[i]._id })
+						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Full', roomId: receivedRooms[i]._id })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Full', roomId: receivedRooms[i]._id })
 					});
 				}
 			}
@@ -503,10 +572,9 @@ class Window extends React.Component {
 			}
 			return receivedPlayers;
 		}).then(function(receivedPlayers){
-			// console.log(receivedPlayers)
 			for(var i = 0; i < receivedPlayers.length; i++){
 				for(var j = 0; j < receivedPlayers.length - 1; j++){
-					if(receivedPlayers[j].stats.games_played < receivedPlayers[j + 1].stats.games_played){
+					if(receivedPlayers[j].stats.wins < receivedPlayers[j + 1].stats.wins){
 						var temp = receivedPlayers[j]
 						receivedPlayers[j] = receivedPlayers[j + 1];
 						receivedPlayers[j + 1] = temp;
@@ -515,7 +583,7 @@ class Window extends React.Component {
 			}
 			for(var i = 0; i < receivedPlayers.length; i++){
 				that.setState({
-					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: receivedPlayers[i].stats.games_played })
+					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: receivedPlayers[i].stats.wins })
 				});
 			}
 		})
@@ -609,11 +677,13 @@ class Window extends React.Component {
 		});
 	}
 
-	rejoinGame(){
+	async rejoinGame(){
 		var that = activeForRejoin;
 		console.log(that)
 		that.setState({
 			gameShown: !that.state.gameShown,
+			enemyBoardButtons: false,
+			shipDeployed: true,
 		})
 		that.fetchGameState();
 	}
@@ -642,6 +712,7 @@ class Window extends React.Component {
 				that.setState({
 					gameShown: !that.state.gameShown,
 					game_id: data._id,
+					game_player: 1,
 				})
 			}
 		})
@@ -673,13 +744,14 @@ class Window extends React.Component {
 					gameShown: !that.state.gameShown,
 					game_id: data._id,
 				})
-				console.log(that.state.game_id)
 			}
 		})
 	}
 
 	async fetchGameState(){
 		var that = this;
+
+		console.log('Aktualizacja')
 
 		const requestOptions = {
 			method: 'POST',
@@ -708,8 +780,34 @@ class Window extends React.Component {
 						turn: data.turn,
 						winner: data.winner,
 						shipsLostGame: data.stats.ships_lost,
-						shipsSunkGame: data.stats.ships_sunk
+						shipsSunkGame: data.stats.ships_sunk,
+						enemyBoardButtons: false,
+						shipDeployed: true,
+						
 					})
+					var confirmBut = document.getElementsByClassName('confirmShips');
+					var resetBut = document.getElementsByClassName('resetBoard');
+					confirmBut[0].style.backgroundColor = 'green';
+					confirmBut[0].disabled = true;
+					resetBut[0].style.backgroundColor = 'green';
+					resetBut[0].disabled = true;
+					var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
+					confirmShotBut.style.backgroundColor = 'red'
+					var shipsButtons = document.getElementsByClassName('ship');
+					for(var i = 0; i < shipsButtons.length; i++){
+						shipsButtons[i].style.backgroundColor = 'green';
+						shipsButtons[i].disabled = true;
+					}
+					if(data.turn == that.state.gamePlayer){
+						that.setState({
+							turn: 'Your turn.'
+						})
+					}
+					else{
+						that.setState({
+							turn: 'Enemy turn.'
+						})
+					}
 				}
 			})
 			.then(function(){
@@ -737,20 +835,22 @@ class Window extends React.Component {
 							if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
 								// trafienie
 								player[j + i * 10].style.backgroundColor = 'red'
-								console.log(that.state.playerBoard[i][j] % 10)
-								console.log(that.state.playerBoard[i][j])
 							}
-							if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+							else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
 								// zatopienie
 								player[j + i * 10].style.backgroundColor = 'black'
-								console.log(that.state.playerBoard[i][j] % 10)
-								console.log(that.state.playerBoard[i][j])
 							}
-							if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+							else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
 								// pudlo
 								player[j + i * 10].style.backgroundColor = 'white'
-								console.log(that.state.playerBoard[i][j] % 10)
-								console.log(that.state.playerBoard[i][j])
+							}
+							else if(parseInt(that.state.playerBoard[i][j]) != 0){
+								// statek
+								player[j + i * 10].style.backgroundColor = '#383838'
+							}
+							else {
+								// puste
+								player[j + i * 10].style.backgroundColor = 'blue'
 							}
 						}
 					}
@@ -889,6 +989,7 @@ class Window extends React.Component {
 					deleteRoomHidden: 'hidden',
 					div2Shown: true,
 					gameShown: false,
+					rejoinCurrentGameHidden: 'hidden',
 				})
 			}
 			document.getElementsByClassName('modalDrawGiveUp')[0].hidden = false;
@@ -923,6 +1024,7 @@ class Window extends React.Component {
 			if(stat == 200){
 				that.setState({
 					div1Shown: !that.state.div1Shown,
+					rejoinCurrentGameHidden: 'hidden',
 				});
 			}
 		})
@@ -1010,6 +1112,181 @@ class Window extends React.Component {
 		that.fetchGameStart();
 	}
 
+	neighbourCheck(that, coords, shipName){
+		var neighbourCoordsTaken = false;
+		if(shipName == 'dreadnought'){
+			for(var i = 0; i < that.state.cruiserCoordsList.length; i++){
+				if((coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y) || (coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y) ||
+				(coords.x == that.state.cruiserCoordsList[i].X && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X && coords.y == that.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.submarineCoordsList.length; i++){
+				if((coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y) || (coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y) ||
+				(coords.x == that.state.submarineCoordsList[i].X && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X && coords.y == that.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.destroyerCoordsList.length; i++){
+				if((coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y) || (coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y) ||
+				(coords.x == that.state.destroyerCoordsList[i].X && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X && coords.y == that.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.reconCoordsList.length; i++){
+				if((coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y) || (coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y) ||
+				(coords.x == that.state.reconCoordsList[i].X && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X && coords.y == that.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		if(shipName == 'cruiser'){
+			for(var i = 0; i < that.state.dreadnoughtCoordsList.length; i++){
+				if((coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y) || (coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.submarineCoordsList.length; i++){
+				if((coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y) || (coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y) ||
+				(coords.x == that.state.submarineCoordsList[i].X && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X && coords.y == that.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.destroyerCoordsList.length; i++){
+				if((coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y) || (coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y) ||
+				(coords.x == that.state.destroyerCoordsList[i].X && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X && coords.y == that.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.reconCoordsList.length; i++){
+				if((coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y) || (coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y) ||
+				(coords.x == that.state.reconCoordsList[i].X && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X && coords.y == that.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		if(shipName == 'submarine'){
+			for(var i = 0; i < that.state.dreadnoughtCoordsList.length; i++){
+				if((coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y) || (coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.cruiserCoordsList.length; i++){
+				if((coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y) || (coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y) ||
+				(coords.x == that.state.cruiserCoordsList[i].X && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X && coords.y == that.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.destroyerCoordsList.length; i++){
+				if((coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y) || (coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y) ||
+				(coords.x == that.state.destroyerCoordsList[i].X && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X && coords.y == that.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.reconCoordsList.length; i++){
+				if((coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y) || (coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y) ||
+				(coords.x == that.state.reconCoordsList[i].X && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X && coords.y == that.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		if(shipName == 'destroyer'){
+			for(var i = 0; i < that.state.dreadnoughtCoordsList.length; i++){
+				if((coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y) || (coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.cruiserCoordsList.length; i++){
+				if((coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y) || (coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y) ||
+				(coords.x == that.state.cruiserCoordsList[i].X && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X && coords.y == that.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.submarineCoordsList.length; i++){
+				if((coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y) || (coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y) ||
+				(coords.x == that.state.submarineCoordsList[i].X && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X && coords.y == that.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.reconCoordsList.length; i++){
+				if((coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y) || (coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y) ||
+				(coords.x == that.state.reconCoordsList[i].X && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X && coords.y == that.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y - 1) ||
+				(coords.x == that.state.reconCoordsList[i].X - 1 && coords.y == that.state.reconCoordsList[i].Y + 1) || (coords.x == that.state.reconCoordsList[i].X + 1 && coords.y == that.state.reconCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		if(shipName == 'recon'){
+			for(var i = 0; i < that.state.dreadnoughtCoordsList.length; i++){
+				if((coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y) || (coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1) ||
+				(coords.x == that.state.dreadnoughtCoordsList[i].X - 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == that.state.dreadnoughtCoordsList[i].X + 1 && coords.y == that.state.dreadnoughtCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.cruiserCoordsList.length; i++){
+				if((coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y) || (coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y) ||
+				(coords.x == that.state.cruiserCoordsList[i].X && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X && coords.y == that.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y - 1) ||
+				(coords.x == that.state.cruiserCoordsList[i].X - 1 && coords.y == that.state.cruiserCoordsList[i].Y + 1) || (coords.x == that.state.cruiserCoordsList[i].X + 1 && coords.y == that.state.cruiserCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.submarineCoordsList.length; i++){
+				if((coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y) || (coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y) ||
+				(coords.x == that.state.submarineCoordsList[i].X && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X && coords.y == that.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y - 1) ||
+				(coords.x == that.state.submarineCoordsList[i].X - 1 && coords.y == that.state.submarineCoordsList[i].Y + 1) || (coords.x == that.state.submarineCoordsList[i].X + 1 && coords.y == that.state.submarineCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+			for(var i = 0; i < that.state.destroyerCoordsList.length; i++){
+				if((coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y) || (coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y) ||
+				(coords.x == that.state.destroyerCoordsList[i].X && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X && coords.y == that.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y - 1) ||
+				(coords.x == that.state.destroyerCoordsList[i].X - 1 && coords.y == that.state.destroyerCoordsList[i].Y + 1) || (coords.x == that.state.destroyerCoordsList[i].X + 1 && coords.y == that.state.destroyerCoordsList[i].Y - 1)){
+					neighbourCoordsTaken = true;
+				}
+			}
+		}
+		return neighbourCoordsTaken;
+	}
+
 	checkCoords(shipName, coordsList, coordsPass){
 		var coords = { x: parseInt(coordsPass.x), y: parseInt(coordsPass.y) }
 		var coordsTaken = false;
@@ -1038,177 +1315,9 @@ class Window extends React.Component {
 				coordsTaken = true;
 			}
 		}
-		var neighbourCoordsTaken = false;
-		if(shipName == 'dreadnought'){
-			for(var i = 0; i < this.state.cruiserCoordsList.length; i++){
-				if((coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y) ||
-				(coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
-				(coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
-				(coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.submarineCoordsList.length; i++){
-				if((coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y) ||
-				(coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
-				(coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
-				(coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.destroyerCoordsList.length; i++){
-				if((coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y) ||
-				(coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
-				(coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
-				(coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.reconCoordsList.length; i++){
-				if((coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y) ||
-				(coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y - 1) ||
-				(coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y - 1) ||
-				(coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-		}
-		if(shipName == 'cruiser'){
-			for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
-				if((coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.submarineCoordsList.length; i++){
-				if((coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y) ||
-				(coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
-				(coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
-				(coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.destroyerCoordsList.length; i++){
-				if((coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y) ||
-				(coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
-				(coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
-				(coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.reconCoordsList.length; i++){
-				if((coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y) ||
-				(coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y - 1) ||
-				(coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y - 1) ||
-				(coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-		}
-		if(shipName == 'submarine'){
-			for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
-				if((coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.cruiserCoordsList.length; i++){
-				if((coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y) ||
-				(coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
-				(coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
-				(coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.destroyerCoordsList.length; i++){
-				if((coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y) ||
-				(coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
-				(coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
-				(coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.reconCoordsList.length; i++){
-				if((coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y) ||
-				(coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y - 1) ||
-				(coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y - 1) ||
-				(coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-		}
-		if(shipName == 'destroyer'){
-			for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
-				if((coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.cruiserCoordsList.length; i++){
-				if((coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y) ||
-				(coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
-				(coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
-				(coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.submarineCoordsList.length; i++){
-				if((coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y) ||
-				(coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
-				(coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
-				(coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.reconCoordsList.length; i++){
-				if((coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y) ||
-				(coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X && coords.y == this.state.reconCoordsList[i].Y - 1) ||
-				(coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y - 1) ||
-				(coords.x == this.state.reconCoordsList[i].X - 1 && coords.y == this.state.reconCoordsList[i].Y + 1) || (coords.x == this.state.reconCoordsList[i].X + 1 && coords.y == this.state.reconCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-		}
-		if(shipName == 'recon'){
-			for(var i = 0; i < this.state.dreadnoughtCoordsList.length; i++){
-				if((coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1) ||
-				(coords.x == this.state.dreadnoughtCoordsList[i].X - 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y + 1) || (coords.x == this.state.dreadnoughtCoordsList[i].X + 1 && coords.y == this.state.dreadnoughtCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.cruiserCoordsList.length; i++){
-				if((coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y) ||
-				(coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
-				(coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1) ||
-				(coords.x == this.state.cruiserCoordsList[i].X - 1 && coords.y == this.state.cruiserCoordsList[i].Y + 1) || (coords.x == this.state.cruiserCoordsList[i].X + 1 && coords.y == this.state.cruiserCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.submarineCoordsList.length; i++){
-				if((coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y) ||
-				(coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
-				(coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y - 1) ||
-				(coords.x == this.state.submarineCoordsList[i].X - 1 && coords.y == this.state.submarineCoordsList[i].Y + 1) || (coords.x == this.state.submarineCoordsList[i].X + 1 && coords.y == this.state.submarineCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-			for(var i = 0; i < this.state.destroyerCoordsList.length; i++){
-				if((coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y) ||
-				(coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
-				(coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1) ||
-				(coords.x == this.state.destroyerCoordsList[i].X - 1 && coords.y == this.state.destroyerCoordsList[i].Y + 1) || (coords.x == this.state.destroyerCoordsList[i].X + 1 && coords.y == this.state.destroyerCoordsList[i].Y - 1)){
-					neighbourCoordsTaken = true;
-				}
-			}
-		}
+
+		var neighbourCoordsTaken = this.neighbourCheck(this, coords, shipName);
+		
 		if(coordsTaken == true || neighbourCoordsTaken == true){
 			return false;
 		}
@@ -1329,7 +1438,7 @@ class Window extends React.Component {
 	handleEnemyBoardClick(event){
 		event.preventDefault();
 		var that = this;
-		if(that.state.enemyBoardButtons == false){
+		if(that.state.enemyBoardButtons == false && that.state.enemyBoard != undefined && that.state.playerBoard != undefined){
 			that.setState({
 				shotX: parseInt(event.target.id[2]),
 				shotY: parseInt(event.target.id[4]),
@@ -1368,9 +1477,9 @@ class Window extends React.Component {
 					}
 				}
 			}
-			that.fetchGameState();
 			event.target.style.backgroundColor = 'yellow'
 		}
+		that.fetchGameState();
 	}
 
 	prepareBoardToSend(){
@@ -1428,10 +1537,6 @@ class Window extends React.Component {
 			var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
 			confirmShotBut.style.backgroundColor = 'red'
 
-			console.log(that.state.game_id)
-			console.log(that.state.user_id)
-			console.log(boardToSend)
-
 			var stat = 0;
 			const requestOptions = {
 				method: 'PATCH',
@@ -1442,8 +1547,6 @@ class Window extends React.Component {
 			fetch('https://localhost:9000/games/init-map', requestOptions)
 			.then(function(response) { 
 				stat = response.status;
-				console.log(stat)
-				console.log(response)
 			})
 			.then(function(){
 				// useEffect(() => {
@@ -1580,7 +1683,6 @@ class Window extends React.Component {
             rowsEnemy.push(<tr>{cellsEnemy}</tr>);
         }
 
-
 		return (
 				this.state.div1Shown ?
 				(
@@ -1646,6 +1748,7 @@ class Window extends React.Component {
 								<div style={{}}>
 									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '60px'}}>Ships Lost: {this.state.shipsLostGame}</p>
 									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>Ships Sunk: {this.state.shipsSunkGame}</p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>{this.state.turn}</p>
 								</div>
 								<div id='playerBoard' class='playerBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
 									<table class='playerTable'>{rowsPlayer}</table>
@@ -1793,7 +1896,7 @@ class Window extends React.Component {
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '50px' }} onClick={this.startGame} class='joinRoomButton'>Start Game</button>
 									<button style={{ visibility: this.state.joinRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.leaveRoom} class='joinRoomButton'>Leave Room</button>
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.deleteYourRoom} class='joinRoomButton'>Delete Your Room</button>
-									<button style={{ visibility: this.state.rejoinRoomHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='joinRoomButton'>Rejoin Your Game</button>
+									<button style={{ visibility: this.state.rejoinCurrentGameHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='joinRoomButton'>Rejoin Your Game</button>
 									{/* <button style={{ visibility: this.state.rejoinCurrentGameHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.rejoinCurrentGame} class='joinRoomButton'>Rejoin Current Game</button> */}
 								</div>
 							</div>
