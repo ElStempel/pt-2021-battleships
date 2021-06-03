@@ -74,6 +74,7 @@ const deleteAccountButton = {
 
 var activeForRules;
 var activeForRejoin;
+var inGame = false;
 
 async function fetchGameState(that){
 	try{
@@ -86,7 +87,7 @@ async function fetchGameState(that){
 		};
 		var stat = 0
 		var data
-		while(true){
+		while(inGame){
 			await new Promise(r => setTimeout(r, 500));
 			fetch('https://localhost:9000/games/fetch-state', requestOptions)
 			.then(function(response){
@@ -829,6 +830,7 @@ class Window extends React.Component {
 					game_id: data._id,
 					game_player: 1,
 				})
+				inGame = true;
 			}
 		})
 	}
@@ -1011,6 +1013,7 @@ class Window extends React.Component {
 			deleteRoomHidden: 'hidden',
 			rejoinCurrentGameHidden: 'visible',
 		})
+		inGame = true;
 		that.fetchGameState();
 	}
 
@@ -1106,6 +1109,7 @@ class Window extends React.Component {
 					gameShown: false,
 					rejoinCurrentGameHidden: 'hidden',
 				})
+				inGame = false;
 			}
 			document.getElementsByClassName('modalDrawGiveUp')[0].hidden = false;
 			that.updateRoomsList();
