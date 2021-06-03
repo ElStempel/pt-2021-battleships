@@ -75,6 +75,121 @@ const deleteAccountButton = {
 var activeForRules;
 var activeForRejoin;
 
+async function fetchGameState(that){
+	try{
+		console.log('Aktualizacja')
+
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "game_id": that.state.game_id, "player_id": that.state.user_id })
+		};
+		var stat = 0
+		var data
+		while(true){
+			await new Promise(r => setTimeout(r, 500));
+			fetch('https://localhost:9000/games/fetch-state', requestOptions)
+			.then(function(response){
+				stat = response.status;
+				if(stat == 200){
+					data = response.json();
+				}
+				return data;
+			})
+			.then(function(data){
+				if(stat == 200){
+					console.log(data)
+					that.setState({
+						playerBoard: data.playerMap,
+						enemyBoard: data.enemyMap,
+						draw: data.draw,
+						turn: data.turn,
+						winner: data.winner,
+						shipsLostGame: data.stats.ships_lost,
+						shipsSunkGame: data.stats.ships_sunk,
+						enemyBoardButtons: false,
+						shipDeployed: true,
+						
+					})
+					var confirmBut = document.getElementsByClassName('confirmShips');
+					var resetBut = document.getElementsByClassName('resetBoard');
+					confirmBut[0].style.backgroundColor = 'green';
+					confirmBut[0].disabled = true;
+					resetBut[0].style.backgroundColor = 'green';
+					resetBut[0].disabled = true;
+					var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
+					confirmShotBut.style.backgroundColor = 'red'
+					var shipsButtons = document.getElementsByClassName('ship');
+					for(var i = 0; i < shipsButtons.length; i++){
+						shipsButtons[i].style.backgroundColor = 'green';
+						shipsButtons[i].disabled = true;
+					}
+					if(data.turn == that.state.gamePlayer){
+						that.setState({
+							turn: 'Your turn.'
+						})
+					}
+					else{
+						that.setState({
+							turn: 'Enemy turn.'
+						})
+					}
+				}
+			})
+			.then(function(){
+				if(stat == 200){
+					var enemy = document.getElementsByClassName('butEnemy');
+					for(var i = 0; i < 10; i++){
+						for(var j = 0; j < 10; j++){
+							if(that.state.enemyBoard[i][j] == 1){
+								enemy[j + i * 10].style.backgroundColor = 'red'
+							}
+							else if(that.state.enemyBoard[i][j] == 2){
+								enemy[j + i * 10].style.backgroundColor = 'black'
+							}
+							else if(that.state.enemyBoard[i][j] == 5){
+								enemy[j + i * 10].style.backgroundColor = 'white'
+							}
+							else if(that.state.enemyBoard[i][j] == 0){
+								enemy[j + i * 10].style.backgroundColor = 'darkblue'
+							}
+						}
+					}
+					var player = document.getElementsByClassName('butPlayer');
+					for(var i = 0; i < 10; i++){
+						for(var j = 0; j < 10; j++){
+							if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+								// trafienie
+								player[j + i * 10].style.backgroundColor = 'red'
+							}
+							else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+								// zatopienie
+								player[j + i * 10].style.backgroundColor = 'black'
+							}
+							else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+								// pudlo
+								player[j + i * 10].style.backgroundColor = 'white'
+							}
+							else if(parseInt(that.state.playerBoard[i][j]) != 0){
+								// statek
+								player[j + i * 10].style.backgroundColor = '#383838'
+							}
+							else {
+								// puste
+								player[j + i * 10].style.backgroundColor = 'blue'
+							}
+						}
+					}
+					
+				}
+			})
+		}
+	}
+	catch(error){
+
+	}
+}
+
 class Window extends React.Component {
 	constructor(props) {
 		super(props);
@@ -1560,6 +1675,7 @@ class Window extends React.Component {
 			})
 
 		}
+		fetchGameState(that);
 	}
 
 	handleResetBoardClick(){
@@ -1620,7 +1736,8 @@ class Window extends React.Component {
 				// 	event.target.style.backgroundColor = 'yellow'
 				// }
 				console.log(stat)
-			});
+		});
+		fetchGameState(that);
 	}
 
 	handleShipButtonClick(event){
