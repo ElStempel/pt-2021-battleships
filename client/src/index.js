@@ -76,7 +76,7 @@ var activeForRules;
 var activeForRejoin;
 var inGame = false;
 
-async function fetchGameState(that){
+async function fetchGameState(that, enemy, player){
 	try{
 		console.log('Aktualizacja')
 
@@ -112,19 +112,6 @@ async function fetchGameState(that){
 						shipDeployed: true,
 						
 					})
-					var confirmBut = document.getElementsByClassName('confirmShips');
-					var resetBut = document.getElementsByClassName('resetBoard');
-					confirmBut[0].style.backgroundColor = 'green';
-					confirmBut[0].disabled = true;
-					resetBut[0].style.backgroundColor = 'green';
-					resetBut[0].disabled = true;
-					var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
-					confirmShotBut.style.backgroundColor = 'red'
-					var shipsButtons = document.getElementsByClassName('ship');
-					for(var i = 0; i < shipsButtons.length; i++){
-						shipsButtons[i].style.backgroundColor = 'green';
-						shipsButtons[i].disabled = true;
-					}
 					if(data.turn == that.state.gamePlayer){
 						that.setState({
 							turn: 'Your turn.'
@@ -139,49 +126,51 @@ async function fetchGameState(that){
 			})
 			.then(function(){
 				if(stat == 200){
-					var enemy = document.getElementsByClassName('butEnemy');
-					for(var i = 0; i < 10; i++){
-						for(var j = 0; j < 10; j++){
-							if(that.state.enemyBoard[i][j] == 1){
-								enemy[j + i * 10].style.backgroundColor = 'red'
+					try{
+						for(var i = 0; i < 10; i++){
+							for(var j = 0; j < 10; j++){
+								if(that.state.enemyBoard[i][j] == 1){
+									enemy[j + i * 10].style.backgroundColor = 'red'
+								}
+								else if(that.state.enemyBoard[i][j] == 2){
+									enemy[j + i * 10].style.backgroundColor = 'black'
+								}
+								else if(that.state.enemyBoard[i][j] == 5){
+									enemy[j + i * 10].style.backgroundColor = 'white'
+								}
+								else if(that.state.enemyBoard[i][j] == 0){
+									enemy[j + i * 10].style.backgroundColor = 'darkblue'
+								}
 							}
-							else if(that.state.enemyBoard[i][j] == 2){
-								enemy[j + i * 10].style.backgroundColor = 'black'
-							}
-							else if(that.state.enemyBoard[i][j] == 5){
-								enemy[j + i * 10].style.backgroundColor = 'white'
-							}
-							else if(that.state.enemyBoard[i][j] == 0){
-								enemy[j + i * 10].style.backgroundColor = 'darkblue'
+						}
+						for(var i = 0; i < 10; i++){
+							for(var j = 0; j < 10; j++){
+								if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+									// trafienie
+									player[j + i * 10].style.backgroundColor = 'red'
+								}
+								else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+									// zatopienie
+									player[j + i * 10].style.backgroundColor = 'black'
+								}
+								else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+									// pudlo
+									player[j + i * 10].style.backgroundColor = 'white'
+								}
+								else if(parseInt(that.state.playerBoard[i][j]) != 0){
+									// statek
+									player[j + i * 10].style.backgroundColor = '#383838'
+								}
+								else {
+									// puste
+									player[j + i * 10].style.backgroundColor = 'blue'
+								}
 							}
 						}
 					}
-					var player = document.getElementsByClassName('butPlayer');
-					for(var i = 0; i < 10; i++){
-						for(var j = 0; j < 10; j++){
-							if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
-								// trafienie
-								player[j + i * 10].style.backgroundColor = 'red'
-							}
-							else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
-								// zatopienie
-								player[j + i * 10].style.backgroundColor = 'black'
-							}
-							else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
-								// pudlo
-								player[j + i * 10].style.backgroundColor = 'white'
-							}
-							else if(parseInt(that.state.playerBoard[i][j]) != 0){
-								// statek
-								player[j + i * 10].style.backgroundColor = '#383838'
-							}
-							else {
-								// puste
-								player[j + i * 10].style.backgroundColor = 'blue'
-							}
-						}
+					catch(error){
+
 					}
-					
 				}
 			})
 		}
@@ -793,7 +782,7 @@ class Window extends React.Component {
 		});
 	}
 
-	async rejoinGame(){
+	rejoinGame(){
 		var that = activeForRejoin;
 		console.log(that)
 		that.setState({
@@ -802,6 +791,10 @@ class Window extends React.Component {
 			shipDeployed: true,
 		})
 		that.fetchGameState();
+		inGame = true;
+		var enemy = document.getElementsByClassName('butEnemy');
+		var player = document.getElementsByClassName('butPlayer');
+		fetchGameState(that, enemy, player);
 	}
 
 	startGame(){
@@ -915,7 +908,7 @@ class Window extends React.Component {
 						shipsButtons[i].style.backgroundColor = 'green';
 						shipsButtons[i].disabled = true;
 					}
-					if(data.turn == that.state.gamePlayer){
+					if(data.turn == data.player){
 						that.setState({
 							turn: 'Your turn.'
 						})
@@ -1109,13 +1102,11 @@ class Window extends React.Component {
 					gameShown: false,
 					rejoinCurrentGameHidden: 'hidden',
 				})
+				document.getElementsByClassName('modalDrawGiveUp')[0].hidden = false;
 				inGame = false;
 			}
-			document.getElementsByClassName('modalDrawGiveUp')[0].hidden = false;
 			that.updateRoomsList();
-
 		})
-		
 	}
 
 	showDrawPopup(){
@@ -1679,7 +1670,9 @@ class Window extends React.Component {
 			})
 
 		}
-		fetchGameState(that);
+		var enemy = document.getElementsByClassName('butEnemy');
+		var player = document.getElementsByClassName('butPlayer');
+		fetchGameState(that, enemy, player);
 	}
 
 	handleResetBoardClick(){
@@ -1741,7 +1734,9 @@ class Window extends React.Component {
 				// }
 				console.log(stat)
 		});
-		fetchGameState(that);
+		var enemy = document.getElementsByClassName('butEnemy');
+		var player = document.getElementsByClassName('butPlayer');
+		fetchGameState(that, enemy, player);
 	}
 
 	handleShipButtonClick(event){
