@@ -1000,7 +1000,6 @@ class Window extends React.Component {
 						shipsSunkGame: data.stats.ships_sunk,
 						enemyBoardButtons: false,
 						shipDeployed: true,
-						
 					})
 					try{
 						var confirmBut = document.getElementsByClassName('confirmShips');
@@ -1217,8 +1216,9 @@ class Window extends React.Component {
 					div2Shown: true,
 					gameShown: false,
 					rejoinCurrentGameHidden: 'hidden',
+					endGameDivText: 'You gave up a game.',
 				})
-				document.getElementsByClassName('modalDrawGiveUp')[0].hidden = false;
+				document.getElementsByClassName('modalEnd')[0].hidden = false;
 				inGame = false;
 			}
 			that.updateRoomsList();
@@ -1622,10 +1622,6 @@ class Window extends React.Component {
 			console.log(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])}))
 			if(this.state.dreadnoughtEnabled == true){
 				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
-					console.log(parseInt(idToCoords(event.target.id)[0]))
-					console.log(parseInt(idToCoords(event.target.id)[1]))
-					console.log(this.state.dreadnoughtCoordsList)
-					console.log(typeof(event.target.id))
 					this.state.dreadnoughtCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					this.setState({
