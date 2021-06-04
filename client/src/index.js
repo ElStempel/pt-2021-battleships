@@ -8,7 +8,6 @@ import background from "./images/sea.jpg";
 import radar from "./images/radar.jpg";
 
 
-
 const startPageHeader = {
 	margin: 0,
     padding: 0,
@@ -76,6 +75,29 @@ var activeForRules;
 var activeForRejoin;
 var inGame = false;
 
+function idToCoords(id){
+	var x, y;
+	if(id[3] == 'Y'){
+		x = parseInt(id[2])
+		if(id.length == 5){
+			y = parseInt(id[4])
+		}
+		else{
+			y = parseInt(id[4]) * 10 + parseInt(id[5])
+		}
+	}
+	else{
+		x = parseInt(id[2]) * 10 + parseInt(id[3])
+		if(id.length == 6){
+			y = parseInt(id[5])
+		}
+		else{
+			y = parseInt(id[5]) * 10 + parseInt(id[6])
+		}
+	}
+	return [x, y];
+}
+
 async function fetchGameState(that, enemy, player){
 	try{
 		console.log('Aktualizacja')
@@ -110,8 +132,54 @@ async function fetchGameState(that, enemy, player){
 						shipsSunkGame: data.stats.ships_sunk,
 						enemyBoardButtons: false,
 						shipDeployed: true,
-						
+						gamePlayer: data.player
 					})
+					console.log(data.turn)
+					console.log(that.state.gamePlayer)
+					if(data.draw == 1){
+						that.setState({
+							drawDivText: 'Enemy Proposed a draw. Do you accept?'
+						})
+						document.getElementsByClassName('modalDraw')[0].hidden = false;
+					}
+					if(data.draw == 2){
+						that.setState({
+							gameShown: false,
+							endGameDivShown: true,
+							endGameDivText: 'Game ended with a draw.',
+							shipsLostGame: 0,
+							shipsSunkGame: 0,
+							rejoinCurrentGameHidden: 'hidden',
+						})
+						inGame = false;
+						document.getElementsByClassName('modalEnd')[0].hidden = false;
+					}
+					if(data.winner == that.state.gamePlayer){
+						that.setState({
+							gameShown: false,
+							endGameDivShown: true,
+							endGameDivText: 'Congratulations, you have won!',
+							shipsLostGame: 0,
+							shipsSunkGame: 0,
+							rejoinCurrentGameHidden: 'hidden',
+						})
+						inGame = false;
+						console.log(that)
+						document.getElementsByClassName('modalEnd')[0].hidden = false;
+					}
+					else if(data.winner != 0){
+						that.setState({
+							gameShown: false,
+							endGameDivShown: true,
+							endGameDivText: 'Unfortunately, you have lost. More luck next time!',
+							shipsLostGame: 0,
+							shipsSunkGame: 0,
+							rejoinCurrentGameHidden: 'hidden',
+						})
+						inGame = false;
+						console.log(that)
+						document.getElementsByClassName('modalEnd')[0].hidden = false;
+					}
 					if(data.turn == that.state.gamePlayer){
 						that.setState({
 							turn: 'Your turn.'
@@ -127,43 +195,43 @@ async function fetchGameState(that, enemy, player){
 			.then(function(){
 				if(stat == 200){
 					try{
-						for(var i = 0; i < 10; i++){
-							for(var j = 0; j < 10; j++){
+						for(var i = 0; i < that.state.mapSize; i++){
+							for(var j = 0; j < that.state.mapSize; j++){
 								if(that.state.enemyBoard[i][j] == 1){
-									enemy[j + i * 10].style.backgroundColor = 'red'
+									enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
 								}
 								else if(that.state.enemyBoard[i][j] == 2){
-									enemy[j + i * 10].style.backgroundColor = 'black'
+									enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
 								}
 								else if(that.state.enemyBoard[i][j] == 5){
-									enemy[j + i * 10].style.backgroundColor = 'white'
+									enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
 								}
 								else if(that.state.enemyBoard[i][j] == 0){
-									enemy[j + i * 10].style.backgroundColor = 'darkblue'
+									enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
 								}
 							}
 						}
-						for(var i = 0; i < 10; i++){
-							for(var j = 0; j < 10; j++){
-								if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+						for(var i = 0; i < that.state.mapSize; i++){
+							for(var j = 0; j < that.state.mapSize; j++){
+								if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 1){
 									// trafienie
-									player[j + i * 10].style.backgroundColor = 'red'
+									player[j + i * that.state.mapSize].style.backgroundColor = 'red'
 								}
-								else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+								else if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 2){
 									// zatopienie
-									player[j + i * 10].style.backgroundColor = 'black'
+									player[j + i * that.state.mapSize].style.backgroundColor = 'black'
 								}
-								else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+								else if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 5){
 									// pudlo
-									player[j + i * 10].style.backgroundColor = 'white'
+									player[j + i * that.state.mapSize].style.backgroundColor = 'white'
 								}
 								else if(parseInt(that.state.playerBoard[i][j]) != 0){
 									// statek
-									player[j + i * 10].style.backgroundColor = '#383838'
+									player[j + i * that.state.mapSize].style.backgroundColor = '#383838'
 								}
 								else {
 									// puste
-									player[j + i * 10].style.backgroundColor = 'blue'
+									player[j + i * that.state.mapSize].style.backgroundColor = 'blue'
 								}
 							}
 						}
@@ -221,7 +289,7 @@ class Window extends React.Component {
 		this.handleSubmitDrawPopup = this.handleSubmitDrawPopup.bind(this);
 		this.handleSubmitDrawGiveUpPopup = this.handleSubmitDrawGiveUpPopup.bind(this);
 		this.handleClickCloseDrawGiveUpPopup = this.handleClickCloseDrawGiveUpPopup.bind(this);
-
+		this.handleClickEndPopup = this.handleClickEndPopup.bind(this);
 
 		this.state = { 
 			// Strona po loginie
@@ -255,6 +323,9 @@ class Window extends React.Component {
 			gameShown: false,
 			customRulesDisabled: true, 
 
+			endGameDivShown: false,
+			endGameDivText: '',
+
 			deleteAccountSeen: false,
 			customRule1: false,
 			customRule2: false,
@@ -262,7 +333,6 @@ class Window extends React.Component {
 			customRule4: false,
 			inviteOnly: false,
 			customSize: false,
-			boardSize: 10,
 			inviteOnly: false,
 
 			createButtonDisabled: false,
@@ -330,6 +400,10 @@ class Window extends React.Component {
 			gamePlayer: 2,
 
 			turn: '',
+
+			mapSize: 16,
+
+			drawDivText: 'Are you sure to propose a Draw?'
 
 		};
 
@@ -518,7 +592,6 @@ class Window extends React.Component {
 					customRule4: false,
 					inviteOnly: false,
 					customSize: false,
-					boardSize: 10,
 					inviteOnly: false,
 
 					createButtonDisabled: false,
@@ -602,13 +675,45 @@ class Window extends React.Component {
 			return receivedRooms;
 		}).then(function(receivedRooms){
 			for(var i = 0; i < receivedRooms.length; i++){
+				var custom = [];
+				if(receivedRooms[i].custom_rules.enabled == true){
+					custom.push('true')
+					custom.push('Enabled')
+					if(receivedRooms[i].custom_rules.map_size != 10){
+						custom.push(receivedRooms[i].custom_rules.map_size)
+					}
+					else{
+						custom.push(10)
+					}
+					if(receivedRooms[i].custom_rules.cust_rule_1 != false){
+						custom.push('Enabled')
+					}
+					else{
+						custom.push('Disabled')
+					}
+					if(receivedRooms[i].custom_rules.cust_rule_2 != false){
+						custom.push('Enabled')
+					}
+					else{
+						custom.push('Disabled')
+					}
+					if(receivedRooms[i].custom_rules.cust_rule_3 != false){
+						custom.push('Enabled')
+					}
+					else{
+						custom.push('Disabled')
+					}
+				}
+				else{
+					custom = ['false', 'Disabled', 10, 'Disabled', 'Disabled', 'Disabled']
+				}
 				if(receivedRooms[i].player_1 == that.state.username){
 					that.setState({
 						room_id: receivedRooms[i]._id,
 						joinRoomHidden: 'hidden',
 						deleteRoomHidden: 'visible',
 						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Created Room', roomId: receivedRooms[i]._id })
-						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Created Room', roomId: receivedRooms[i]._id })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Created Room', roomId: receivedRooms[i]._id, customRules: custom })
 					});
 					if(that.state.rejoinCurrentGameHidden == 'visible'){
 						that.setState({
@@ -620,13 +725,13 @@ class Window extends React.Component {
 				else if(receivedRooms[i].player_2 == null && that.state.room_id == 0 && that.state.rejoinCurrentGameHidden == 'hidden'){
 					that.setState({
 						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: false, hover: 'auto', text: 'Join', roomId: receivedRooms[i]._id })
-						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: false, hover: 'auto', text: 'Join', roomId: receivedRooms[i]._id })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: false, hover: 'auto', text: 'Join', roomId: receivedRooms[i]._id, customRules: custom })
 					});
 				}
 				else if(receivedRooms[i].player_2 == null){
 					that.setState({
 						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Join', roomId: receivedRooms[i]._id  })
-						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Join', roomId: receivedRooms[i]._id  })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Join', roomId: receivedRooms[i]._id, customRules: custom })
 					});
 				}
 				else if(receivedRooms[i].player_2 == that.state.username){
@@ -635,7 +740,7 @@ class Window extends React.Component {
 						joinRoomHidden: 'visible',
 						createButtonDisabled: true,
 						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id })
-						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id, customRules: custom })
 					});
 					if(that.state.rejoinCurrentGameHidden == 'visible'){
 						that.setState({
@@ -647,7 +752,7 @@ class Window extends React.Component {
 				else{
 					that.setState({
 						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Full', roomId: receivedRooms[i]._id })
-						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Full', roomId: receivedRooms[i]._id })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Full', roomId: receivedRooms[i]._id, customRules: custom })
 					});
 				}
 			}
@@ -799,6 +904,8 @@ class Window extends React.Component {
 
 	startGame(){
 		var that = this;
+		this.activeForRules = this;
+		this.activeForRejoin = this;
 		console.log('Starting Game')
 
 		const requestOptions = {
@@ -895,76 +1002,85 @@ class Window extends React.Component {
 						shipDeployed: true,
 						
 					})
-					var confirmBut = document.getElementsByClassName('confirmShips');
-					var resetBut = document.getElementsByClassName('resetBoard');
-					confirmBut[0].style.backgroundColor = 'green';
-					confirmBut[0].disabled = true;
-					resetBut[0].style.backgroundColor = 'green';
-					resetBut[0].disabled = true;
-					var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
-					confirmShotBut.style.backgroundColor = 'red'
-					var shipsButtons = document.getElementsByClassName('ship');
-					for(var i = 0; i < shipsButtons.length; i++){
-						shipsButtons[i].style.backgroundColor = 'green';
-						shipsButtons[i].disabled = true;
+					try{
+						var confirmBut = document.getElementsByClassName('confirmShips');
+						var resetBut = document.getElementsByClassName('resetBoard');
+						confirmBut[0].style.backgroundColor = 'green';
+						confirmBut[0].disabled = true;
+						resetBut[0].style.backgroundColor = 'green';
+						resetBut[0].disabled = true;
+						var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
+						confirmShotBut.style.backgroundColor = 'red'
+						var shipsButtons = document.getElementsByClassName('ship');
+						for(var i = 0; i < shipsButtons.length; i++){
+							shipsButtons[i].style.backgroundColor = 'green';
+							shipsButtons[i].disabled = true;
+						}
+						if(data.turn == data.player){
+							that.setState({
+								turn: 'Your turn.'
+							})
+						}
+						else{
+							that.setState({
+								turn: 'Enemy turn.'
+							})
+						}
 					}
-					if(data.turn == data.player){
-						that.setState({
-							turn: 'Your turn.'
-						})
-					}
-					else{
-						that.setState({
-							turn: 'Enemy turn.'
-						})
+					catch(error){
+
 					}
 				}
 			})
 			.then(function(){
 				if(stat == 200){
-					var enemy = document.getElementsByClassName('butEnemy');
-					for(var i = 0; i < 10; i++){
-						for(var j = 0; j < 10; j++){
-							if(that.state.enemyBoard[i][j] == 1){
-								enemy[j + i * 10].style.backgroundColor = 'red'
+					try{
+						var enemy = document.getElementsByClassName('butEnemy');
+						for(var i = 0; i < that.state.mapSize; i++){
+							for(var j = 0; j < that.state.mapSize; j++){
+								if(that.state.enemyBoard[i][j] == 1){
+									enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
+								}
+								else if(that.state.enemyBoard[i][j] == 2){
+									enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
+								}
+								else if(that.state.enemyBoard[i][j] == 5){
+									enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
+								}
+								else if(that.state.enemyBoard[i][j] == 0){
+									enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
+								}
 							}
-							else if(that.state.enemyBoard[i][j] == 2){
-								enemy[j + i * 10].style.backgroundColor = 'black'
-							}
-							else if(that.state.enemyBoard[i][j] == 5){
-								enemy[j + i * 10].style.backgroundColor = 'white'
-							}
-							else if(that.state.enemyBoard[i][j] == 0){
-								enemy[j + i * 10].style.backgroundColor = 'darkblue'
+						}
+						var player = document.getElementsByClassName('butPlayer');
+						for(var i = 0; i < that.state.mapSize; i++){
+							for(var j = 0; j < that.state.mapSize; j++){
+								if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 1){
+									// trafienie
+									player[j + i * that.state.mapSize].style.backgroundColor = 'red'
+								}
+								else if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 2){
+									// zatopienie
+									player[j + i * that.state.mapSize].style.backgroundColor = 'black'
+								}
+								else if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 5){
+									// pudlo
+									player[j + i * that.state.mapSize].style.backgroundColor = 'white'
+								}
+								else if(parseInt(that.state.playerBoard[i][j]) != 0){
+									// statek
+									player[j + i * that.state.mapSize].style.backgroundColor = '#383838'
+								}
+								else {
+									// puste
+									player[j + i * that.state.mapSize].style.backgroundColor = 'blue'
+								}
 							}
 						}
 					}
-					var player = document.getElementsByClassName('butPlayer');
-					for(var i = 0; i < 10; i++){
-						for(var j = 0; j < 10; j++){
-							if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
-								// trafienie
-								player[j + i * 10].style.backgroundColor = 'red'
-							}
-							else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
-								// zatopienie
-								player[j + i * 10].style.backgroundColor = 'black'
-							}
-							else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
-								// pudlo
-								player[j + i * 10].style.backgroundColor = 'white'
-							}
-							else if(parseInt(that.state.playerBoard[i][j]) != 0){
-								// statek
-								player[j + i * 10].style.backgroundColor = '#383838'
-							}
-							else {
-								// puste
-								player[j + i * 10].style.backgroundColor = 'blue'
-							}
-						}
+					catch(error){
+
 					}
-					
 				}
 			})
 		}
@@ -1116,7 +1232,7 @@ class Window extends React.Component {
 
 	handleClickDrawPopup() {
 		document.getElementsByClassName('modalDraw')[0].hidden = true;
-	};
+	}
 
 	handleSubmitDrawPopup(event) {
 		var that = this;
@@ -1138,6 +1254,10 @@ class Window extends React.Component {
 				});
 			}
 		})
+	}
+
+	handleClickEndPopup(){
+		document.getElementsByClassName('modalEnd')[0].hidden = true;
 	}
 
 	showDeletePopup(){
@@ -1428,6 +1548,8 @@ class Window extends React.Component {
 
 		var neighbourCoordsTaken = this.neighbourCheck(this, coords, shipName);
 		
+		console.log(coordsTaken)
+		console.log(neighbourCoordsTaken)
 		if(coordsTaken == true || neighbourCoordsTaken == true){
 			return false;
 		}
@@ -1497,9 +1619,14 @@ class Window extends React.Component {
 		event.preventDefault()
 		console.log(event.target.id)
 		if(this.state.availableFields > 0){
+			console.log(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])}))
 			if(this.state.dreadnoughtEnabled == true){
-				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.dreadnoughtCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
+				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
+					console.log(parseInt(idToCoords(event.target.id)[0]))
+					console.log(parseInt(idToCoords(event.target.id)[1]))
+					console.log(this.state.dreadnoughtCoordsList)
+					console.log(typeof(event.target.id))
+					this.state.dreadnoughtCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -1507,8 +1634,8 @@ class Window extends React.Component {
 				}
 			}
 			else if(this.state.cruiserEnabled == true){
-				if(this.checkCoords('cruiser', this.state.cruiserCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.cruiserCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
+				if(this.checkCoords('cruiser', this.state.cruiserCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
+					this.state.cruiserCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -1516,8 +1643,8 @@ class Window extends React.Component {
 				}
 			}
 			else if(this.state.submarineEnabled == true){
-				if(this.checkCoords('submarine', this.state.submarineCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.submarineCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
+				if(this.checkCoords('submarine', this.state.submarineCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
+					this.state.submarineCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -1525,8 +1652,8 @@ class Window extends React.Component {
 				}
 			}
 			else if(this.state.destroyerEnabled == true){
-				if(this.checkCoords('destroyer', this.state.destroyerCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.destroyerCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
+				if(this.checkCoords('destroyer', this.state.destroyerCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
+					this.state.destroyerCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -1534,8 +1661,8 @@ class Window extends React.Component {
 				}
 			}
 			else if(this.state.reconEnabled == true){
-				if(this.checkCoords('recon', this.state.reconCoordsList, {x: event.target.id[2], y: event.target.id[4]})){
-					this.state.reconCoordsList.push({X: parseInt(event.target.id[2]), Y: parseInt(event.target.id[4])})
+				if(this.checkCoords('recon', this.state.reconCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
+					this.state.reconCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -1550,40 +1677,40 @@ class Window extends React.Component {
 		var that = this;
 		if(that.state.enemyBoardButtons == false && that.state.enemyBoard != undefined && that.state.playerBoard != undefined){
 			that.setState({
-				shotX: parseInt(event.target.id[2]),
-				shotY: parseInt(event.target.id[4]),
+				shotX: parseInt(idToCoords(event.target.id)[0]),
+				shotY: parseInt(idToCoords(event.target.id)[1]),
 			})
 			var enemy = document.getElementsByClassName('butEnemy');
-			for(var i = 0; i < 10; i++){
-				for(var j = 0; j < 10; j++){
+			for(var i = 0; i < that.state.mapSize; i++){
+				for(var j = 0; j < that.state.mapSize; j++){
 					if(that.state.enemyBoard[i][j] == 1){
-						enemy[j + i * 10].style.backgroundColor = 'red'
+						enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
 					}
 					else if(that.state.enemyBoard[i][j] == 2){
-						enemy[j + i * 10].style.backgroundColor = 'black'
+						enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
 					}
 					else if(that.state.enemyBoard[i][j] == 5){
-						enemy[j + i * 10].style.backgroundColor = 'white'
+						enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
 					}
 					else if(that.state.enemyBoard[i][j] == 0){
-						enemy[j + i * 10].style.backgroundColor = 'darkblue'
+						enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
 					}
 				}
 			}
 			var player = document.getElementsByClassName('butPlayer');
-			for(var i = 0; i < 10; i++){
-				for(var j = 0; j < 10; j++){
-					if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+			for(var i = 0; i < that.state.mapSize; i++){
+				for(var j = 0; j < that.state.mapSize; j++){
+					if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 1){
 						// trafienie
-						player[j + i * 10].style.backgroundColor = 'red'
+						player[j + i * that.state.mapSize].style.backgroundColor = 'red'
 					}
-					if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+					if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 2){
 						// zatopienie
-						player[j + i * 10].style.backgroundColor = 'black'
+						player[j + i * that.state.mapSize].style.backgroundColor = 'black'
 					}
-					if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+					if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 5){
 						// pudlo
-						player[j + i * 10].style.backgroundColor = 'white'
+						player[j + i * that.state.mapSize].style.backgroundColor = 'white'
 					}
 				}
 			}
@@ -1595,9 +1722,9 @@ class Window extends React.Component {
 	prepareBoardToSend(){
 		var that = this;
 		var board = [];
-		for(var i = 0; i < 10; i++){
+		for(var i = 0; i < that.state.mapSize; i++){
 			var temp = [];
-			for(var j = 0; j < 10; j++){
+			for(var j = 0; j < that.state.mapSize; j++){
 				temp.push(0)
 			}
 			board.push(temp)
@@ -1767,10 +1894,28 @@ class Window extends React.Component {
 		}
 	}
 
+	showCustomRulesDiv(room){
+		console.log('Inside')
+		document.getElementsByClassName(room)[0].style.setProperty("display", "inline");
+	}
+
+	hideCustomRulesDiv(room){
+		document.getElementsByClassName(room)[0].style.setProperty("display", "none");
+	}
+
 	render() {
 		const listNames = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.player}</li>);
 		const listScore = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.score}</li>);
-		const listRooms = this.state.rooms.map((r) => <li style={{ height: '80px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id={r.room} class='joinButton' disabled={r.full} onClick={this.joinGame} style={{display: 'inline-block', float: 'right', marginRight: '20px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px', pointerEvents: [r.hover]}}> {r.text} </button></li>)
+		const listRooms = this.state.rooms.map((r) => <li style={{ height: '100px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id={r.room} class='joinButton' disabled={r.full} onClick={this.joinGame} 
+		onMouseOver={() => this.showCustomRulesDiv(r.room)}
+		onMouseOut={() => this.hideCustomRulesDiv(r.room)}
+		style={{display: 'inline-block', float: 'right', marginRight: '20px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px', pointerEvents: [r.hover]}}> {r.text} </button>
+		<div class={r.room} style={{ fontSize: '15px', display: 'none', fontWeight: 'normal'}}>
+			<br></br>
+			Custom Rules: {r.customRules[1]} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Map Size: {r.customRules[2]} <br></br>
+			One Field of space: {r.customRules[3]} &nbsp;&nbsp; | &nbsp;&nbsp; Torpedo Shot: {r.customRules[4]} &nbsp;&nbsp; | &nbsp;&nbsp; Airstrike: {r.customRules[5]}
+		</div>
+		</li>)
 
 		const noHover = {
 			pointerEvents: 'none',
@@ -1778,9 +1923,9 @@ class Window extends React.Component {
 
 		let rowsPlayer = [];
 		var playerId;
-        for (let y = 0; y < 10; y++) {
+        for (let y = 0; y < activeForRules.state.mapSize; y++) {
             const cellsPlayer = [];
-            for (let x = 0; x < 10; x++) {
+            for (let x = 0; x < activeForRules.state.mapSize; x++) {
 				playerId = 'PX' + x.toString() + 'Y' + y.toString();
                 cellsPlayer.push(<th><button class='butPlayer' id={playerId} disabled={!this.state.playerBoardEnabled} onClick={this.handlePlayerBoardClick}></button></th>);
             }
@@ -1789,9 +1934,9 @@ class Window extends React.Component {
 
 		let rowsEnemy = [];
 		var enemyId;
-        for (let y = 0; y < 10; y++) {
+        for (let y = 0; y < activeForRules.state.mapSize; y++) {
             const cellsEnemy = [];
-            for (let x = 0; x < 10; x++) {
+            for (let x = 0; x < activeForRules.state.mapSize; x++) {
 				// this.state.enemyBoardButtons
 				enemyId = 'EX' + x.toString() + 'Y' + y.toString();
                 cellsEnemy.push(<th><button class='butEnemy' id={enemyId} onClick={this.handleEnemyBoardClick}></button></th>);
@@ -1836,7 +1981,7 @@ class Window extends React.Component {
 									<span className="close" onClick={this.handleClickDrawPopup}>
 										&times;
 									</span>
-										<h2 style={{textAlign: 'center'}}>Are you sure to propose a Draw?</h2>
+										<h2 style={{textAlign: 'center'}}>{this.state.drawDivText}</h2>
 										<br />
 										<div style={{ textAlign: 'center'}}> 
 											<button id="submitButton" class="submitButton" onClick={this.handleSubmitDrawPopup} style={{ cursor: 'pointer', height: '30px', width: '400px' }}>Yes</button>
@@ -1945,6 +2090,15 @@ class Window extends React.Component {
 											</div>
 										</div>
 									</div>
+
+									<div className="modalEnd" hidden='true'>
+										<div className="modal_content">
+										<span className="close" onClick={this.handleClickEndPopup}>
+											&times;
+										</span>
+											<h2 style={{textAlign: 'center'}}>{this.state.endGameDivText}</h2>
+										</div>
+									</div>
 									
 									<div id="rooms" style={{display: 'inline-block', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
 										<h2 id="roomsText" style={{ marginLeft: '10px', minHeight: '40px', color: 'white', display: 'inline-block', }}>Rooms</h2>
@@ -1972,8 +2126,6 @@ class Window extends React.Component {
 											{listScore}
 										</div>
 									</div>
-
-									{/* {this.state.deleteAccountSeen ? <DeletePopup toggle={this.togglePop} /> : null} */}
 
 									<div id="statistics" style={{display: 'inline-block', marginTop: '0px', marginRight: '50px', marginLeft: '70px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
 										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px',}}>My statistics</h2>
