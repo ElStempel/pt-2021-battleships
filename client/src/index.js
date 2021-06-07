@@ -132,7 +132,7 @@ async function fetchGameState(that, enemy, player){
 						shipsSunkGame: data.stats.ships_sunk,
 						enemyBoardButtons: false,
 						shipDeployed: true,
-						gamePlayer: data.player
+						gamePlayer: data.player,
 					})
 					console.log(data.turn)
 					console.log(that.state.gamePlayer)
@@ -213,15 +213,15 @@ async function fetchGameState(that, enemy, player){
 						}
 						for(var i = 0; i < that.state.mapSize; i++){
 							for(var j = 0; j < that.state.mapSize; j++){
-								if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 1){
+								if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
 									// trafienie
 									player[j + i * that.state.mapSize].style.backgroundColor = 'red'
 								}
-								else if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 2){
+								else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
 									// zatopienie
 									player[j + i * that.state.mapSize].style.backgroundColor = 'black'
 								}
-								else if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 5){
+								else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
 									// pudlo
 									player[j + i * that.state.mapSize].style.backgroundColor = 'white'
 								}
@@ -402,7 +402,7 @@ class Window extends React.Component {
 
 			turn: '',
 
-			mapSize: 16,
+			mapSize: 10,
 
 			drawDivText: 'Are you sure to propose a Draw?'
 
@@ -856,57 +856,50 @@ class Window extends React.Component {
 	}
 
 	enableRulesChoice(){
-		var that = this;
 		console.log("Enabled custom rules")
-		that.setState({
-			customRulesDisabled: !that.state.customRulesDisabled,
+		activeForRules.setState({
+			customRulesDisabled: !activeForRules.state.customRulesDisabled,
 		});
 	}
 
 	enableRule1(){
-		var that = this;
 		console.log("Enabled custom rule 1")
-		that.setState({
-			customRule1: !that.state.customRule1,
+		activeForRules.setState({
+			customRule1: !activeForRules.state.customRule1,
 		});
 	}
 
 	enableRule2(){
-		var that = this;
 		console.log("Enabled custom rule 2")
-		that.setState({
-			customRule2: !that.state.customRule2,
+		activeForRules.setState({
+			customRule2: !activeForRules.state.customRule2,
 		});
 	}
 
 	enableRule3(){
-		var that = this;
 		console.log("Enabled custom rule 3")
-		that.setState({
-			customRule3: !that.state.customRule3,
+		activeForRules.setState({
+			customRule3: !activeForRules.state.customRule3,
 		});
 	}
 
 	enableRule4(){
-		var that = this;
 		console.log("Enabled custom rule 4")
-		that.setState({
-			customRule4: !that.state.customRule4,
+		activeForRules.setState({
+			customRule4: !activeForRules.state.customRule4,
 		});
 	}
 
 	enableInviteOnly(){
-		var that = this;
 		console.log("Enabled invite only")
-		that.setState({
-			inviteOnly: !that.state.inviteOnly,
+		activeForRules.setState({
+			inviteOnly: !activeForRules.state.inviteOnly,
 		});
 	}
 
 	customMapSize(event){
-		var that = this;
 		console.log("Enabled invite only")
-		that.setState({
+		activeForRules.setState({
 			mapSize: event.target.value,
 		});
 	}
@@ -1078,15 +1071,15 @@ class Window extends React.Component {
 						var player = document.getElementsByClassName('butPlayer');
 						for(var i = 0; i < that.state.mapSize; i++){
 							for(var j = 0; j < that.state.mapSize; j++){
-								if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 1){
+								if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
 									// trafienie
 									player[j + i * that.state.mapSize].style.backgroundColor = 'red'
 								}
-								else if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 2){
+								else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
 									// zatopienie
 									player[j + i * that.state.mapSize].style.backgroundColor = 'black'
 								}
-								else if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 5){
+								else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
 									// pudlo
 									player[j + i * that.state.mapSize].style.backgroundColor = 'white'
 								}
@@ -2205,16 +2198,16 @@ class Window extends React.Component {
 									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRules">Custom Rules</label><br/>
 									<br/>
 									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" ref="customRule1" id="customRule1" name="customRule1" value="customRule1" onChange={this.enableRule1} disabled={this.state.customRulesDisabled}/>
-									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule1">Rule 1</label><br/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule1">Torpedo attack</label><br/>
 									<br/>
 									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" ref="customRule2" id="customRule2" name="customRule2" value="customRule2" onChange={this.enableRule2} disabled={this.state.customRulesDisabled}/>
-									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule2">Rule 2</label><br/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule2">Cluster attack</label><br/>
 									<br/>
 									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" ref="customRule3" id="customRule3" name="customRule3" value="customRule3" onChange={this.enableRule3} disabled={this.state.customRulesDisabled}/>
-									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule3">Rule 3</label><br/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule3">Air strike</label><br/>
 									<br/>
 									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" ref="customRule4" id="customRule4" name="customRule4" value="customRule4" onChange={this.enableRule4} disabled={this.state.customRulesDisabled}/>
-									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule4">Rule 4</label><br/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule4">One field of space between ships</label><br/>
 									<br/>
 									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" ref="inviteOnly" id="inviteOnly" name="inviteOnly" value="inviteOnly" onChange={this.enableInviteOnly} disabled={this.state.customRulesDisabled}/>
 									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="inviteOnly">Invite Only</label><br/>
