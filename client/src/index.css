@@ -307,3 +307,75 @@ code {
   background-color: black;
   color: white;
 }
+
+.torpedoShotVertical {
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  background-color: grey;
+  margin-left: 250px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.torpedoShotVertical:hover{
+  background-color: black;
+  color: white;
+}
+
+.torpedoShotHorizontal {
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  background-color: grey;
+  margin-left: 250px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.torpedoShotHorizontal:hover{
+  background-color: black;
+  color: white;
+}
+
+.clusterAttack {
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  background-color: grey;
+  margin-left: 250px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.clusterAttack:hover{
+  background-color: black;
+  color: white;
+}
+
+.airStrike {
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  background-color: grey;
+  margin-left: 250px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.airStrike:hover{
+  background-color: black;
+  color: white;
+}

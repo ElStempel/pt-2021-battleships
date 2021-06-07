@@ -133,9 +133,26 @@ async function fetchGameState(that, enemy, player){
 						enemyBoardButtons: false,
 						shipDeployed: true,
 						gamePlayer: data.player,
+						mapSize: data.map_size,
 					})
-					console.log(data.turn)
-					console.log(that.state.gamePlayer)
+					if(data.stats.attack1 == false){
+						var torp1 = document.getElementsByClassName('torpedoShotVertical')[0];
+						torp1.style.background = 'green';
+						torp1.disabled = true;
+						var torp2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
+						torp2.style.background = 'green';
+						torp2.disabled = true;
+					}
+					if(data.stats.attack2 == false){
+						var cluster = document.getElementsByClassName('clusterAttack')[0];
+						cluster.style.background = 'green';
+						cluster.disabled = true;
+					}
+					if(data.stats.attack3 == false){
+						var air = document.getElementsByClassName('airStrike')[0];
+						air.style.background = 'green';
+						air.disabled = true;
+					}
 					if(data.draw == 1){
 						that.setState({
 							drawDivText: 'Enemy Proposed a draw. Do you accept?'
@@ -291,6 +308,10 @@ class Window extends React.Component {
 		this.handleClickCloseDrawGiveUpPopup = this.handleClickCloseDrawGiveUpPopup.bind(this);
 		this.handleClickEndPopup = this.handleClickEndPopup.bind(this);
 		this.customMapSize = this.customMapSize.bind(this);
+		this.torpedoShotVertical = this.torpedoShotVertical.bind(this);
+		this.torpedoShotHorizontal = this.torpedoShotHorizontal.bind(this);
+		this.clusterAttack = this.clusterAttack.bind(this);
+		this.airStrike = this.airStrike.bind(this);
 
 		this.state = { 
 			// Strona po loginie
@@ -825,6 +846,7 @@ class Window extends React.Component {
 			cust_rule_3: that.state.customRule3,
 			cust_rule_4: that.state.customRule4,
 		}
+		console.log(custom)
 
 		const requestOptions = {
 			method: 'POST',
@@ -977,6 +999,7 @@ class Window extends React.Component {
 				that.setState({
 					gameShown: !that.state.gameShown,
 					game_id: data._id,
+					mapSize: data.map_size,
 				})
 			}
 		})
@@ -1017,6 +1040,7 @@ class Window extends React.Component {
 						shipsSunkGame: data.stats.ships_sunk,
 						enemyBoardButtons: false,
 						shipDeployed: true,
+						mapSize: data.map_size
 					})
 					try{
 						var confirmBut = document.getElementsByClassName('confirmShips');
@@ -1854,25 +1878,25 @@ class Window extends React.Component {
 		event.preventDefault()
 		event.target.style.backgroundColor = 'red'
 		var stat = 0;
-			const requestOptions = {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
-			};
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
+		};
 
-			fetch('https://localhost:9000/games/shot', requestOptions)
-			.then(function(response) { 
-				stat = response.status;
-				if(stat == 200){
-					// event.target.style.backgroundColor = 'green'
-					console.log( that.state.shotX)
-					console.log( that.state.shotY)
-					that.fetchGameState()
-				}
-				// else{
-				// 	event.target.style.backgroundColor = 'yellow'
-				// }
-				console.log(stat)
+		fetch('https://localhost:9000/games/shot', requestOptions)
+		.then(function(response) { 
+			stat = response.status;
+			if(stat == 200){
+				// event.target.style.backgroundColor = 'green'
+				console.log( that.state.shotX)
+				console.log( that.state.shotY)
+				that.fetchGameState()
+			}
+			// else{
+			// 	event.target.style.backgroundColor = 'yellow'
+			// }
+			console.log(stat)
 		});
 		var enemy = document.getElementsByClassName('butEnemy');
 		var player = document.getElementsByClassName('butPlayer');
@@ -1914,6 +1938,96 @@ class Window extends React.Component {
 
 	hideCustomRulesDiv(room){
 		document.getElementsByClassName(room)[0].style.setProperty("display", "none");
+	}
+
+	torpedoShotHorizontal(){
+		var that = this;
+		var torpedoButton1 = document.getElementsByClassName('torpedoShotVertical')[0];
+		var torpedoButton2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
+		var stat = 0;
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY}})
+		};
+
+		fetch('https://localhost:9000/games/shot/torpedo', requestOptions)
+		.then(function(response) { 
+			stat = response.status;
+			if(stat == 200){
+				torpedoButton1.disabled = true;
+				torpedoButton1.style.backgroundColor = 'green';
+				torpedoButton2.disabled = true;
+				torpedoButton2.style.backgroundColor = 'green';
+				that.fetchGameState()
+			}
+		});
+	}
+
+	torpedoShotVertical(){
+		var that = this;
+		var torpedoButton1 = document.getElementsByClassName('torpedoShotVertical')[0];
+		var torpedoButton2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
+		var stat = 0;
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { y: that.state.shotX}})
+		};
+
+		fetch('https://localhost:9000/games/shot/torpedo', requestOptions)
+		.then(function(response) { 
+			stat = response.status;
+			if(stat == 200){
+				torpedoButton1.disabled = true;
+				torpedoButton1.style.backgroundColor = 'green';
+				torpedoButton2.disabled = true;
+				torpedoButton2.style.backgroundColor = 'green';
+				that.fetchGameState()
+			}
+		});
+	}
+
+	airStrike(){
+		var that = this;
+		var airStrikeButton = document.getElementsByClassName('airStrike')[0];
+		var stat = 0;
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
+		};
+
+		fetch('https://localhost:9000/games/shot/airstrike', requestOptions)
+		.then(function(response) { 
+			stat = response.status;
+			if(stat == 200){
+				airStrikeButton.disabled = true;
+				airStrikeButton.style.backgroundColor = 'green';
+				that.fetchGameState()
+			}
+		});
+	}
+
+	clusterAttack(){
+		var that = this;
+		var clusterButton = document.getElementsByClassName('clusterAttack')[0];
+		var stat = 0;
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
+		};
+
+		fetch('https://localhost:9000/games/shot/cluster', requestOptions)
+		.then(function(response) { 
+			stat = response.status;
+			if(stat == 200){
+				clusterButton.disabled = true;
+				clusterButton.style.backgroundColor = 'green';
+				that.fetchGameState()
+			}
+		});
 	}
 
 	render() {
@@ -2020,17 +2134,17 @@ class Window extends React.Component {
 								</div>
 
 								<div style={{}}>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '60px'}}>Ships Lost: {this.state.shipsLostGame}</p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>Ships Sunk: {this.state.shipsSunkGame}</p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '60px'}}>Ships lost: {this.state.shipsLostGame}</p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
 									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>{this.state.turn}</p>
 								</div>
 								<div id='playerBoard' class='playerBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
 									<table class='playerTable'>{rowsPlayer}</table>
-									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}}>Player Board</p>
+									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}}>Player board</p>
 								</div>
 								<div id='enemyBoard' class='enemyBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
 									<table class='enemyTable'>{rowsEnemy}</table>
-									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}} disabled={this.state.enemyBoardButtons}>Enemy Board</p>
+									<p style={{textAlign: 'center', fontSize: '35px', color:'white', fontWeight: 'bold'}} disabled={this.state.enemyBoardButtons}>Enemy board</p>
 								</div>
 
 								<div id='gameButtons' class='gameButtons' style={{ display: 'inline-block', verticalAlign: 'top', marginLeft: '50px', marginTop: '20px', }}>
@@ -2046,10 +2160,10 @@ class Window extends React.Component {
 									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon</button>
 									<br></br>
 									<br></br>
-									<button id='resetBoard' class="resetBoard" onClick={this.handleResetBoardClick} >Reset Board</button>
+									<button id='resetBoard' class="resetBoard" onClick={this.handleResetBoardClick} >Reset board</button>
 									<br></br>
 									<br></br>
-									<button id='confirmShips' class="confirmShips" onClick={this.handleConfirmShipsClick} >Confirm Setup</button>
+									<button id='confirmShips' class="confirmShips" onClick={this.handleConfirmShipsClick} >Confirm setup</button>
 									<br></br>
 									<br></br>
 									<button id='confirmShot' class="confirmShot" onClick={this.handleConfirmShotClick}>Confirm Shot</button>
@@ -2059,6 +2173,14 @@ class Window extends React.Component {
 									<br></br>
 									<br></br>
 									<button id='draw' class="draw" onClick={this.showDrawPopup}>Propose a draw</button>
+								</div>
+								<br></br>
+								<div style={{ display: 'inline-block', verticalAlign: 'top' }}>
+									<button class="torpedoShotVertical" hidden={!this.state.customRule1} onClick={this.torpedoShotVertical}>Vertical torpedo shot</button>
+									<button class="torpedoShotHorizontal" hidden={!this.state.customRule1} onClick={this.torpedoShotHorizontal}>Horizontal torpedo shot</button>
+									<button class="clusterAttack" hidden={!this.state.customRule2} onClick={this.clusterAttack}>Cluster attack</button>
+									<button class="airStrike" hidden={!this.state.customRule3} onClick={this.airStrike}>Air strike</button>
+									<p class="coords" style={{ fontSize: '50px', color: 'white', display: "inline-block", verticalAlign: 'top', marginLeft: '250px' }}>Current coords: x - {this.state.shotX + 1}, y - {this.state.shotY + 1} </p>
 								</div>
 
 							</div>
