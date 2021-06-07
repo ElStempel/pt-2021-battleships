@@ -192,11 +192,11 @@ router.post('/shot/cluster', async function(req, res, next) {
                                 game.p2_map[x][y]+=1;
                                 snd_info = await search_and_destroy(game.p2_map, game.p2_map[x][y], game.map_size)
                                 game.p2_map = snd_info[0];
+                                game.turn = 2;
+                                game.p1.attack2 = false
                                 if(snd_info[1] == true){
                                     game.p1.ships_sunk += 1;
                                     game.p2.ships_lost += 1;
-                                    game.turn = 2;
-                                    game.p1.attack2 = false
                                     if(game.p1.ships_sunk == 5){
                                         game.winner = 1;
                                     }
@@ -233,11 +233,11 @@ router.post('/shot/cluster', async function(req, res, next) {
                                 game.p1_map[x][y]+=1;
                                 snd_info = await search_and_destroy(game.p1_map, game.p1_map[x][y], game.map_size)
                                 game.p1_map = snd_info[0];
+                                game.turn = 1;
+                                game.p2.attack2 = false
                                 if(snd_info[1] == true){
                                     game.p2.ships_sunk += 1;
                                     game.p1.ships_lost += 1;
-                                    game.turn = 1;
-                                    game.p2.attack2 = false
                                     if(game.p2.ships_sunk == 5){
                                         game.winner = 2;
                                     }
@@ -593,7 +593,8 @@ router.post('/fetch-state', async function(req, res, next) {
                     stats: game.p1,
                     draw: game.propose_draw,
                     playerMap: game.p1_map,
-                    enemyMap: censoredMap
+                    enemyMap: censoredMap,
+                    map_size: game.map_size
                 }
                 res.status(200).json(data)
                 end_game(game);
@@ -606,7 +607,8 @@ router.post('/fetch-state', async function(req, res, next) {
                     stats: game.p2,
                     draw: game.propose_draw,
                     playerMap: game.p2_map,
-                    enemyMap: censoredMap
+                    enemyMap: censoredMap,
+                    map_size: game.map_size
                 }
                 res.status(200).json(data)
                 end_game(game);
