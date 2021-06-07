@@ -133,10 +133,16 @@ async function fetchGameState(that, enemy, player){
 						enemyBoardButtons: false,
 						shipDeployed: true,
 						gamePlayer: data.player,
-						mapSize: data.map_size,
-						gap: data.force_gap
+						mapSize: data.custom_rules.map_size,
+						customRule1: data.custom_rules.cust_rule_1,
+						customRule2: data.custom_rules.cust_rule_2,
+						customRule3: data.custom_rules.cust_rule_3,
+						gap: data.custom_rules.cust_rule_4
 					})
 					try{
+						if(data.custom_rules.enabled == true){
+							document.getElementsByClassName('specialAttacks')[0].hidden = false;
+						}
 						if(data.stats.attack1 == false){
 							var torp1 = document.getElementsByClassName('torpedoShotVertical')[0];
 							torp1.style.background = 'green';
@@ -163,7 +169,12 @@ async function fetchGameState(that, enemy, player){
 						that.setState({
 							drawDivText: 'Enemy Proposed a draw. Do you accept?'
 						})
-						document.getElementsByClassName('modalDraw')[0].hidden = false;
+						try{
+							document.getElementsByClassName('modalDraw')[0].hidden = false;
+						}
+						catch(error){
+							
+						}
 					}
 					if(data.draw == 2){
 						that.setState({
@@ -1064,8 +1075,11 @@ class Window extends React.Component {
 						shipsSunkGame: data.stats.ships_sunk,
 						enemyBoardButtons: false,
 						shipDeployed: true,
-						mapSize: data.map_size,
-						gap: data.force_gap
+						mapSize: data.custom_rules.map_size,
+						customRule1: data.custom_rules.cust_rule_1,
+						customRule2: data.custom_rules.cust_rule_2,
+						customRule3: data.custom_rules.cust_rule_3,
+						gap: data.custom_rules.cust_rule_4
 					})
 					try{
 						var confirmBut = document.getElementsByClassName('confirmShips');
@@ -1315,7 +1329,7 @@ class Window extends React.Component {
 			console.log(stat)
 			if(stat == 200){
 				that.setState({
-					div1Shown: !that.state.div1Shown,
+					gameShown: !that.state.gameShown,
 					rejoinCurrentGameHidden: 'hidden',
 				});
 			}
@@ -2052,8 +2066,14 @@ class Window extends React.Component {
 		.then(function(response) { 
 			stat = response.status;
 			if(stat == 200){
-				clusterButton.disabled = true;
-				clusterButton.style.backgroundColor = 'green';
+				if(that.state.gamePlayer == that.state.turn){
+					document.getElementsByClassName('confirmShot')[0].disabled = true;
+				}
+				else{
+					clusterButton.disabled = true;
+					clusterButton.style.backgroundColor = 'green';
+					document.getElementsByClassName('confirmShot')[0].disabled = false;
+				}
 				that.fetchGameState()
 			}
 		});
@@ -2208,11 +2228,11 @@ class Window extends React.Component {
 								<br></br>
 								<br></br>
 								<br></br>
-								<div style={{ display: 'inline-block', verticalAlign: 'top' }}>
-									<button class="torpedoShotVertical" hidden={!this.state.customRule1} onClick={this.torpedoShotVertical}>Vertical torpedo shot</button>
-									<button class="torpedoShotHorizontal" hidden={!this.state.customRule1} onClick={this.torpedoShotHorizontal}>Horizontal torpedo shot</button>
-									<button class="clusterAttack" hidden={!this.state.customRule2} onClick={this.clusterAttack}>Cluster attack</button>
-									<button class="airStrike" hidden={!this.state.customRule3} onClick={this.airStrike}>Air strike</button>
+								<div className='specialAttacks' style={{ display: 'inline-block', verticalAlign: 'top' }} hidden='true'>
+									<button className="torpedoShotVertical" hidden={!this.state.customRule1} onClick={this.torpedoShotVertical}>Vertical torpedo shot</button>
+									<button className="torpedoShotHorizontal" hidden={!this.state.customRule1} onClick={this.torpedoShotHorizontal}>Horizontal torpedo shot</button>
+									<button className="clusterAttack" hidden={!this.state.customRule2} onClick={this.clusterAttack}>Cluster attack</button>
+									<button className="airStrike" hidden={!this.state.customRule3} onClick={this.airStrike}>Air strike</button>
 								</div>
 
 							</div>
