@@ -290,6 +290,7 @@ class Window extends React.Component {
 		this.handleSubmitDrawGiveUpPopup = this.handleSubmitDrawGiveUpPopup.bind(this);
 		this.handleClickCloseDrawGiveUpPopup = this.handleClickCloseDrawGiveUpPopup.bind(this);
 		this.handleClickEndPopup = this.handleClickEndPopup.bind(this);
+		this.customMapSize = this.customMapSize.bind(this);
 
 		this.state = { 
 			// Strona po loginie
@@ -816,17 +817,26 @@ class Window extends React.Component {
 	confirmRoomCreation(){
 		var that = this;
 		console.log("Room created")
+		var custom = {
+			enabled: !that.state.customRulesDisabled,
+			map_size: that.state.mapSize,
+			cust_rule_1: that.state.customRule1,
+			cust_rule_2: that.state.customRule2,
+			cust_rule_3: that.state.customRule3,
+			cust_rule_4: that.state.customRule4,
+		}
 
 		const requestOptions = {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ "player_1_id": this.state.user_id })
+			body: JSON.stringify({ player_1_id: this.state.user_id, custom_rules: custom })
 		};
 		var stat = 0;
 		var roomDetails;
 		fetch('https://localhost:9000/rooms/create', requestOptions)
 		.then(function(response){
 			stat = response.status;
+			console.log(stat)
 			if(stat == 201){
 				roomDetails = response.json();
 			}
@@ -846,44 +856,58 @@ class Window extends React.Component {
 	}
 
 	enableRulesChoice(){
+		var that = this;
 		console.log("Enabled custom rules")
-		this.setState({
-			customRulesDisabled: !this.state.customRulesDisabled,
+		that.setState({
+			customRulesDisabled: !that.state.customRulesDisabled,
 		});
 	}
 
 	enableRule1(){
+		var that = this;
 		console.log("Enabled custom rule 1")
-		activeForRules.setState({
-			customRule1: !activeForRules.state.customRule1,
+		that.setState({
+			customRule1: !that.state.customRule1,
 		});
 	}
 
 	enableRule2(){
+		var that = this;
 		console.log("Enabled custom rule 2")
-		activeForRules.setState({
-			customRule2: !activeForRules.state.customRule2,
+		that.setState({
+			customRule2: !that.state.customRule2,
 		});
 	}
 
 	enableRule3(){
+		var that = this;
 		console.log("Enabled custom rule 3")
-		activeForRules.setState({
-			customRule3: !activeForRules.state.customRule3,
+		that.setState({
+			customRule3: !that.state.customRule3,
 		});
 	}
 
 	enableRule4(){
+		var that = this;
 		console.log("Enabled custom rule 4")
-		activeForRules.setState({
-			customRule4: !activeForRules.state.customRule4,
+		that.setState({
+			customRule4: !that.state.customRule4,
 		});
 	}
 
 	enableInviteOnly(){
+		var that = this;
 		console.log("Enabled invite only")
-		activeForRules.setState({
-			inviteOnly: !activeForRules.state.inviteOnly,
+		that.setState({
+			inviteOnly: !that.state.inviteOnly,
+		});
+	}
+
+	customMapSize(event){
+		var that = this;
+		console.log("Enabled invite only")
+		that.setState({
+			mapSize: event.target.value,
 		});
 	}
 
@@ -2197,7 +2221,7 @@ class Window extends React.Component {
 									<br/>
 									<br/>
 
-									<select style={{fontSize: '30px', fontWeight: 'bold', width: '140px', height: '40px', marginLeft: '10px' }} name="size" id="size" disabled={this.state.customRulesDisabled}>
+									<select style={{fontSize: '30px', fontWeight: 'bold', width: '140px', height: '40px', marginLeft: '10px' }} name="size" id="size" disabled={this.state.customRulesDisabled} onChange={this.customMapSize}>
 										<option value="10">10 x 10</option>
 										<option value="16">16 x 16</option>
 										<option value="24">24 x 24</option>
