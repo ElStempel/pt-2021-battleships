@@ -141,7 +141,17 @@ async function fetchGameState(that, enemy, player){
 					})
 					try{
 						if(data.custom_rules.enabled == true){
-							document.getElementsByClassName('specialAttacks')[0].hidden = false;
+							document.getElementsByClassName('specialAttacks')[0].style.display = 'inline-block';
+							if(data.custom_rules.cust_rule_1){
+								document.getElementsByClassName('torpedoShotVertical')[0].style.display = 'inline-block';
+								document.getElementsByClassName('torpedoShotHorizontal')[0].style.display = 'inline-block';
+							}
+							if(data.custom_rules.cust_rule_2){
+								document.getElementsByClassName('clusterAttack')[0].style.display = 'inline-block';
+							}
+							if(data.custom_rules.cust_rule_3){
+								document.getElementsByClassName('airStrike')[0].style.display = 'inline-block';
+							}
 						}
 						if(data.stats.attack1 == false){
 							var torp1 = document.getElementsByClassName('torpedoShotVertical')[0];
@@ -151,15 +161,33 @@ async function fetchGameState(that, enemy, player){
 							torp2.style.background = 'green';
 							torp2.disabled = true;
 						}
+						else{
+							var torp1 = document.getElementsByClassName('torpedoShotVertical')[0];
+							torp1.style.background = 'red';
+							torp1.disabled = false;
+							var torp2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
+							torp2.style.background = 'red';
+							torp2.disabled = false;
+						}
 						if(data.stats.attack2 == false){
 							var cluster = document.getElementsByClassName('clusterAttack')[0];
 							cluster.style.background = 'green';
 							cluster.disabled = true;
 						}
+						else{
+							var cluster = document.getElementsByClassName('clusterAttack')[0];
+							cluster.style.background = 'red';
+							cluster.disabled = false;
+						}
 						if(data.stats.attack3 == false){
 							var air = document.getElementsByClassName('airStrike')[0];
 							air.style.background = 'green';
 							air.disabled = true;
+						}
+						else{
+							var air = document.getElementsByClassName('airStrike')[0];
+							air.style.background = 'red';
+							air.disabled = false;
 						}
 					}
 					catch(error){
@@ -2228,7 +2256,7 @@ class Window extends React.Component {
 								<br></br>
 								<br></br>
 								<br></br>
-								<div className='specialAttacks' style={{ display: 'inline-block', verticalAlign: 'top' }} hidden='true'>
+								<div className='specialAttacks' style={{ display: 'none', verticalAlign: 'top' }} hidden='true'>
 									<button className="torpedoShotVertical" hidden={!this.state.customRule1} onClick={this.torpedoShotVertical}>Vertical torpedo shot</button>
 									<button className="torpedoShotHorizontal" hidden={!this.state.customRule1} onClick={this.torpedoShotHorizontal}>Horizontal torpedo shot</button>
 									<button className="clusterAttack" hidden={!this.state.customRule2} onClick={this.clusterAttack}>Cluster attack</button>

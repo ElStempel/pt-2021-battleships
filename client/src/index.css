@@ -317,7 +317,7 @@ code {
   color: white;
   font-size: 40px;
   cursor: pointer;
-  display: inline-block;
+  display: none;
   vertical-align: top;
 }
 
@@ -335,7 +335,7 @@ code {
   color: white;
   font-size: 40px;
   cursor: pointer;
-  display: inline-block;
+  display: none;
   vertical-align: top;
 }
 
@@ -353,7 +353,7 @@ code {
   color: white;
   font-size: 40px;
   cursor: pointer;
-  display: inline-block;
+  display: none;
   vertical-align: top;
 }
 
@@ -371,7 +371,7 @@ code {
   color: white;
   font-size: 40px;
   cursor: pointer;
-  display: inline-block;
+  display: none;
   vertical-align: top;
 }
 
