@@ -584,6 +584,7 @@ router.post('/fetch-state', async function(req, res, next) {
     let game = await Game.findOne({_id: req.body.game_id})
     if(game){
         if(game.p1_ready == true && game.p2_ready == true){
+            let room = await Room.findById(game.room)
             if(game.player_1 == req.body.player_id){
                 censoredMap = censoreMap(game.p2_map, game.map_size)
                 var data = {
@@ -594,7 +595,7 @@ router.post('/fetch-state', async function(req, res, next) {
                     draw: game.propose_draw,
                     playerMap: game.p1_map,
                     enemyMap: censoredMap,
-                    map_size: game.map_size
+                    custom_rules: room.custom_rules
                 }
                 res.status(200).json(data)
                 end_game(game);
@@ -608,7 +609,7 @@ router.post('/fetch-state', async function(req, res, next) {
                     draw: game.propose_draw,
                     playerMap: game.p2_map,
                     enemyMap: censoredMap,
-                    map_size: game.map_size
+                    custom_rules: room.custom_rules
                 }
                 res.status(200).json(data)
                 end_game(game);

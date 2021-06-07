@@ -9,7 +9,7 @@ var RoomSchema = new Schema(
     inv_only: {type: Boolean, required: true, default: false},
     custom_rules: {
         enabled: {type: Boolean, required: true, default: false},
-        map_size: {type: Number, required: true, default: 10},
+        map_size: {type: Number, required: true, default: 10, min: 7, max: 20},
         cust_rule_1: {type: Boolean, required: true, default: false},
         cust_rule_2: {type: Boolean, required: true, default: false},
         cust_rule_3: {type: Boolean, required: true, default: false},
