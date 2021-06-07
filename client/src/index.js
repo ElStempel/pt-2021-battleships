@@ -134,24 +134,30 @@ async function fetchGameState(that, enemy, player){
 						shipDeployed: true,
 						gamePlayer: data.player,
 						mapSize: data.map_size,
+						gap: data.force_gap
 					})
-					if(data.stats.attack1 == false){
-						var torp1 = document.getElementsByClassName('torpedoShotVertical')[0];
-						torp1.style.background = 'green';
-						torp1.disabled = true;
-						var torp2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
-						torp2.style.background = 'green';
-						torp2.disabled = true;
+					try{
+						if(data.stats.attack1 == false){
+							var torp1 = document.getElementsByClassName('torpedoShotVertical')[0];
+							torp1.style.background = 'green';
+							torp1.disabled = true;
+							var torp2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
+							torp2.style.background = 'green';
+							torp2.disabled = true;
+						}
+						if(data.stats.attack2 == false){
+							var cluster = document.getElementsByClassName('clusterAttack')[0];
+							cluster.style.background = 'green';
+							cluster.disabled = true;
+						}
+						if(data.stats.attack3 == false){
+							var air = document.getElementsByClassName('airStrike')[0];
+							air.style.background = 'green';
+							air.disabled = true;
+						}
 					}
-					if(data.stats.attack2 == false){
-						var cluster = document.getElementsByClassName('clusterAttack')[0];
-						cluster.style.background = 'green';
-						cluster.disabled = true;
-					}
-					if(data.stats.attack3 == false){
-						var air = document.getElementsByClassName('airStrike')[0];
-						air.style.background = 'green';
-						air.disabled = true;
+					catch(error){
+
 					}
 					if(data.draw == 1){
 						that.setState({
@@ -312,6 +318,7 @@ class Window extends React.Component {
 		this.torpedoShotHorizontal = this.torpedoShotHorizontal.bind(this);
 		this.clusterAttack = this.clusterAttack.bind(this);
 		this.airStrike = this.airStrike.bind(this);
+		this.createRoom = this.createRoom.bind(this);
 
 		this.state = { 
 			// Strona po loginie
@@ -425,8 +432,9 @@ class Window extends React.Component {
 
 			mapSize: 10,
 
-			drawDivText: 'Are you sure to propose a Draw?'
+			drawDivText: 'Are you sure to propose a Draw?',
 
+			gap: false,
 		};
 
 		activeForRules = this;
@@ -725,9 +733,15 @@ class Window extends React.Component {
 					else{
 						custom.push('Disabled')
 					}
+					if(receivedRooms[i].custom_rules.cust_rule_4 != false){
+						custom.push('Enabled')
+					}
+					else{
+						custom.push('Disabled')
+					}
 				}
 				else{
-					custom = ['false', 'Disabled', 10, 'Disabled', 'Disabled', 'Disabled']
+					custom = ['false', 'Disabled', 10, 'Disabled', 'Disabled', 'Disabled', 'Disabled']
 				}
 				if(receivedRooms[i].player_1 == that.state.username){
 					that.setState({
@@ -829,6 +843,13 @@ class Window extends React.Component {
 
 	showCreateRoomPage(){
 		console.log("Creating room")
+		this.updateRoomsList();
+		this.setState({
+			div2Shown: !this.state.div2Shown,
+		});
+	}
+
+	createRoom(){
 		this.updateRoomsList();
 		this.setState({
 			div2Shown: !this.state.div2Shown,
@@ -968,6 +989,8 @@ class Window extends React.Component {
 					gameShown: !that.state.gameShown,
 					game_id: data._id,
 					game_player: 1,
+					mapSize: data.map_size,
+					gap: data.force_gap
 				})
 				inGame = true;
 			}
@@ -1000,6 +1023,7 @@ class Window extends React.Component {
 					gameShown: !that.state.gameShown,
 					game_id: data._id,
 					mapSize: data.map_size,
+					gap: data.force_gap
 				})
 			}
 		})
@@ -1040,7 +1064,8 @@ class Window extends React.Component {
 						shipsSunkGame: data.stats.ships_sunk,
 						enemyBoardButtons: false,
 						shipDeployed: true,
-						mapSize: data.map_size
+						mapSize: data.map_size,
+						gap: data.force_gap
 					})
 					try{
 						var confirmBut = document.getElementsByClassName('confirmShips');
@@ -1587,7 +1612,11 @@ class Window extends React.Component {
 			}
 		}
 
-		var neighbourCoordsTaken = this.neighbourCheck(this, coords, shipName);
+		var neighbourCoordsTaken = false;
+
+		if(this.state.gap == true){
+			neighbourCoordsTaken = this.neighbourCheck(this, coords, shipName);
+		}
 		
 		console.log(coordsTaken)
 		console.log(neighbourCoordsTaken)
@@ -1737,15 +1766,15 @@ class Window extends React.Component {
 			var player = document.getElementsByClassName('butPlayer');
 			for(var i = 0; i < that.state.mapSize; i++){
 				for(var j = 0; j < that.state.mapSize; j++){
-					if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 1){
+					if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
 						// trafienie
 						player[j + i * that.state.mapSize].style.backgroundColor = 'red'
 					}
-					if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 2){
+					if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
 						// zatopienie
 						player[j + i * that.state.mapSize].style.backgroundColor = 'black'
 					}
-					if(parseInt(that.state.playerBoard[i][j] % that.state.mapSize) == 5){
+					if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
 						// pudlo
 						player[j + i * that.state.mapSize].style.backgroundColor = 'white'
 					}
@@ -2033,13 +2062,14 @@ class Window extends React.Component {
 	render() {
 		const listNames = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.player}</li>);
 		const listScore = this.state.playersList.map((d) => <li style={{ height: '80px', fontWeight: 'bold' }} key={d.player}>{d.score}</li>);
-		const listRooms = this.state.rooms.map((r) => <li style={{ height: '100px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id={r.room} class='joinButton' disabled={r.full} onClick={this.joinGame} 
+		const listRooms = this.state.rooms.map((r) => <li style={{ height: '110px', fontWeight: 'bold' }} key={r.room}>{r.room} <button id={r.room} class='joinButton' disabled={r.full} onClick={this.joinGame} 
 		onMouseOver={() => this.showCustomRulesDiv(r.room)}
 		onMouseOut={() => this.hideCustomRulesDiv(r.room)}
 		style={{display: 'inline-block', float: 'right', marginRight: '20px', width: '120px', height: '40px', cursor: 'pointer', fontSize: '15px', pointerEvents: [r.hover]}}> {r.text} </button>
 		<div class={r.room} style={{ fontSize: '15px', display: 'none', fontWeight: 'normal'}}>
 			<br></br>
-			Custom Rules: {r.customRules[1]} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Map Size: {r.customRules[2]} <br></br>
+			<br></br>
+			Custom Rules: {r.customRules[1]} &nbsp;&nbsp; | &nbsp;&nbsp; Map Size: {r.customRules[2]}  &nbsp;&nbsp; | &nbsp;&nbsp; Field of gap: {r.customRules[6]}<br></br>
 			One Field of space: {r.customRules[3]} &nbsp;&nbsp; | &nbsp;&nbsp; Torpedo Shot: {r.customRules[4]} &nbsp;&nbsp; | &nbsp;&nbsp; Airstrike: {r.customRules[5]}
 		</div>
 		</li>)
@@ -2134,9 +2164,10 @@ class Window extends React.Component {
 								</div>
 
 								<div style={{}}>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '60px'}}>Ships lost: {this.state.shipsLostGame}</p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '630px'}}>{this.state.turn}</p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '100px'}}>Ships lost: {this.state.shipsLostGame}</p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '100px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
+									<p class="coords" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '100px' }}>Current coords: x - {this.state.shotX + 1}, y - {this.state.shotY + 1} </p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '100px'}}>{this.state.turn}</p>
 								</div>
 								<div id='playerBoard' class='playerBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
 									<table class='playerTable'>{rowsPlayer}</table>
@@ -2175,12 +2206,13 @@ class Window extends React.Component {
 									<button id='draw' class="draw" onClick={this.showDrawPopup}>Propose a draw</button>
 								</div>
 								<br></br>
+								<br></br>
+								<br></br>
 								<div style={{ display: 'inline-block', verticalAlign: 'top' }}>
 									<button class="torpedoShotVertical" hidden={!this.state.customRule1} onClick={this.torpedoShotVertical}>Vertical torpedo shot</button>
 									<button class="torpedoShotHorizontal" hidden={!this.state.customRule1} onClick={this.torpedoShotHorizontal}>Horizontal torpedo shot</button>
 									<button class="clusterAttack" hidden={!this.state.customRule2} onClick={this.clusterAttack}>Cluster attack</button>
 									<button class="airStrike" hidden={!this.state.customRule3} onClick={this.airStrike}>Air strike</button>
-									<p class="coords" style={{ fontSize: '50px', color: 'white', display: "inline-block", verticalAlign: 'top', marginLeft: '250px' }}>Current coords: x - {this.state.shotX + 1}, y - {this.state.shotY + 1} </p>
 								</div>
 
 							</div>
@@ -2330,17 +2362,19 @@ class Window extends React.Component {
 									<br/>
 									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" ref="customRule4" id="customRule4" name="customRule4" value="customRule4" onChange={this.enableRule4} disabled={this.state.customRulesDisabled}/>
 									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule4">One field of space between ships</label><br/>
-									<br/>
+									{/* <br/>
 									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" ref="inviteOnly" id="inviteOnly" name="inviteOnly" value="inviteOnly" onChange={this.enableInviteOnly} disabled={this.state.customRulesDisabled}/>
-									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="inviteOnly">Invite Only</label><br/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="inviteOnly">Invite Only</label><br/> */}
 									<br/>
 									<br/>
 
 									<select style={{fontSize: '30px', fontWeight: 'bold', width: '140px', height: '40px', marginLeft: '10px' }} name="size" id="size" disabled={this.state.customRulesDisabled} onChange={this.customMapSize}>
 										<option value="10">10 x 10</option>
+										<option value="12">12 x 12</option>
+										<option value="14">14 x 14</option>
 										<option value="16">16 x 16</option>
-										<option value="24">24 x 24</option>
-										<option value="30">30 x 30</option>
+										<option value="18">18 x 18</option>
+										<option value="20">20 x 20</option>
 									</select> 
 									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="size">Choose board size</label>
 									<br/>
