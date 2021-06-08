@@ -16,89 +16,6 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function check_ship_interference(ship, map, map_size){
-//true to interferencja
-    if(ship.course == 0){
-        if((ship.bow.y + (ship.size - 1)) < 0 || (ship.bow.y + (ship.size - 1)) >= map_size)
-            return true;
-        for(segment in ship.size){
-            if(map[ship.bow.y + segment][ship.bow.x] != 0)
-                return true;
-        }
-        return false;
-    } else if(ship.course == 2){
-        if((ship.bow.y - (ship.size - 1)) < 0 || (ship.bow.y - (ship.size - 1)) >= map_size)
-            return true;
-        for(segment in ship.size){
-            if(map[ship.bow.y - segment][ship.bow.x] != 0)
-                return true;
-        }
-        return false;
-    } else if(ship.course == 1){
-        if((ship.bow.x - (ship.size - 1)) < 0 || (ship.bow.x - (ship.size - 1)) >= map_size)
-            return true;
-        for(segment in ship.size){
-            if(map[ship.bow.y][ship.bow.x - segment] != 0)
-                return true;
-        }
-        return false;
-    } else if(ship.course == 3){
-        if((ship.bow.x + (ship.size - 1)) < 0 || (ship.bow.x + (ship.size - 1)) >= map_size)
-            return true;
-        for(segment in ship.size){
-            if(map[ship.bow.y][ship.bow.x + segment] != 0)
-                return true;
-        }
-        return false;
-    }
-}
-
-function add_ship(ship, map){
-    for(segment in ship.size){
-        if(ship.course == 0){
-            map[ship.bow.y + segment][ship.bow.x] = ship.symbol
-        } else if(ship.course == 2){
-            map[ship.bow.y - segment][ship.bow.x] = ship.symbol
-        } else if(ship.course == 1){
-            map[ship.bow.y][ship.bow.x - segment] = ship.symbol
-        } else if(ship.course == 3){
-            map[ship.bow.y][ship.bow.x + segment] = ship.symbol
-        }
-    }
-    return map;
-}
-
-function init_bot_map(game){
-    var map = game.p2_map;
-    const size = game.map_size;
-    var ships = { s1:{size: 5, symbol: 10, bow, course},
-                  s2:{size: 4, symbol: 20, bow, course},
-                  s3:{size: 3, symbol: 30, bow, course},
-                  s4:{size: 3, symbol: 40, bow, course},
-                  s5:{size: 2, symbol: 50, bow, course}
-                };
-    var bad_placement = false;
-    for(s in ships){
-        do{
-            s.bow.x = getRandomInt(0, size)
-            s.bow.y = getRandomInt(0, size)
-            for(var i = 0; i < 4; i++){
-                s.course = getRandomInt(i, 4)
-                if(!check_ship_interference(s, map, size))
-                    break;
-            }
-            if(check_ship_interference(s, map, size))
-                bad_placement = true;
-            else
-                bad_placement = false;
-        } while(bad_placement)
-        
-        map = add_ship(s, map)       
-    }
-
-    return map;
-}
-
 //Init-map (game_id, player_id, map[][])
 router.patch('/init-map', async function(req, res, next) {
     let game = await Game.findOne({_id: req.body.game_id})
@@ -108,11 +25,6 @@ router.patch('/init-map', async function(req, res, next) {
                 if(req.body.map.length == game.map_size){
                     game.p1_map = req.body.map;
                     game.p1_ready = true;
-                    //BOT
-                    if(game.player_2 == null){
-                        game.p2_map = init_bot_map(game);
-                        game.p2_ready = true;
-                    }
                     try {
                         await game.save()
                         res.status(200).send('Map updated');
