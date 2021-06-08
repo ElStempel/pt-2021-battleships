@@ -1118,8 +1118,17 @@ class Window extends React.Component {
 				if(receivedPlayers[i].stats.loses != 0){
 					divider = divider = receivedPlayers[i].stats.loses;
 				}
+				var score;
+				if(receivedPlayers[i].stats.loses == undefined){
+					score = parseInt(parseInt(receivedPlayers[i].stats.wins) / 1)
+				}
+				else{
+					score = parseInt(receivedPlayers[i].stats.wins) / parseInt(receivedPlayers[i].stats.loses)
+				}
+				// console.log(parseInt(parseInt(receivedPlayers[i].stats.wins) / parseInt(receivedPlayers[i].stats.loses)))
+				// console.log(score)
 				that.setState({
-					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: receivedPlayers[i].stats.wins })
+					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: score })
 				});
 			}
 		})
