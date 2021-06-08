@@ -411,8 +411,8 @@ router.post('/start-game', async function(req, res, next) {
         new_game.p2_map = await init_bot_map(new_game);
         new_game.turn = 1;
         new_game.p2_ready = true;
-        await new_game.save()
       }
+      await new_game.save()
     } catch (error) {
       console.log(error)
       res.status(400).send(error)
