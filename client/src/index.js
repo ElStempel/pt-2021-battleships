@@ -2620,12 +2620,11 @@ class Window extends React.Component {
 									<button style={{ visibility: this.state.joinRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.leaveRoom} class='joinRoomButton'>Leave room</button>
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.deleteYourRoom} class='joinRoomButton'>Delete your room</button>
 									<br></br>
-									<button style={{ visibility: this.state.rejoinCurrentGameHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='joinRoomButton'>Rejoin your game</button>
+									<button style={{ visibility: this.state.rejoinCurrentGameHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='rejoinGameButton'>Rejoin your game</button>
+									<p style={{ display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white', textAlign: 'center' }}> {this.state.playerInRoom} </p>
 									<div style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white' }}>
 										<div style={{ display: this.state.customRulesDisabledVisibility }}> Map size: {this.state.mapSize}, custom rules enabled: <p style={{ display: this.state.customRule1Visibility, }}>one field of space,&nbsp;</p><p style={{ display: this.state.customRule2Visibility, }}>torpedo attack,&nbsp;</p><p style={{ display: this.state.customRule3Visibility, }}>cluster attack,&nbsp;</p><p style={{ display: this.state.customRule4Visibility, }}>airstrike</p></div>
 									</div>
-									<br></br>
-									<p style={{ display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white', textAlign: 'center' }}> {this.state.playerInRoom} </p>
 
 								</div>
 							</div>

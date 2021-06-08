@@ -308,6 +308,25 @@ code {
   color: white;
 }
 
+.rejoinGameButton {
+  text-align: center;
+  visibility: hidden;
+  margin-top: 20px;
+  /* margin-left: 50px; */
+  width: 400px;
+  height: 50px;
+  text-align: center;
+  background-color: grey;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.rejoinGameButton:hover {
+  background-color: black;
+  color: white;
+}
+
 .torpedoShotVertical {
   width: 250px;
   height: 150px;
