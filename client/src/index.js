@@ -140,6 +140,26 @@ async function fetchGameState(that, enemy, player){
 						gap: data.custom_rules.cust_rule_4
 					})
 					try{
+						var normalShotButton = document.getElementsByClassName('confirmShot')[0];
+						var clusterButton = document.getElementsByClassName('clusterAttack')[0];
+						if(that.state.gamePlayer == that.state.turn && that.state.clusterAttackActive == true){
+							normalShotButton.disabled = true;
+							normalShotButton.style.backgroundColor = 'green';
+						}
+						else{
+							clusterButton.disabled = true;
+							clusterButton.style.backgroundColor = 'green';
+							normalShotButton.disabled = false;
+							normalShotButton.style.backgroundColor = 'red';
+							that.setState({
+								clusterAttackActive: false,
+							})
+						}
+					}
+					catch(error){
+
+					}
+					try{
 						if(data.custom_rules.enabled == true){
 							document.getElementsByClassName('specialAttacks')[0].style.display = 'inline-block';
 							if(data.custom_rules.cust_rule_1){
@@ -193,7 +213,8 @@ async function fetchGameState(that, enemy, player){
 					catch(error){
 
 					}
-					if(data.draw == 1){
+					console.log(data.draw)
+					if(data.draw == 1 && that.state.drawProposed == false){
 						that.setState({
 							drawDivText: 'Enemy Proposed a draw. Do you accept?'
 						})
@@ -204,13 +225,11 @@ async function fetchGameState(that, enemy, player){
 							
 						}
 					}
-					if(data.draw == 2){
+					else if(data.draw >= 2){
 						that.setState({
 							gameShown: false,
 							endGameDivShown: true,
 							endGameDivText: 'Game ended with a draw.',
-							shipsLostGame: 0,
-							shipsSunkGame: 0,
 							rejoinCurrentGameHidden: 'hidden',
 						})
 						inGame = false;
@@ -228,6 +247,7 @@ async function fetchGameState(that, enemy, player){
 						inGame = false;
 						console.log(that)
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
+						that.getMineStats();
 					}
 					else if(data.winner != 0){
 						that.setState({
@@ -241,15 +261,16 @@ async function fetchGameState(that, enemy, player){
 						inGame = false;
 						console.log(that)
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
+						that.getMineStats();
 					}
 					if(data.turn == that.state.gamePlayer){
 						that.setState({
-							turn: 'Your turn.'
+							turnText: 'Your turn.'
 						})
 					}
 					else{
 						that.setState({
-							turn: 'Enemy turn.'
+							turnText: 'Enemy turn.'
 						})
 					}
 				}
@@ -358,6 +379,7 @@ class Window extends React.Component {
 		this.clusterAttack = this.clusterAttack.bind(this);
 		this.airStrike = this.airStrike.bind(this);
 		this.createRoom = this.createRoom.bind(this);
+		this.getMineStats = this.getMineStats.bind(this);
 
 		this.state = { 
 			// Strona po loginie
@@ -457,7 +479,6 @@ class Window extends React.Component {
 			shotY: 0,
 
 			draw: 0,
-			turn: 0,
 			winner: 0,
 			shipsLostGame: 0,
 			shipsSunkGame: 0,
@@ -467,13 +488,20 @@ class Window extends React.Component {
 
 			gamePlayer: 2,
 
-			turn: '',
+			turn: 0,
+			turnText: '',
 
 			mapSize: 10,
 
 			drawDivText: 'Are you sure to propose a Draw?',
 
 			gap: false,
+
+			drawProposed: false,
+
+			shotText: '',
+
+			clusterAttackActive: false,
 		};
 
 		activeForRules = this;
@@ -557,30 +585,40 @@ class Window extends React.Component {
 				that.getPlayersList();
 			}
 		})
-		.then(function(){
+		.then(async function(){
 			const rejoinRequestOptions = {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ player_id: that.state.user_id })
 			};
-			fetch('https://localhost:9000/rooms/rejoin', rejoinRequestOptions)
+			await fetch('https://localhost:9000/rooms/rejoin', rejoinRequestOptions)
 			.then(function(response){
 				rejoinStat = response.status
-				if(rejoinStat == 200){
+				return response.json()
+			})
+			.then(function(data){
+				console.log(data)
+				if(rejoinStat == 200 && data.game_id){
 					that.setState({
+						game_id: data.game_id,
 						rejoinCurrentGameHidden: 'visible',
 						joinRoomHidden: 'hidden',
 						deleteRoomHidden: 'hidden',
 					})
 				}
-				return response.json()
-			})
-			.then(function(data){
-				if(rejoinStat == 200){
+				else if(rejoinStat == 200 && data.player_1 == that.state.user_id){
 					that.setState({
-						game_id: data.game_id,
+						rejoinCurrentGameHidden: 'hidden',
+						joinRoomHidden: 'hidden',
+						deleteRoomHidden: 'visible',
 					})
-					console.log(that.state.game_id)
+				}
+				else if(rejoinStat == 200 && data.player_1 != that.state.user_id){
+					that.setState({
+						rejoinCurrentGameHidden: 'hidden',
+						joinRoomHidden: 'visible',
+						deleteRoomHidden: 'hidden',
+					})
 				}
 				else{
 					that.setState({
@@ -611,6 +649,11 @@ class Window extends React.Component {
 					startText: 'New account created.',
 				});
 			}
+			else{
+				that.setState({
+					startText: 'There is acoount with specified username.',
+				});
+			}
 		});
 	}
 
@@ -630,14 +673,18 @@ class Window extends React.Component {
 			stat = response.status;
 			if(stat == 200){
 				that.setState({
+					// Strona po loginie
 					div1Shown: true, 
 
+					// Tekst na stronie loginu
 					startText: '',
 
+					// Dane usera
 					user_id: '', 
 					password: '', 
 					username: '', 
 
+					// Staty usera
 					games_played: 0, 
 					ships_sunk: 0, 
 					ships_lost: 0,
@@ -646,14 +693,20 @@ class Window extends React.Component {
 					wins: 0,
 					loses: 0,
 
+					// Dołączanie do pokoi
 					joinRoomHidden: 'hidden',
+					// Usuwanie pokoi i start do gry
 					deleteRoomHidden: 'hidden',
+					// Ponowne łączenie z grą
 					rejoinCurrentGameHidden: 'hidden',
 
 					div2Shown: true, 
 					gameShown: false,
 					customRulesDisabled: true, 
-					
+
+					endGameDivShown: false,
+					endGameDivText: '',
+
 					deleteAccountSeen: false,
 					customRule1: false,
 					customRule2: false,
@@ -664,6 +717,9 @@ class Window extends React.Component {
 					inviteOnly: false,
 
 					createButtonDisabled: false,
+					joinRoomHidden: 'hidden',
+					deleteRoomHidden: 'hidden',
+					rejoinCurrentGameHidden: 'hidden',
 
 					rooms: [
 
@@ -714,13 +770,29 @@ class Window extends React.Component {
 					shotY: 0,
 
 					draw: 0,
-					turn: 0,
 					winner: 0,
 					shipsLostGame: 0,
 					shipsSunkGame: 0,
 
 					drawGiveUpPopupText: '',
-					drawGiveUpPopupShown: false
+					drawGiveUpPopupShown: false,
+
+					gamePlayer: 2,
+
+					turn: 0,
+					turnText: '',
+
+					mapSize: 10,
+
+					drawDivText: 'Are you sure to propose a Draw?',
+
+					gap: false,
+
+					drawProposed: false,
+
+					shotText: '',
+
+					clusterAttackActive: false,
 				});
 			}
 		});
@@ -994,11 +1066,11 @@ class Window extends React.Component {
 			enemyBoardButtons: false,
 			shipDeployed: true,
 		})
-		that.fetchGameState();
 		inGame = true;
 		var enemy = document.getElementsByClassName('butEnemy');
 		var player = document.getElementsByClassName('butPlayer');
-		fetchGameState(that, enemy, player);
+		that.fetchGameState();
+		// fetchGameState(that, enemy, player);
 	}
 
 	startGame(){
@@ -1071,126 +1143,129 @@ class Window extends React.Component {
 	async fetchGameState(){
 		var that = this;
 
-		console.log('Aktualizacja')
+		// console.log('Aktualizacja')
 
-		const requestOptions = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ "game_id": that.state.game_id, "player_id": that.state.user_id })
-		};
-		var stat = 0
-		var data
-		while(stat != 200){
-			await new Promise(r => setTimeout(r, 200));
-			fetch('https://localhost:9000/games/fetch-state', requestOptions)
-			.then(function(response){
-				stat = response.status;
-				if(stat == 200){
-					data = response.json();
-				}
-				return data;
-			})
-			.then(function(data){
-				if(stat == 200){
-					console.log(data)
-					that.setState({
-						playerBoard: data.playerMap,
-						enemyBoard: data.enemyMap,
-						draw: data.draw,
-						turn: data.turn,
-						winner: data.winner,
-						shipsLostGame: data.stats.ships_lost,
-						shipsSunkGame: data.stats.ships_sunk,
-						enemyBoardButtons: false,
-						shipDeployed: true,
-						mapSize: data.custom_rules.map_size,
-						customRule1: data.custom_rules.cust_rule_1,
-						customRule2: data.custom_rules.cust_rule_2,
-						customRule3: data.custom_rules.cust_rule_3,
-						gap: data.custom_rules.cust_rule_4
-					})
-					try{
-						var confirmBut = document.getElementsByClassName('confirmShips');
-						var resetBut = document.getElementsByClassName('resetBoard');
-						confirmBut[0].style.backgroundColor = 'green';
-						confirmBut[0].disabled = true;
-						resetBut[0].style.backgroundColor = 'green';
-						resetBut[0].disabled = true;
-						var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
-						confirmShotBut.style.backgroundColor = 'red'
-						var shipsButtons = document.getElementsByClassName('ship');
-						for(var i = 0; i < shipsButtons.length; i++){
-							shipsButtons[i].style.backgroundColor = 'green';
-							shipsButtons[i].disabled = true;
-						}
-						if(data.turn == data.player){
-							that.setState({
-								turn: 'Your turn.'
-							})
-						}
-						else{
-							that.setState({
-								turn: 'Enemy turn.'
-							})
-						}
-					}
-					catch(error){
+		// const requestOptions = {
+		// 	method: 'POST',
+		// 	headers: { 'Content-Type': 'application/json' },
+		// 	body: JSON.stringify({ "game_id": that.state.game_id, "player_id": that.state.user_id })
+		// };
+		// var stat = 0
+		// var data
+		// while(stat != 200){
+		// 	await new Promise(r => setTimeout(r, 200));
+		// 	fetch('https://localhost:9000/games/fetch-state', requestOptions)
+		// 	.then(function(response){
+		// 		stat = response.status;
+		// 		if(stat == 200){
+		// 			data = response.json();
+		// 		}
+		// 		return data;
+		// 	})
+		// 	.then(function(data){
+		// 		if(stat == 200){
+		// 			console.log(data)
+		// 			that.setState({
+		// 				playerBoard: data.playerMap,
+		// 				enemyBoard: data.enemyMap,
+		// 				draw: data.draw,
+		// 				turn: data.turn,
+		// 				winner: data.winner,
+		// 				shipsLostGame: data.stats.ships_lost,
+		// 				shipsSunkGame: data.stats.ships_sunk,
+		// 				enemyBoardButtons: false,
+		// 				shipDeployed: true,
+		// 				mapSize: data.custom_rules.map_size,
+		// 				customRule1: data.custom_rules.cust_rule_1,
+		// 				customRule2: data.custom_rules.cust_rule_2,
+		// 				customRule3: data.custom_rules.cust_rule_3,
+		// 				gap: data.custom_rules.cust_rule_4
+		// 			})
+		// 			try{
+		// 				var confirmBut = document.getElementsByClassName('confirmShips');
+		// 				var resetBut = document.getElementsByClassName('resetBoard');
+		// 				confirmBut[0].style.backgroundColor = 'green';
+		// 				confirmBut[0].disabled = true;
+		// 				resetBut[0].style.backgroundColor = 'green';
+		// 				resetBut[0].disabled = true;
+		// 				var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
+		// 				confirmShotBut.style.backgroundColor = 'red'
+		// 				var shipsButtons = document.getElementsByClassName('ship');
+		// 				for(var i = 0; i < shipsButtons.length; i++){
+		// 					shipsButtons[i].style.backgroundColor = 'green';
+		// 					shipsButtons[i].disabled = true;
+		// 				}
+		// 				if(data.turn == data.player){
+		// 					that.setState({
+		// 						turnText: 'Your turn.'
+		// 					})
+		// 				}
+		// 				else{
+		// 					that.setState({
+		// 						turnText: 'Enemy turn.'
+		// 					})
+		// 				}
+		// 			}
+		// 			catch(error){
 
-					}
-				}
-			})
-			.then(function(){
-				if(stat == 200){
-					try{
-						var enemy = document.getElementsByClassName('butEnemy');
-						for(var i = 0; i < that.state.mapSize; i++){
-							for(var j = 0; j < that.state.mapSize; j++){
-								if(that.state.enemyBoard[i][j] == 1){
-									enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
-								}
-								else if(that.state.enemyBoard[i][j] == 2){
-									enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
-								}
-								else if(that.state.enemyBoard[i][j] == 5){
-									enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
-								}
-								else if(that.state.enemyBoard[i][j] == 0){
-									enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
-								}
-							}
-						}
-						var player = document.getElementsByClassName('butPlayer');
-						for(var i = 0; i < that.state.mapSize; i++){
-							for(var j = 0; j < that.state.mapSize; j++){
-								if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
-									// trafienie
-									player[j + i * that.state.mapSize].style.backgroundColor = 'red'
-								}
-								else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
-									// zatopienie
-									player[j + i * that.state.mapSize].style.backgroundColor = 'black'
-								}
-								else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
-									// pudlo
-									player[j + i * that.state.mapSize].style.backgroundColor = 'white'
-								}
-								else if(parseInt(that.state.playerBoard[i][j]) != 0){
-									// statek
-									player[j + i * that.state.mapSize].style.backgroundColor = '#383838'
-								}
-								else {
-									// puste
-									player[j + i * that.state.mapSize].style.backgroundColor = 'blue'
-								}
-							}
-						}
-					}
-					catch(error){
+		// 			}
+		// 		}
+		// 	})
+		// 	.then(function(){
+		// 		if(stat == 200){
+		// 			try{
+		// 				var enemy = document.getElementsByClassName('butEnemy');
+		// 				for(var i = 0; i < that.state.mapSize; i++){
+		// 					for(var j = 0; j < that.state.mapSize; j++){
+		// 						if(that.state.enemyBoard[i][j] == 1){
+		// 							enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
+		// 						}
+		// 						else if(that.state.enemyBoard[i][j] == 2){
+		// 							enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
+		// 						}
+		// 						else if(that.state.enemyBoard[i][j] == 5){
+		// 							enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
+		// 						}
+		// 						else if(that.state.enemyBoard[i][j] == 0){
+		// 							enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
+		// 						}
+		// 					}
+		// 				}
+		// 				var player = document.getElementsByClassName('butPlayer');
+		// 				for(var i = 0; i < that.state.mapSize; i++){
+		// 					for(var j = 0; j < that.state.mapSize; j++){
+		// 						if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+		// 							// trafienie
+		// 							player[j + i * that.state.mapSize].style.backgroundColor = 'red'
+		// 						}
+		// 						else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+		// 							// zatopienie
+		// 							player[j + i * that.state.mapSize].style.backgroundColor = 'black'
+		// 						}
+		// 						else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+		// 							// pudlo
+		// 							player[j + i * that.state.mapSize].style.backgroundColor = 'white'
+		// 						}
+		// 						else if(parseInt(that.state.playerBoard[i][j]) != 0){
+		// 							// statek
+		// 							player[j + i * that.state.mapSize].style.backgroundColor = '#383838'
+		// 						}
+		// 						else {
+		// 							// puste
+		// 							player[j + i * that.state.mapSize].style.backgroundColor = 'blue'
+		// 						}
+		// 					}
+		// 				}
+		// 			}
+		// 			catch(error){
 
-					}
-				}
-			})
-		}
+		// 			}
+		// 		}
+		// 	})
+		// }
+		var enemy = document.getElementsByClassName('butEnemy');
+		var player = document.getElementsByClassName('butPlayer');
+		fetchGameState(that, enemy, player);
 	}
 
 	leaveRoom(){
@@ -1331,10 +1406,10 @@ class Window extends React.Component {
 			}
 			that.updateRoomsList();
 		})
+		that.getMineStats();
 	}
 
 	showDrawPopup(){
-		console.log("Usuwanie konta")
 		document.getElementsByClassName('modalDraw')[0].hidden = false;
 	}
 
@@ -1356,10 +1431,21 @@ class Window extends React.Component {
 			stat = response.status;
 			console.log(stat)
 			if(stat == 200){
-				that.setState({
-					gameShown: !that.state.gameShown,
-					rejoinCurrentGameHidden: 'hidden',
-				});
+				if(that.state.drawProposed == false){
+					that.setState({
+						drawProposed: true,	
+					});
+					try{
+						document.getElementsByClassName('modalDraw')[0].hidden = true;
+					}
+					catch(error){
+
+					}
+				}
+				// that.setState({
+				// 	gameShown: !that.state.gameShown,
+				// 	rejoinCurrentGameHidden: 'hidden',
+				// });
 			}
 		})
 	}
@@ -1448,6 +1534,35 @@ class Window extends React.Component {
 		})
 
 		that.fetchGameStart();
+	}
+
+	async getMineStats(){
+		var that = this;
+		var stat = 0;
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ _id: that.state.user_id })
+		};
+
+		await fetch('https://localhost:9000/stats/mine', requestOptions)
+		.then(function(response) { 
+			stat = response.status;
+			return response.json();
+		})
+		.then(function(data){
+			if(stat == 200){
+				that.setState({
+					games_played: data[0].stats.games_played, 
+					ships_sunk: data[0].stats.ships_sunk, 
+					ships_lost: data[0].stats.ships_lost,
+					shots_fired: data[0].stats.shots_fired,
+					shots_missed: data[0].stats.shots_missed,
+					wins: data[0].stats.wins,
+					loses: data[0].stats.defeats,
+				})
+			}
+		})
 	}
 
 	neighbourCheck(that, coords, shipName){
@@ -1731,7 +1846,6 @@ class Window extends React.Component {
 		event.preventDefault()
 		console.log(event.target.id)
 		if(this.state.availableFields > 0){
-			console.log(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])}))
 			if(this.state.dreadnoughtEnabled == true){
 				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.dreadnoughtCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
@@ -1824,7 +1938,7 @@ class Window extends React.Component {
 			}
 			event.target.style.backgroundColor = 'yellow'
 		}
-		that.fetchGameState();
+		// that.fetchGameState();
 	}
 
 	prepareBoardToSend(){
@@ -1894,20 +2008,16 @@ class Window extends React.Component {
 				stat = response.status;
 			})
 			.then(function(){
-				// useEffect(() => {
-				// 	that.fetchGameState()
-				// 	const interval = setInterval(()=>{
-				// 		that.fetchGameState()
-				// 	}, 1000)
-				// 	return() => clearInterval(interval)
-				// })
+				if(stat == 200){
+					inGame = true;
+				}
 				that.fetchGameState()
 			})
 
 		}
 		var enemy = document.getElementsByClassName('butEnemy');
 		var player = document.getElementsByClassName('butPlayer');
-		fetchGameState(that, enemy, player);
+		// fetchGameState(that, enemy, player);
 	}
 
 	handleResetBoardClick(){
@@ -1944,34 +2054,44 @@ class Window extends React.Component {
 		var that = this;
 		var enemyBoard = document.getElementsByClassName('enemyTable')[0];
 		// console.log(enemyBoard)
-		
-		console.log("Shots fired!")
-		event.preventDefault()
-		event.target.style.backgroundColor = 'red'
-		var stat = 0;
-		const requestOptions = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
-		};
 
-		fetch('https://localhost:9000/games/shot', requestOptions)
-		.then(function(response) { 
-			stat = response.status;
-			if(stat == 200){
-				// event.target.style.backgroundColor = 'green'
-				console.log( that.state.shotX)
-				console.log( that.state.shotY)
-				that.fetchGameState()
-			}
-			// else{
-			// 	event.target.style.backgroundColor = 'yellow'
-			// }
-			console.log(stat)
-		});
-		var enemy = document.getElementsByClassName('butEnemy');
-		var player = document.getElementsByClassName('butPlayer');
-		fetchGameState(that, enemy, player);
+		if(that.state.enemyBoard[that.state.shotY][that.state.shotX] == 0){
+			console.log("Shots fired!")
+			event.preventDefault()
+			event.target.style.backgroundColor = 'red'
+			var stat = 0;
+			const requestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
+			};
+
+			fetch('https://localhost:9000/games/shot', requestOptions)
+			.then(function(response) { 
+				stat = response.status;
+				if(stat == 200){
+					// event.target.style.backgroundColor = 'green'
+					that.setState({
+						shotText: ''
+					})
+					console.log( that.state.shotX)
+					console.log( that.state.shotY)
+					// that.fetchGameState()
+				}
+				// else{
+				// 	event.target.style.backgroundColor = 'yellow'
+				// }
+				console.log(stat)
+			});
+			var enemy = document.getElementsByClassName('butEnemy');
+			var player = document.getElementsByClassName('butPlayer');
+			// fetchGameState(that, enemy, player);
+		}
+		else{
+			that.setState({
+				shotText: 'You already shot here'
+			})
+		}
 	}
 
 	handleShipButtonClick(event){
@@ -2030,7 +2150,7 @@ class Window extends React.Component {
 				torpedoButton1.style.backgroundColor = 'green';
 				torpedoButton2.disabled = true;
 				torpedoButton2.style.backgroundColor = 'green';
-				that.fetchGameState()
+				// that.fetchGameState()
 			}
 		});
 	}
@@ -2054,7 +2174,7 @@ class Window extends React.Component {
 				torpedoButton1.style.backgroundColor = 'green';
 				torpedoButton2.disabled = true;
 				torpedoButton2.style.backgroundColor = 'green';
-				that.fetchGameState()
+				// that.fetchGameState()
 			}
 		});
 	}
@@ -2062,49 +2182,76 @@ class Window extends React.Component {
 	airStrike(){
 		var that = this;
 		var airStrikeButton = document.getElementsByClassName('airStrike')[0];
-		var stat = 0;
-		const requestOptions = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
-		};
+		if(that.state.shotY > 0 && that.state.shotY < that.state.mapSize - 1 && that.state.shotX > 0 && that.state.shotX < that.state.mapSize - 1){
+			var stat = 0;
+			const requestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
+			};
 
-		fetch('https://localhost:9000/games/shot/airstrike', requestOptions)
-		.then(function(response) { 
-			stat = response.status;
-			if(stat == 200){
-				airStrikeButton.disabled = true;
-				airStrikeButton.style.backgroundColor = 'green';
-				that.fetchGameState()
-			}
-		});
+			fetch('https://localhost:9000/games/shot/airstrike', requestOptions)
+			.then(function(response) { 
+				stat = response.status;
+				if(stat == 200){
+					that.setState({
+						shotText: ''
+					})
+					airStrikeButton.disabled = true;
+					airStrikeButton.style.backgroundColor = 'green';
+					// that.fetchGameState()
+				}
+			});
+		}
+		else{
+			that.setState({
+				shotText: 'You cannot shoot here'
+			})
+		}
 	}
 
 	clusterAttack(){
 		var that = this;
 		var clusterButton = document.getElementsByClassName('clusterAttack')[0];
-		var stat = 0;
-		const requestOptions = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
-		};
+		var normalShotButton = document.getElementsByClassName('confirmShot')[0];
+		if(that.state.enemyBoard[that.state.shotY][that.state.shotX] == 0){
+			var stat = 0;
+			const requestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ game_id: that.state.game_id, player_id: that.state.user_id, coordinates: { x: that.state.shotY, y: that.state.shotX}})
+			};
 
-		fetch('https://localhost:9000/games/shot/cluster', requestOptions)
-		.then(function(response) { 
-			stat = response.status;
-			if(stat == 200){
-				if(that.state.gamePlayer == that.state.turn){
-					document.getElementsByClassName('confirmShot')[0].disabled = true;
+			fetch('https://localhost:9000/games/shot/cluster', requestOptions)
+			.then(function(response) { 
+				stat = response.status;
+				if(stat == 200){
+					that.setState({
+						shotText: '',
+						clusterAttackActive: true,
+					})
+					if(that.state.gamePlayer == that.state.turn && that.state.clusterAttackActive == true){
+						normalShotButton.disabled = true;
+						normalShotButton.style.backgroundColor = 'green';
+					}
+					else{
+						clusterButton.disabled = true;
+						clusterButton.style.backgroundColor = 'green';
+						normalShotButton.disabled = false;
+						normalShotButton.style.backgroundColor = 'red';
+						that.setState({
+							clusterAttackActive: false,
+						})
+					}
+					// that.fetchGameState()
 				}
-				else{
-					clusterButton.disabled = true;
-					clusterButton.style.backgroundColor = 'green';
-					document.getElementsByClassName('confirmShot')[0].disabled = false;
-				}
-				that.fetchGameState()
-			}
-		});
+			});
+		}
+		else{
+			that.setState({
+				shotText: 'You already shot here'
+			})
+		}
 	}
 
 	render() {
@@ -2212,10 +2359,11 @@ class Window extends React.Component {
 								</div>
 
 								<div style={{}}>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '100px'}}>Ships lost: {this.state.shipsLostGame}</p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '100px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
-									<p class="coords" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '100px' }}>Current coords: x - {this.state.shotX + 1}, y - {this.state.shotY + 1} </p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '100px'}}>{this.state.turn}</p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships lost: {this.state.shipsLostGame}</p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
+									<p class="coords" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '50px' }}>Current coords: column - {this.state.shotX + 1}, row - {this.state.shotY + 1} </p>
+									<p class="shotText" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '50px' }}> {this.state.shotText} </p>
+									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>{this.state.turnText}</p>
 								</div>
 								<div id='playerBoard' class='playerBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
 									<table class='playerTable'>{rowsPlayer}</table>
