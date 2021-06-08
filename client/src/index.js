@@ -100,8 +100,6 @@ function idToCoords(id){
 
 async function fetchGameState(that, enemy, player){
 	try{
-		console.log('Aktualizacja')
-
 		const requestOptions = {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -121,7 +119,6 @@ async function fetchGameState(that, enemy, player){
 			})
 			.then(function(data){
 				if(stat == 200){
-					console.log(data)
 					that.setState({
 						playerBoard: data.playerMap,
 						enemyBoard: data.enemyMap,
@@ -213,7 +210,6 @@ async function fetchGameState(that, enemy, player){
 					catch(error){
 
 					}
-					console.log(data.draw)
 					if(data.draw == 1 && that.state.drawProposed == false){
 						that.setState({
 							drawDivText: 'Enemy Proposed a draw. Do you accept?'
@@ -246,7 +242,6 @@ async function fetchGameState(that, enemy, player){
 							rejoinCurrentGameHidden: 'hidden',
 						})
 						inGame = false;
-						console.log(that)
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
 						that.getRoomsList();
@@ -261,7 +256,6 @@ async function fetchGameState(that, enemy, player){
 							rejoinCurrentGameHidden: 'hidden',
 						})
 						inGame = false;
-						console.log(that)
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
 						that.getRoomsList();
@@ -430,6 +424,13 @@ class Window extends React.Component {
 			inviteOnly: false,
 			customSize: false,
 			inviteOnly: false,
+
+			customRulesDisabledVisibility: 'none',
+			mapSizeVisibility: 'none',
+			customRule1Visibility: 'none',
+			customRule2Visibility: 'none',
+			customRule3Visibility: 'none',
+			customRule4Visibility: 'none',
 
 			createButtonDisabled: false,
 			joinRoomHidden: 'hidden',
@@ -603,7 +604,6 @@ class Window extends React.Component {
 				return response.json()
 			})
 			.then(function(data){
-				console.log(data)
 				if(rejoinStat == 200 && data.game_id){
 					that.setState({
 						game_id: data.game_id,
@@ -617,6 +617,12 @@ class Window extends React.Component {
 						rejoinCurrentGameHidden: 'hidden',
 						joinRoomHidden: 'hidden',
 						deleteRoomHidden: 'visible',
+						customRulesDisabled: !data.custom_rules.enabled,
+						mapSize: data.custom_rules.map_size,
+						customRule1: data.custom_rules.cust_rule_1,
+						customRule2: data.custom_rules.cust_rule_2,
+						customRule3: data.custom_rules.cust_rule_3,
+						customRule4: data.custom_rules.cust_rule_4,
 					})
 				}
 				else if(rejoinStat == 200 && data.player_1 != that.state.user_id){
@@ -624,11 +630,47 @@ class Window extends React.Component {
 						rejoinCurrentGameHidden: 'hidden',
 						joinRoomHidden: 'visible',
 						deleteRoomHidden: 'hidden',
+						customRulesDisabled: !data.custom_rules.enabled,
+						mapSize: data.custom_rules.map_size,
+						customRule1: data.custom_rules.cust_rule_1,
+						customRule2: data.custom_rules.cust_rule_2,
+						customRule3: data.custom_rules.cust_rule_3,
+						customRule4: data.custom_rules.cust_rule_4,
 					})
 				}
 				else{
 					that.setState({
 						rejoinCurrentGameHidden: 'hidden',
+					})
+				}
+				if(that.state.customRulesDisabled == false){
+					that.setState({
+						customRulesDisabledVisibility: 'inline-block'
+					})
+				}
+				if(that.state.mapSize == true){
+					that.setState({
+						mapSizeVisibility: 'inline-block'
+					})
+				}
+				if(that.state.customRule1 == true){
+					that.setState({
+						customRule1Visibility: 'inline-block'
+					})
+				}
+				if(that.state.customRule2 == true){
+					that.setState({
+						customRule2Visibility: 'inline-block'
+					})
+				}
+				if(that.state.customRule3 == true){
+					that.setState({
+						customRule3Visibility: 'inline-block'
+					})
+				}
+				if(that.state.customRule4 == true){
+					that.setState({
+						customRule4Visibility: 'inline-block'
 					})
 				}
 			})
@@ -639,7 +681,6 @@ class Window extends React.Component {
 	chooseRegister(){
 		var that = this;
 
-		console.log("Rejestracja nacisnieta")
 		var stat = 0;
 		const requestOptions = {
 			method: 'POST',
@@ -657,7 +698,7 @@ class Window extends React.Component {
 			}
 			else{
 				that.setState({
-					startText: 'There is acoount with specified username.',
+					startText: 'There is account with specified username.',
 				});
 			}
 		});
@@ -666,7 +707,6 @@ class Window extends React.Component {
 	chooseLogout(){
 		var that = this;
 
-		console.log("Rejestracja nacisnieta")
 		var stat = 0;
 		const requestOptions = {
 			method: 'POST',
@@ -721,6 +761,13 @@ class Window extends React.Component {
 					inviteOnly: false,
 					customSize: false,
 					inviteOnly: false,
+
+					customRulesDisabledVisibility: 'none',
+					mapSizeVisibility: 'none',
+					customRule1Visibility: 'none',
+					customRule2Visibility: 'none',
+					customRule3Visibility: 'none',
+					customRule4Visibility: 'none',
 
 					createButtonDisabled: false,
 					joinRoomHidden: 'hidden',
@@ -806,7 +853,6 @@ class Window extends React.Component {
 
 	getRoomsList(){
 		var that = this;
-		console.log("Getting list of rooms")
 		var receivedRooms;
 		const requestOptions = {
 			method: 'GET',
@@ -920,7 +966,6 @@ class Window extends React.Component {
 
 	getPlayersList(){
 		var that = this;
-		console.log("Getting list of players")
 		var receivedPlayers;
 		const requestOptions = {
 			method: 'GET',
@@ -959,7 +1004,6 @@ class Window extends React.Component {
 	}
 
 	showCreateRoomPage(){
-		console.log("Creating room")
 		this.updateRoomsList();
 		this.setState({
 			div2Shown: !this.state.div2Shown,
@@ -975,7 +1019,6 @@ class Window extends React.Component {
 
 	confirmRoomCreation(){
 		var that = this;
-		console.log("Room created")
 		var custom = {
 			enabled: !that.state.customRulesDisabled,
 			map_size: that.state.mapSize,
@@ -984,7 +1027,6 @@ class Window extends React.Component {
 			cust_rule_3: that.state.customRule3,
 			cust_rule_4: that.state.customRule4,
 		}
-		console.log(custom)
 
 		const requestOptions = {
 			method: 'POST',
@@ -996,7 +1038,6 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/rooms/create', requestOptions)
 		.then(function(response){
 			stat = response.status;
-			console.log(stat)
 			if(stat == 201){
 				roomDetails = response.json();
 			}
@@ -1009,6 +1050,36 @@ class Window extends React.Component {
 				createButtonDisabled: true,
 				joinRoomHidden: 'visible',
 			});
+			if(that.state.customRulesDisabled == false){
+				that.setState({
+					customRulesDisabledVisibility: 'inline-block'
+				})
+			}
+			if(that.state.mapSize == true){
+				that.setState({
+					mapSizeVisibility: 'inline-block'
+				})
+			}
+			if(that.state.customRule1 == true){
+				that.setState({
+					customRule1Visibility: 'inline-block'
+				})
+			}
+			if(that.state.customRule2 == true){
+				that.setState({
+					customRule2Visibility: 'inline-block'
+				})
+			}
+			if(that.state.customRule3 == true){
+				that.setState({
+					customRule3Visibility: 'inline-block'
+				})
+			}
+			if(that.state.customRule4 == true){
+				that.setState({
+					customRule4Visibility: 'inline-block'
+				})
+			}
 		})
 		.then(function(){
 			that.updateRoomsList();
@@ -1016,49 +1087,42 @@ class Window extends React.Component {
 	}
 
 	enableRulesChoice(){
-		console.log("Enabled custom rules")
 		activeForRules.setState({
 			customRulesDisabled: !activeForRules.state.customRulesDisabled,
 		});
 	}
 
 	enableRule1(){
-		console.log("Enabled custom rule 1")
 		activeForRules.setState({
 			customRule1: !activeForRules.state.customRule1,
 		});
 	}
 
 	enableRule2(){
-		console.log("Enabled custom rule 2")
 		activeForRules.setState({
 			customRule2: !activeForRules.state.customRule2,
 		});
 	}
 
 	enableRule3(){
-		console.log("Enabled custom rule 3")
 		activeForRules.setState({
 			customRule3: !activeForRules.state.customRule3,
 		});
 	}
 
 	enableRule4(){
-		console.log("Enabled custom rule 4")
 		activeForRules.setState({
 			customRule4: !activeForRules.state.customRule4,
 		});
 	}
 
 	enableInviteOnly(){
-		console.log("Enabled invite only")
 		activeForRules.setState({
 			inviteOnly: !activeForRules.state.inviteOnly,
 		});
 	}
 
 	customMapSize(event){
-		console.log("Enabled invite only")
 		activeForRules.setState({
 			mapSize: event.target.value,
 		});
@@ -1066,7 +1130,6 @@ class Window extends React.Component {
 
 	rejoinGame(){
 		var that = activeForRejoin;
-		console.log(that)
 		that.setState({
 			gameShown: !that.state.gameShown,
 			enemyBoardButtons: false,
@@ -1083,7 +1146,6 @@ class Window extends React.Component {
 		var that = this;
 		this.activeForRules = this;
 		this.activeForRejoin = this;
-		console.log('Starting Game')
 
 		const requestOptions = {
 			method: 'POST',
@@ -1127,7 +1189,6 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/rooms/fetch-game', requestOptions)
 		.then(function(response){
 			var data;
-			console.log(response)
 			stat = response.status;
 			if(stat == 200){
 				data = response.json();
@@ -1148,8 +1209,6 @@ class Window extends React.Component {
 
 	async fetchGameState(){
 		var that = this;
-
-		// console.log('Aktualizacja')
 
 		const requestOptions = {
 			method: 'POST',
@@ -1197,7 +1256,6 @@ class Window extends React.Component {
 	}
 
 	leaveRoom(){
-		console.log("Leaving")
 		var that = this;
 
 		const requestOptions = {
@@ -1224,7 +1282,6 @@ class Window extends React.Component {
 
 	rejoinCurrentGame(){
 		var that = this;
-		console.log(that)
 		that.setState({
 			gameShown: true,
 			createButtonDisabled: true,
@@ -1238,7 +1295,6 @@ class Window extends React.Component {
 
 	deleteYourRoom(){
 		var that = this;
-		console.log('Delete Your Room');
 
 		const requestOptions = {
 			method: 'POST',
@@ -1300,7 +1356,6 @@ class Window extends React.Component {
 	}
 
 	handleSubmitGiveUpPopup(event) {
-		console.log('Give Up')
 
 		var that = this;
 
@@ -1357,7 +1412,6 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/games/draw', requestOptions)
 		.then(function(response) { 
 			stat = response.status;
-			console.log(stat)
 			if(stat == 200){
 				if(that.state.drawProposed == false){
 					that.setState({
@@ -1383,7 +1437,6 @@ class Window extends React.Component {
 	}
 
 	showDeletePopup(){
-		console.log("Usuwanie konta")
 		document.getElementsByClassName('modalDelete')[0].hidden = false;
 	}
 
@@ -1393,7 +1446,6 @@ class Window extends React.Component {
 
 	handleSubmitDeletePopup(event) {
 		var that = this;
-		console.log(this.state.inputValue)
 		if(that.state.password = that.state.inputValue){
 			var stat = 0;
 			const requestOptions = {
@@ -1405,7 +1457,6 @@ class Window extends React.Component {
 			fetch('https://localhost:9000/users/delete', requestOptions)
 			.then(function(response) { 
 				stat = response.status;
-				console.log(stat)
 				if(stat == 200){
 					that.setState({
 						div1Shown: !that.state.div1Shown,
@@ -1449,7 +1500,6 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/rooms/join', requestOptions)
 		.then(function(response) { 
 			stat = response.status;
-			console.log(stat)
 			if(stat == 201){
 				that.setState({ 
 					createButtonDisabled: true,
@@ -1703,8 +1753,6 @@ class Window extends React.Component {
 			neighbourCoordsTaken = this.neighbourCheck(this, coords, shipName);
 		}
 		
-		console.log(coordsTaken)
-		console.log(neighbourCoordsTaken)
 		if(coordsTaken == true || neighbourCoordsTaken == true){
 			return false;
 		}
@@ -1772,7 +1820,6 @@ class Window extends React.Component {
 
 	handlePlayerBoardClick(event){
 		event.preventDefault()
-		console.log(event.target.id)
 		if(this.state.availableFields > 0){
 			if(this.state.dreadnoughtEnabled == true){
 				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
@@ -1901,7 +1948,6 @@ class Window extends React.Component {
 	handleConfirmShipsClick(){
 		var that = this;
 		var boardToSend = that.prepareBoardToSend();
-		console.log("Confirm ships")
 		var shipsBut = document.getElementsByClassName('ship');
 		var allSet = true;
 		for(var i = 0; i < shipsBut.length; i++)
@@ -1981,10 +2027,7 @@ class Window extends React.Component {
 	handleConfirmShotClick(event){
 		var that = this;
 		var enemyBoard = document.getElementsByClassName('enemyTable')[0];
-		// console.log(enemyBoard)
-
 		if(that.state.enemyBoard[that.state.shotY][that.state.shotX] == 0){
-			console.log("Shots fired!")
 			event.preventDefault()
 			event.target.style.backgroundColor = 'red'
 			var stat = 0;
@@ -2002,14 +2045,11 @@ class Window extends React.Component {
 					that.setState({
 						shotText: ''
 					})
-					console.log( that.state.shotX)
-					console.log( that.state.shotY)
 					// that.fetchGameState()
 				}
 				// else{
 				// 	event.target.style.backgroundColor = 'yellow'
 				// }
-				console.log(stat)
 			});
 			var enemy = document.getElementsByClassName('butEnemy');
 			var player = document.getElementsByClassName('butPlayer');
@@ -2051,7 +2091,6 @@ class Window extends React.Component {
 	}
 
 	showCustomRulesDiv(room){
-		console.log('Inside')
 		document.getElementsByClassName(room)[0].style.setProperty("display", "inline");
 	}
 
@@ -2289,7 +2328,7 @@ class Window extends React.Component {
 								<div style={{}}>
 									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships lost: {this.state.shipsLostGame}</p>
 									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
-									<p class="coords" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '50px' }}>Current coords: column - {this.state.shotX + 1}, row - {this.state.shotY + 1} </p>
+									{/* <p class="coords" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '50px' }}>Current coords: column - {this.state.shotX + 1}, row - {this.state.shotY + 1} </p> */}
 									<p class="shotText" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '50px' }}> {this.state.shotText} </p>
 									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>{this.state.turnText}</p>
 								</div>
@@ -2455,8 +2494,12 @@ class Window extends React.Component {
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '50px' }} onClick={this.startGame} class='joinRoomButton'>Start Game</button>
 									<button style={{ visibility: this.state.joinRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.leaveRoom} class='joinRoomButton'>Leave Room</button>
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.deleteYourRoom} class='joinRoomButton'>Delete Your Room</button>
+									<br></br>
 									<button style={{ visibility: this.state.rejoinCurrentGameHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='joinRoomButton'>Rejoin Your Game</button>
-									{/* <button style={{ visibility: this.state.rejoinCurrentGameHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.rejoinCurrentGame} class='joinRoomButton'>Rejoin Current Game</button> */}
+									<div style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white' }}>
+										<div style={{ display: this.state.customRulesDisabledVisibility }}> Map size: {this.state.mapSize}, custom rules enabled: <p style={{ display: this.state.customRule1Visibility, }}>one field of space,&nbsp;</p><p style={{ display: this.state.customRule2Visibility, }}>torpedo attack,&nbsp;</p><p style={{ display: this.state.customRule3Visibility, }}>cluster attack,&nbsp;</p><p style={{ display: this.state.customRule4Visibility, }}>airstrike</p></div>
+									</div>
+
 								</div>
 							</div>
 						)
