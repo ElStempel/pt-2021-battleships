@@ -244,6 +244,14 @@ async function fetchGameState(that, enemy, player){
 							reconCoordsList: [],
 							draw: 0,
 							winner: 0,
+							customRule1: false,
+							customRule2: false,
+							customRule3: false,
+							customRule4: false,
+							mapSize: 10,
+							customRulesDisabled: true,
+							turnText: '',
+							turn: 0,
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
@@ -274,6 +282,14 @@ async function fetchGameState(that, enemy, player){
 							reconCoordsList: [],
 							draw: 0,
 							winner: 0,
+							customRule1: false,
+							customRule2: false,
+							customRule3: false,
+							customRule4: false,
+							mapSize: 10,
+							customRulesDisabled: true,
+							turnText: '',
+							turn: 0,
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
@@ -305,6 +321,14 @@ async function fetchGameState(that, enemy, player){
 							reconCoordsList: [],
 							draw: 0,
 							winner: 0,
+							customRule1: false,
+							customRule2: false,
+							customRule3: false,
+							customRule4: false,
+							mapSize: 10,
+							customRulesDisabled: true,
+							turnText: '',
+							turn: 0,
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
@@ -1427,6 +1451,34 @@ class Window extends React.Component {
 					joinRoomHidden: 'hidden',
 					deleteRoomHidden: 'hidden',
           			room_id: 0,
+					shipsLostGame: 0,
+					shipsSunkGame: 0,
+					rejoinCurrentGameHidden: 'hidden',
+					dreadnoughtFields: 5,
+					cruiserFields: 4,
+					submarineFields: 3,
+					destroyerFields: 3,
+					reconFields: 2,
+					dreadnoughtEnabled: true,
+					cruiserEnabled: true,
+					submarineEnabled: true,
+					destroyerEnabled: true,
+					reconEnabled: true,
+					dreadnoughtCoordsList: [],
+					cruiserCoordsList: [],
+					submarineCoordsList: [],
+					destroyerCoordsList: [],
+					reconCoordsList: [],
+					draw: 0,
+					winner: 0,
+					customRule1: false,
+					customRule2: false,
+					customRule3: false,
+					customRule4: false,
+					mapSize: 10,
+					customRulesDisabled: true,
+					turnText: '',
+					turn: 0,
 				})
 			}
 			if(stat == 403){
