@@ -337,14 +337,12 @@ async function getUserInYourRoom(that){
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ room_id: that.state.room_id, player_id: that.state.user_id })
 	};
-	console.log(that.state.room_id)
 	var stat = 0;
 	var data;
 	while(that.state.room_id != 0){
 		await new Promise(r => setTimeout(r, 500));
 		fetch('https://localhost:9000/rooms/fetch-players', requestOptions)
 		.then(function(response){
-			console.log('wysyla')
 			stat = response.status;
 			if(stat == 200){
 				data = response.json();
@@ -352,7 +350,6 @@ async function getUserInYourRoom(that){
 			return data;
 		})
 		.then(function(data){
-			console.log(data)
 			if(stat == 200){
 				if(that.state.username == data.player_1){
 					that.setState({
@@ -1899,7 +1896,6 @@ class Window extends React.Component {
 					this.state.dreadnoughtCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					event.target.style.color = 'white'
-					// event.target.textContent = 5
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 						dreadnoughtFields: this.state.dreadnoughtFields - 1,
@@ -1911,7 +1907,6 @@ class Window extends React.Component {
 					this.state.cruiserCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					event.target.style.color = 'white'
-					// event.target.textContent = 4
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 						cruiserFields: this.state.cruiserFields - 1,
@@ -1923,7 +1918,6 @@ class Window extends React.Component {
 					this.state.submarineCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					event.target.style.color = 'white'
-					// event.target.textContent = 3
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 						submarineFields: this.state.submarineFields - 1,
@@ -1935,7 +1929,6 @@ class Window extends React.Component {
 					this.state.destroyerCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					event.target.style.color = 'white'
-					// event.target.textContent = 3
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 						destroyerFields: this.state.destroyerFields - 1,
@@ -1947,7 +1940,6 @@ class Window extends React.Component {
 					this.state.reconCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
 					event.target.style.color = 'white'
-					// event.target.textContent = 2
 					this.setState({
 						availableFields: this.state.availableFields - 1,
 						reconFields: this.state.reconFields - 1,
