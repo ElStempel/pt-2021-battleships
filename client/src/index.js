@@ -1898,8 +1898,11 @@ class Window extends React.Component {
 				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.dreadnoughtCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
+					event.target.style.color = 'white'
+					// event.target.textContent = 5
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						dreadnoughtFields: this.state.dreadnoughtFields - 1,
 					})
 				}
 			}
@@ -1907,8 +1910,11 @@ class Window extends React.Component {
 				if(this.checkCoords('cruiser', this.state.cruiserCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.cruiserCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
+					event.target.style.color = 'white'
+					// event.target.textContent = 4
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						cruiserFields: this.state.cruiserFields - 1,
 					})
 				}
 			}
@@ -1916,8 +1922,11 @@ class Window extends React.Component {
 				if(this.checkCoords('submarine', this.state.submarineCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.submarineCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
+					event.target.style.color = 'white'
+					// event.target.textContent = 3
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						submarineFields: this.state.submarineFields - 1,
 					})
 				}
 			}
@@ -1925,8 +1934,11 @@ class Window extends React.Component {
 				if(this.checkCoords('destroyer', this.state.destroyerCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.destroyerCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
+					event.target.style.color = 'white'
+					// event.target.textContent = 3
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						destroyerFields: this.state.destroyerFields - 1,
 					})
 				}
 			}
@@ -1934,8 +1946,11 @@ class Window extends React.Component {
 				if(this.checkCoords('recon', this.state.reconCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.reconCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
 					event.target.style.backgroundColor = '#383838'
+					event.target.style.color = 'white'
+					// event.target.textContent = 2
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						reconFields: this.state.reconFields - 1,
 					})
 				}
 			}
@@ -2148,7 +2163,7 @@ class Window extends React.Component {
 			reconEnabled: !this.state.reconEnabled,
 			playerBoardEnabled: !this.state.playerBoardEnabled,
 			availableFields: this.state[shipDeployed],
-			[shipDeployed]: 0,
+			// [shipDeployed]: 0,
 		});
 
 		this.setState({
