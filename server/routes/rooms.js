@@ -333,6 +333,7 @@ router.post('/start-game', async function(req, res, next) {
       if(new_game.player2 == null){
         //BOT
         new_game.p2_map = await init_bot_map(new_game);
+        new_game.turn = 1;
         new_game.p2_ready = true;
         console.log(new_game.p2_map)
         await new_game.save()
