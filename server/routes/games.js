@@ -95,6 +95,47 @@ function search_and_destroy(enemyMap, ship, map_size){
     }
 }
 
+async function bot_shot(game){
+    var bot_x;
+    var bot_y;
+    var can_shoot = true;
+    while(can_shoot){
+        bot_x = getRandomInt(0, game.map_size)
+        bot_y = getRandomInt(0, game.map_size)
+        //Check if chosen place was never shot before
+        if(game.p1_map[bot_y][bot_x]%10 == 0){
+            //Check if it's a ship or not
+            if(parseInt(game.p1_map[bot_y][bot_x]/10) > 0){
+                game.p1_map[bot_y][bot_x]+=1;
+                bot_snd_info = await search_and_destroy(game.p1_map, game.p1_map[bot_y][bot_x], game.map_size)
+                game.p1_map = bot_snd_info[0];
+                if(bot_snd_info[1] == true){
+                    game.p2.ships_sunk += 1;
+                    game.p1.ships_lost += 1;
+                    if(game.p2.ships_sunk == 5){
+                        game.winner = 2;
+                    }
+                }
+            } else {
+                game.p2.shots_missed += 1;
+                game.p1_map[bot_y][bot_x]=5;
+                game.turn = 1;
+                can_shoot = false;
+            }
+            try {
+                await game.markModified("p1_map")
+                await game.save()
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    }
+}
+
+async function bot_play(game){
+    //if(){}
+}
+
 //shot (game_id, player_id, coordinates:{x, y})
 router.post('/shot', async function(req, res, next) {
     let game = await Game.findOne({_id: req.body.game_id})
@@ -133,40 +174,7 @@ router.post('/shot', async function(req, res, next) {
 
                         //BOT
                         if(game.player_2 == null && game.turn == 2){
-                            var bot_x;
-                            var bot_y;
-                            var can_shoot = true;
-                            while(can_shoot){
-                                bot_x = getRandomInt(0, game.map_size)
-                                bot_y = getRandomInt(0, game.map_size)
-                                //Check if chosen place was never shot before
-                                if(game.p1_map[bot_y][bot_x]%10 == 0){
-                                    //Check if it's a ship or not
-                                    if(parseInt(game.p1_map[bot_y][bot_x]/10) > 0){
-                                        game.p1_map[bot_y][bot_x]+=1;
-                                        bot_snd_info = await search_and_destroy(game.p1_map, game.p1_map[bot_y][bot_x], game.map_size)
-                                        game.p1_map = bot_snd_info[0];
-                                        if(bot_snd_info[1] == true){
-                                            game.p2.ships_sunk += 1;
-                                            game.p1.ships_lost += 1;
-                                            if(game.p2.ships_sunk == 5){
-                                                game.winner = 2;
-                                            }
-                                        }
-                                    } else {
-                                        game.p2.shots_missed += 1;
-                                        game.p1_map[bot_y][bot_x]=5;
-                                        game.turn = 1;
-                                        can_shoot = false;
-                                    }
-                                    try {
-                                        await game.markModified("p1_map")
-                                        await game.save()
-                                    } catch (error) {
-                                        console.log(error)
-                                    }
-                                }
-                            }        
+                            await bot_play(game)
                         }
                     } else {
                         res.status(409).send('Coordinates out of range')
@@ -576,8 +584,11 @@ async function end_game(game){
             } catch (error) {
                 //trudno
             }
-            var p1 = await User.findOne({_id: game.player_1._id})
-            var p2 = await User.findOne({_id: game.player_2._id})
+            if(game.player_2 == null){
+                await Game.deleteOne({_id: game._id});
+            }
+            var p1 = await User.findById(game.player_1)
+            var p2 = await User.findById(game.player_2)
             if (p1 && p2){
                 p1.stats.games_played += 1;
                 p1.stats.ships_sunk += game.p1.ships_sunk;
@@ -713,6 +724,7 @@ router.patch('/give-up', async function(req, res, next) {
             } catch (error) {
                 res.status(500).send(error)
             }
+            //if(game) coś z botem
         } else if(game.player_2 == req.body.player_id){
             game.winner = 1
             game.p1_ready = true;
