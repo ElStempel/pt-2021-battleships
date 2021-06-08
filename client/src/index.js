@@ -331,6 +331,49 @@ async function fetchGameState(that, enemy, player){
 	}
 }
 
+async function getUserInYourRoom(that){
+	const requestOptions = {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ room_id: that.state.room_id, player_id: that.state.user_id })
+	};
+	console.log(that.state.room_id)
+	var stat = 0;
+	var data;
+	while(that.state.room_id != 0){
+		await new Promise(r => setTimeout(r, 500));
+		fetch('https://localhost:9000/rooms/fetch-players', requestOptions)
+		.then(function(response){
+			console.log('wysyla')
+			stat = response.status;
+			if(stat == 200){
+				data = response.json();
+			}
+			return data;
+		})
+		.then(function(data){
+			console.log(data)
+			if(stat == 200){
+				if(that.state.username == data.player_1){
+					that.setState({
+						playerInRoom: "User in room: " + data.player_2
+					})
+				}
+				else if(that.state.username == data.player_2){
+					that.setState({
+						playerInRoom: "User in room: " + data.player_1
+					})
+				}
+				else{
+					that.setState({
+						playerInRoom: 'No user in room'
+					})
+				}
+			}
+		})
+	}
+}
+
 class Window extends React.Component {
 	constructor(props) {
 		super(props);
@@ -625,6 +668,7 @@ class Window extends React.Component {
 						customRule2: data.custom_rules.cust_rule_2,
 						customRule3: data.custom_rules.cust_rule_3,
 						customRule4: data.custom_rules.cust_rule_4,
+						room_id: data._id
 					})
 				}
 				else if(rejoinStat == 200 && data.player_1 != that.state.user_id){
@@ -638,6 +682,7 @@ class Window extends React.Component {
 						customRule2: data.custom_rules.cust_rule_2,
 						customRule3: data.custom_rules.cust_rule_3,
 						customRule4: data.custom_rules.cust_rule_4,
+						room_id: data._id
 					})
 				}
 				else{
@@ -676,8 +721,13 @@ class Window extends React.Component {
 					})
 				}
 			})
-
 		})
+		.then(function(){
+			if(stat == 200){
+				getUserInYourRoom(that);
+			}
+		})
+		
 	}
 
 	chooseRegister(){
@@ -1050,12 +1100,15 @@ class Window extends React.Component {
 			return roomDetails;
 		})
 		.then(function(roomDetails){
-			that.setState({
-				div2Shown: !that.state.div2Shown,
-				room_id: roomDetails._id,
-				createButtonDisabled: true,
-				joinRoomHidden: 'visible',
-			});
+			if(stat == 201){
+				that.setState({
+					div2Shown: !that.state.div2Shown,
+					room_id: roomDetails._id,
+					createButtonDisabled: true,
+					joinRoomHidden: 'visible',
+				});
+				getUserInYourRoom(that);
+			}
 			if(that.state.customRulesDisabled == false){
 				that.setState({
 					customRulesDisabledVisibility: 'inline-block'
@@ -1183,34 +1236,36 @@ class Window extends React.Component {
 	}
 
 	async fetchGameStart(){
-		await new Promise(r => setTimeout(r, 5000));
 		var that = this;
+		while(that.state.gameShown == false){
+			await new Promise(r => setTimeout(r, 5000));
 
-		const requestOptions = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ "room_id": that.state.room_id, "player_2_id": that.state.user_id })
-		};
-		var stat = 0;
-		fetch('https://localhost:9000/rooms/fetch-game', requestOptions)
-		.then(function(response){
-			var data;
-			stat = response.status;
-			if(stat == 200){
-				data = response.json();
-			}
-			return data;
-		})
-		.then(function(data){
-			if(stat == 200){
-				that.setState({
-					gameShown: !that.state.gameShown,
-					game_id: data._id,
-					mapSize: data.map_size,
-					gap: data.force_gap
-				})
-			}
-		})
+			const requestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ "room_id": that.state.room_id, "player_2_id": that.state.user_id })
+			};
+			var stat = 0;
+			fetch('https://localhost:9000/rooms/fetch-game', requestOptions)
+			.then(function(response){
+				var data;
+				stat = response.status;
+				if(stat == 200){
+					data = response.json();
+				}
+				return data;
+			})
+			.then(function(data){
+				if(stat == 200){
+					that.setState({
+						gameShown: !that.state.gameShown,
+						game_id: data._id,
+						mapSize: data.map_size,
+						gap: data.force_gap
+					})
+				}
+			})
+		}
 	}
 
 	async fetchGameState(){
@@ -1284,6 +1339,12 @@ class Window extends React.Component {
 		.then(function(){
 			that.updateRoomsList();
 		})
+		.then(function(){
+			getUserInYourRoom(that);
+			that.setState({
+				playerInRoom: ''
+			})
+		})
 	}
 
 	rejoinCurrentGame(){
@@ -1333,6 +1394,9 @@ class Window extends React.Component {
 		})
 		.then(function(){
 			that.updateRoomsList();
+			that.setState({
+				playerInRoom: ''
+			})
 		})
 	}
 
@@ -1515,6 +1579,9 @@ class Window extends React.Component {
 		})
 		.then(function(){
 			that.updateRoomsList();
+		})
+		.then(function(){
+			getUserInYourRoom(that);
 		})
 
 		that.fetchGameStart();
@@ -2505,6 +2572,8 @@ class Window extends React.Component {
 									<div style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white' }}>
 										<div style={{ display: this.state.customRulesDisabledVisibility }}> Map size: {this.state.mapSize}, custom rules enabled: <p style={{ display: this.state.customRule1Visibility, }}>one field of space,&nbsp;</p><p style={{ display: this.state.customRule2Visibility, }}>torpedo attack,&nbsp;</p><p style={{ display: this.state.customRule3Visibility, }}>cluster attack,&nbsp;</p><p style={{ display: this.state.customRule4Visibility, }}>airstrike</p></div>
 									</div>
+									<br></br>
+									<p style={{ display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white', textAlign: 'center' }}> {this.state.playerInRoom} </p>
 
 								</div>
 							</div>
