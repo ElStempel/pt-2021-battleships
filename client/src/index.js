@@ -990,6 +990,10 @@ class Window extends React.Component {
 				}
 			}
 			for(var i = 0; i < receivedPlayers.length; i++){
+				var divider = 1;
+				if(receivedPlayers[i].stats.loses != 0){
+					divider = divider = receivedPlayers[i].stats.loses;
+				}
 				that.setState({
 					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: receivedPlayers[i].stats.wins })
 				});
