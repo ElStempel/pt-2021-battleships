@@ -2080,41 +2080,46 @@ class Window extends React.Component {
 				shotX: parseInt(idToCoords(event.target.id)[0]),
 				shotY: parseInt(idToCoords(event.target.id)[1]),
 			})
-			var enemy = document.getElementsByClassName('butEnemy');
-			for(var i = 0; i < that.state.mapSize; i++){
-				for(var j = 0; j < that.state.mapSize; j++){
-					if(that.state.enemyBoard[i][j] == 1){
-						enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
-					}
-					else if(that.state.enemyBoard[i][j] == 2){
-						enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
-					}
-					else if(that.state.enemyBoard[i][j] == 5){
-						enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
-					}
-					else if(that.state.enemyBoard[i][j] == 0){
-						enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
-					}
-				}
-			}
-			var player = document.getElementsByClassName('butPlayer');
-			for(var i = 0; i < that.state.mapSize; i++){
-				for(var j = 0; j < that.state.mapSize; j++){
-					if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
-						// trafienie
-						player[j + i * that.state.mapSize].style.backgroundColor = 'red'
-					}
-					if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
-						// zatopienie
-						player[j + i * that.state.mapSize].style.backgroundColor = 'black'
-					}
-					if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
-						// pudlo
-						player[j + i * that.state.mapSize].style.backgroundColor = 'white'
+			try{
+				var enemy = document.getElementsByClassName('butEnemy');
+				for(var i = 0; i < that.state.mapSize; i++){
+					for(var j = 0; j < that.state.mapSize; j++){
+						if(that.state.enemyBoard[i][j] == 1){
+							enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
+						}
+						else if(that.state.enemyBoard[i][j] == 2){
+							enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
+						}
+						else if(that.state.enemyBoard[i][j] == 5){
+							enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
+						}
+						else if(that.state.enemyBoard[i][j] == 0){
+							enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
+						}
 					}
 				}
+				var player = document.getElementsByClassName('butPlayer');
+				for(var i = 0; i < that.state.mapSize; i++){
+					for(var j = 0; j < that.state.mapSize; j++){
+						if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+							// trafienie
+							player[j + i * that.state.mapSize].style.backgroundColor = 'red'
+						}
+						if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+							// zatopienie
+							player[j + i * that.state.mapSize].style.backgroundColor = 'black'
+						}
+						if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+							// pudlo
+							player[j + i * that.state.mapSize].style.backgroundColor = 'white'
+						}
+					}
+				}
+				event.target.style.backgroundColor = 'yellow'
 			}
-			event.target.style.backgroundColor = 'yellow'
+			catch(error){
+				
+			}
 		}
 		// that.fetchGameState();
 	}
