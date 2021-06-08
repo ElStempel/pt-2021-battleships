@@ -2287,7 +2287,7 @@ class Window extends React.Component {
 							Login
 						</button>
 						<button style={buttonChooseStyle} class="buttonChoose" id="chooseRegister" onClick={this.chooseRegister}>
-							Create new Account
+							Create new account
 						</button>
 					</div>
 					</div>
@@ -2318,7 +2318,7 @@ class Window extends React.Component {
 									<span className="close" onClick={this.handleClickGiveUpPopup}>
 										&times;
 									</span>
-										<h2 style={{textAlign: 'center'}}>Are you sure to Give Up?</h2>
+										<h2 style={{textAlign: 'center'}}>Are you sure to give up?</h2>
 										<div style={{ textAlign: 'center'}}>
 										</div>
 										<br />
@@ -2364,7 +2364,7 @@ class Window extends React.Component {
 									<button id='confirmShips' class="confirmShips" onClick={this.handleConfirmShipsClick} >Confirm setup</button>
 									<br></br>
 									<br></br>
-									<button id='confirmShot' class="confirmShot" onClick={this.handleConfirmShotClick}>Confirm Shot</button>
+									<button id='confirmShot' class="confirmShot" onClick={this.handleConfirmShotClick}>Confirm shot</button>
 									<br></br>
 									<br></br>
 									<button id='defeat' class="defeat" onClick={this.showGiveUpPopup}>Give up</button>
@@ -2399,7 +2399,7 @@ class Window extends React.Component {
 										<span className="close" onClick={this.handleClickCloseDeletePopup}>
 											&times;
 										</span>
-											<h2 style={{textAlign: 'center'}}>Type in your password to delete Account.</h2>
+											<h2 style={{textAlign: 'center'}}>Type in your password to delete account.</h2>
 											<div style={{ textAlign: 'center'}}>
 												<label>
 												Password:
@@ -2436,18 +2436,18 @@ class Window extends React.Component {
 									
 									<div id="rooms" style={{display: 'inline-block', marginLeft: '50px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
 										<h2 id="roomsText" style={{ marginLeft: '10px', minHeight: '40px', color: 'white', display: 'inline-block', }}>Rooms</h2>
-										<button class='createButton' id='createButton' disabled={this.state.createButtonDisabled} onClick={this.showCreateRoomPage} style={createButtonStyle}>Create Room</button>
+										<button class='createButton' id='createButton' disabled={this.state.createButtonDisabled} onClick={this.showCreateRoomPage} style={createButtonStyle}>Create room</button>
 										<hr></hr>
-										<button class='updateButton' id='updateButton' onClick={this.updateRoomsList} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh Rooms list</button>
+										<button class='updateButton' id='updateButton' onClick={this.updateRoomsList} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh rooms list</button>
 										<hr></hr>
 										<div id="roomsEntrys" style={{ marginLeft: '25px', listStyleType: 'none', color: 'white', }}>
 											{listRooms}
 										</div>
 									</div>
 									<div id="players" style={{display: 'inline-block', minHeight: '600px', marginLeft: '70px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto', }}>
-										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px',}}>Top Players</h2>
+										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px',}}>Top players</h2>
 										<hr></hr>
-										<button class='updateButton' id='updateButton' onClick={this.updatePlayersList} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh Top Players list</button>
+										<button class='updateButton' id='updateButton' onClick={this.updatePlayersList} style={{marginLeft: '150px', display: 'block', width: '300px', height: '40px', cursor: 'pointer', fontSize: '15px'}}>Refresh top players list</button>
 										<hr></hr>
 										<div id="playerNames" style={{ marginLeft: '25px', display: 'inline-block', listStyleType: 'none', color: 'white', fontSize: '30px', fontWeight: 'bold' }}>
 											Player
@@ -2489,17 +2489,17 @@ class Window extends React.Component {
 										</p>
 									<br />
 										<div style={{ textAlign: 'center', }}>
-											<button class='deleteAccountButton' id='deleteAccountButton' onClick={this.showDeletePopup} style={deleteAccountButton}>Delete Account</button>
+											<button class='deleteAccountButton' id='deleteAccountButton' onClick={this.showDeletePopup} style={deleteAccountButton}>Delete account</button>
 										</div>
 									<br />
 									</div>
 								</div>
 								<div class='joinRoomButtonDiv'>
-									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '50px' }} onClick={this.startGame} class='joinRoomButton'>Start Game</button>
-									<button style={{ visibility: this.state.joinRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.leaveRoom} class='joinRoomButton'>Leave Room</button>
-									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.deleteYourRoom} class='joinRoomButton'>Delete Your Room</button>
+									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '50px' }} onClick={this.startGame} class='joinRoomButton'>Start game</button>
+									<button style={{ visibility: this.state.joinRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.leaveRoom} class='joinRoomButton'>Leave room</button>
+									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.deleteYourRoom} class='joinRoomButton'>Delete your room</button>
 									<br></br>
-									<button style={{ visibility: this.state.rejoinCurrentGameHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='joinRoomButton'>Rejoin Your Game</button>
+									<button style={{ visibility: this.state.rejoinCurrentGameHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='joinRoomButton'>Rejoin your game</button>
 									<div style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white' }}>
 										<div style={{ display: this.state.customRulesDisabledVisibility }}> Map size: {this.state.mapSize}, custom rules enabled: <p style={{ display: this.state.customRule1Visibility, }}>one field of space,&nbsp;</p><p style={{ display: this.state.customRule2Visibility, }}>torpedo attack,&nbsp;</p><p style={{ display: this.state.customRule3Visibility, }}>cluster attack,&nbsp;</p><p style={{ display: this.state.customRule4Visibility, }}>airstrike</p></div>
 									</div>
@@ -2517,10 +2517,10 @@ class Window extends React.Component {
 								<button class='cancelButton' id='cancelButton' onClick={this.createRoom} style={cancelButtonStyle}>Cancel</button>
 							</div>
 							<div style={{ marginLeft: '50px', backgroundColor: 'grey', width: '1930px', height: '800px', }}>
-								<h3 style={{marginLeft: '50px', color: 'white', }}>New Room</h3>
+								<h3 style={{marginLeft: '50px', color: 'white', }}>New room</h3>
 								<div>
 									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" ref="customRules" id="customRules" name="customRules" value="customRules" onChange={this.enableRulesChoice}/>
-									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRules">Custom Rules</label><br/>
+									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRules">Custom rules</label><br/>
 									<br/>
 									<input style={{width: '30px', height: '30px', marginLeft: '10px'}} type="checkbox" ref="customRule1" id="customRule1" name="customRule1" value="customRule1" onChange={this.enableRule1} disabled={this.state.customRulesDisabled}/>
 									<label style={{fontSize: '30px', fontWeight: 'bold', marginLeft: '10px' }} forHtml="customRule1">Torpedo attack</label><br/>
