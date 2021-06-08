@@ -227,6 +227,21 @@ async function fetchGameState(that, enemy, player){
 							endGameDivShown: true,
 							endGameDivText: 'Game ended with a draw.',
 							rejoinCurrentGameHidden: 'hidden',
+							dreadnoughtFields: 5,
+							cruiserFields: 4,
+							submarineFields: 3,
+							destroyerFields: 3,
+							reconFields: 2,
+							dreadnoughtEnabled: true,
+							cruiserEnabled: true,
+							submarineEnabled: true,
+							destroyerEnabled: true,
+							reconEnabled: true,
+							dreadnoughtCoordsList: [],
+							cruiserCoordsList: [],
+							submarineCoordsList: [],
+							destroyerCoordsList: [],
+							reconCoordsList: [],
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
@@ -240,6 +255,21 @@ async function fetchGameState(that, enemy, player){
 							shipsLostGame: 0,
 							shipsSunkGame: 0,
 							rejoinCurrentGameHidden: 'hidden',
+							dreadnoughtFields: 5,
+							cruiserFields: 4,
+							submarineFields: 3,
+							destroyerFields: 3,
+							reconFields: 2,
+							dreadnoughtEnabled: true,
+							cruiserEnabled: true,
+							submarineEnabled: true,
+							destroyerEnabled: true,
+							reconEnabled: true,
+							dreadnoughtCoordsList: [],
+							cruiserCoordsList: [],
+							submarineCoordsList: [],
+							destroyerCoordsList: [],
+							reconCoordsList: [],
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
@@ -254,6 +284,21 @@ async function fetchGameState(that, enemy, player){
 							shipsLostGame: 0,
 							shipsSunkGame: 0,
 							rejoinCurrentGameHidden: 'hidden',
+							dreadnoughtFields: 5,
+							cruiserFields: 4,
+							submarineFields: 3,
+							destroyerFields: 3,
+							reconFields: 2,
+							dreadnoughtEnabled: true,
+							cruiserEnabled: true,
+							submarineEnabled: true,
+							destroyerEnabled: true,
+							reconEnabled: true,
+							dreadnoughtCoordsList: [],
+							cruiserCoordsList: [],
+							submarineCoordsList: [],
+							destroyerCoordsList: [],
+							reconCoordsList: [],
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
@@ -1255,7 +1300,7 @@ class Window extends React.Component {
 			.then(function(data){
 				if(stat == 200){
 					that.setState({
-						gameShown: !that.state.gameShown,
+						gameShown: true,
 						game_id: data._id,
 						mapSize: data.map_size,
 						gap: data.force_gap
@@ -2423,15 +2468,15 @@ class Window extends React.Component {
 
 								<div id='gameButtons' class='gameButtons' style={{ display: 'inline-block', verticalAlign: 'top', marginLeft: '50px', marginTop: '20px', }}>
 									<br></br>
-									<button id='dreadnought' class="ship" disabled={!this.state.dreadnoughtEnabled} onClick={this.handleShipButtonClick}>Dreadnought {this.state.dreadnoughtFields}</button>
+									<button id='dreadnought' class="ship" disabled={!this.state.dreadnoughtEnabled} onClick={this.handleShipButtonClick}>Dreadnought &#91;{this.state.dreadnoughtFields}&#93;</button>
 									<br></br>
-									<button id='cruiser' class="ship" disabled={!this.state.cruiserEnabled} onClick={this.handleShipButtonClick}>Cruiser {this.state.cruiserFields}</button>
+									<button id='cruiser' class="ship" disabled={!this.state.cruiserEnabled} onClick={this.handleShipButtonClick}>Cruiser &#91;{this.state.cruiserFields}&#93;</button>
 									<br></br>
-									<button id='submarine' class="ship" disabled={!this.state.submarineEnabled} onClick={this.handleShipButtonClick}>Submarine {this.state.submarineFields}</button>
+									<button id='submarine' class="ship" disabled={!this.state.submarineEnabled} onClick={this.handleShipButtonClick}>Submarine &#91;{this.state.submarineFields}&#93;</button>
 									<br></br>
-									<button id='destroyer' class="ship" disabled={!this.state.destroyerEnabled} onClick={this.handleShipButtonClick}>Destroyer {this.state.destroyerFields}</button>
+									<button id='destroyer' class="ship" disabled={!this.state.destroyerEnabled} onClick={this.handleShipButtonClick}>Destroyer &#91;{this.state.destroyerFields}&#93;</button>
 									<br></br>
-									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon {this.state.reconFields}</button>
+									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon &#91;{this.state.reconFields}&#93;</button>
 									<br></br>
 									<br></br>
 									<button id='resetBoard' class="resetBoard" onClick={this.handleResetBoardClick} >Reset board</button>
