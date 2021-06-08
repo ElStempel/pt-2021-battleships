@@ -134,6 +134,7 @@ async function bot_shot(game){
 
 async function bot_play(game){
     //if(){}
+    bot_shot(game)
 }
 
 //shot (game_id, player_id, coordinates:{x, y})

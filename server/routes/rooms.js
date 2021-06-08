@@ -200,21 +200,29 @@ function check_ship_interference(ship, map, map_size, force_gap){
       //check if surrounding fields are empty
       if(force_gap){
         //top
-        if(map[ship.bow.y - 1][ship.bow.x] != 0)
-          return true;
+        try{
+          if(map[ship.bow.y - 1][ship.bow.x] != 0)
+            return true;
+        } catch(e){}
         //bottom
-        if(map[ship.bow.y + ship.size][ship.bow.x] != 0)
-          return true;
+        try{
+          if(map[ship.bow.y + ship.size][ship.bow.x] != 0)
+            return true;
+        } catch(e){}
         //left side
-        for(var segment = -1; segment <= ship.size; segment++){
-          if(map[ship.bow.y + segment][ship.bow.x - 1] != 0)
-              return true;
-        }
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y + segment][ship.bow.x - 1] != 0)
+                return true;
+          }
+        } catch(e){}
         //right side
-        for(var segment = -1; segment <= ship.size; segment++){
-          if(map[ship.bow.y + segment][ship.bow.x + 1] != 0)
-              return true;
-        }
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y + segment][ship.bow.x + 1] != 0)
+                return true;
+          }
+        } catch(e){}
       }
       return false;
   } else if(ship.course == 2){
@@ -227,21 +235,29 @@ function check_ship_interference(ship, map, map_size, force_gap){
       //check if surrounding fields are empty
       if(force_gap){
         //bottom
-        if(map[ship.bow.y + 1][ship.bow.x] != 0)
-          return true;
+        try{
+          if(map[ship.bow.y + 1][ship.bow.x] != 0)
+            return true;
+        } catch(e){}
         //top
-        if(map[ship.bow.y - ship.size][ship.bow.x] != 0)
-          return true;
+        try{
+          if(map[ship.bow.y - ship.size][ship.bow.x] != 0)
+            return true;
+        } catch(e){}
         //left side
-        for(var segment = -1; segment <= ship.size; segment++){
-          if(map[ship.bow.y - segment][ship.bow.x - 1] != 0)
-              return true;
-        }
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y - segment][ship.bow.x - 1] != 0)
+                return true;
+          }
+        } catch(e){}
         //right side
-        for(var segment = -1; segment <= ship.size; segment++){
-          if(map[ship.bow.y - segment][ship.bow.x + 1] != 0)
-              return true;
-        }
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y - segment][ship.bow.x + 1] != 0)
+                return true;
+          }
+        } catch(e){}
       }
       return false;
   } else if(ship.course == 1){
@@ -254,21 +270,30 @@ function check_ship_interference(ship, map, map_size, force_gap){
       //check if surrounding fields are empty
       if(force_gap){
         //right side
-        if(map[ship.bow.y][ship.bow.x + 1] != 0)
-          return true;
+        try{
+          if(map[ship.bow.y][ship.bow.x + 1] != 0)
+            return true;
+        } catch(e){}
         //left side
-        if(map[ship.bow.y][ship.bow.x - ship.size] != 0)
-          return true;
+        try{
+          if(map[ship.bow.y][ship.bow.x - ship.size] != 0)
+            return true;
+        } catch(e){}
         //top side
-        for(var segment = -1; segment <= ship.size; segment++){
-          if(map[ship.bow.y - 1][ship.bow.x - segment] != 0)
-              return true;
-        }
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y - 1][ship.bow.x - segment] != 0)
+                return true;
+          }
+        } catch(e){}
+
         //bottom side
-        for(var segment = -1; segment <= ship.size; segment++){
-          if(map[ship.bow.y + 1][ship.bow.x - segment] != 0)
-              return true;
-        }
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y + 1][ship.bow.x - segment] != 0)
+                return true;
+          }
+        } catch(e){}
       }
       return false;
   } else if(ship.course == 3){
@@ -281,21 +306,29 @@ function check_ship_interference(ship, map, map_size, force_gap){
       //check if surrounding fields are empty
       if(force_gap){
         //left side
-        if(map[ship.bow.y][ship.bow.x - 1] != 0)
-          return true;
+        try{
+          if(map[ship.bow.y][ship.bow.x - 1] != 0)
+            return true;
+        } catch(e){}
         //right side
-        if(map[ship.bow.y][ship.bow.x + ship.size] != 0)
-          return true;
+        try{
+          if(map[ship.bow.y][ship.bow.x + ship.size] != 0)
+            return true;
+        } catch(e){}
         //top side
-        for(var segment = -1; segment <= ship.size; segment++){
-          if(map[ship.bow.y - 1][ship.bow.x + segment] != 0)
-              return true;
-        }
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y - 1][ship.bow.x + segment] != 0)
+                return true;
+          }
+        } catch(e){}
         //bottom side
-        for(var segment = -1; segment <= ship.size; segment++){
-          if(map[ship.bow.y + 1][ship.bow.x + segment] != 0)
-              return true;
-        }
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y + 1][ship.bow.x + segment] != 0)
+                return true;
+          }
+        } catch(e){}
       }
       return false;
   }
@@ -404,18 +437,27 @@ router.post('/start-game', async function(req, res, next) {
         attack3: shot_3
       }
     })
-    try {
-      await new_game.save()
+    
+    if(new_game.player2 == null){
       res.status(201).send(new_game);
-      if(new_game.player2 == null){
-        //BOT
-        new_game.p2_map = await init_bot_map(new_game);
-        new_game.turn = 1;
-        new_game.p2_ready = true;
+      //BOT
+      new_game.p2_map = await init_bot_map(new_game);
+      new_game.turn = 1;
+      new_game.p2_ready = true;
+      try{
+        await new_game.save()
+      } catch (error) {
+        console.log(error)
+        res.status(400).send(error)
       }
-    } catch (error) {
-      console.log(error)
-      res.status(400).send(error)
+    } else {
+      try {
+        await new_game.save()
+        res.status(201).send(new_game);
+      } catch (error) {
+        console.log(error)
+        res.status(400).send(error)
+      }
     }
   } else {
     return res.status(400).send("Bad data");
