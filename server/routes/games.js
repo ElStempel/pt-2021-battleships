@@ -130,6 +130,44 @@ router.post('/shot', async function(req, res, next) {
                         } catch (error) {
                             res.status(500).send(error)
                         }
+
+                        //BOT
+                        if(game.player_2 == null){
+                            var bot_x;
+                            var bot_y;
+                            var can_shoot = true;
+                            while(can_shoot){
+                                bot_x = getRandomInt(0, game.map_size)
+                                bot_y = getRandomInt(0, game.map_size)
+                                //Check if chosen place was never shot before
+                                if(game.p1_map[bot_y][bot_x]%10 == 0){
+                                    //Check if it's a ship or not
+                                    if(parseInt(game.p1_map[bot_y][bot_x]/10) > 0){
+                                        game.p1_map[bot_y][bot_x]+=1;
+                                        snd_info = await search_and_destroy(game.p1_map, game.p1_map[bot_y][bot_x], game.map_size)
+                                        game.p1_map = snd_info[0];
+                                        if(snd_info[1] == true){
+                                            game.p2.ships_sunk += 1;
+                                            game.p1.ships_lost += 1;
+                                            if(game.p2.ships_sunk == 5){
+                                                game.winner = 2;
+                                            }
+                                        }
+                                    } else {
+                                        game.p2.shots_missed += 1;
+                                        game.p1_map[x][y]=5;
+                                        game.turn = 1;
+                                        can_shoot = false;
+                                    }
+                                    try {
+                                        await game.markModified("p1_map")
+                                        await game.save()
+                                    } catch (error) {
+                                        console.log(error)
+                                    }
+                                }
+                            }        
+                        }
                     } else {
                         res.status(409).send('Coordinates out of range')
                     }
@@ -279,15 +317,6 @@ router.post('/shot/cluster', async function(req, res, next) {
         res.status(404).send("Game does not exist")
     }
 });
-
-function censoreMap(map, map_size){
-    for(var i = 0; i < map_size; i++){
-        for(var j = 0; j < map_size; j++){
-            map[i][j] = map[i][j]%10
-        }
-    }
-    return map;
-}
 
 router.post('/shot/torpedo', async function(req, res, next) {
     let game = await Game.findOne({_id: req.body.game_id})
