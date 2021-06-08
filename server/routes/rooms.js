@@ -188,7 +188,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function check_ship_interference(ship, map, map_size){
+function check_ship_interference(ship, map, map_size, force_gap){
 //true to interferencja
   if(ship.course == 0){
       if((ship.bow.y + (ship.size - 1)) < 0 || (ship.bow.y + (ship.size - 1)) >= map_size)
@@ -196,6 +196,25 @@ function check_ship_interference(ship, map, map_size){
       for(var segment = 0; segment < ship.size; segment++){
           if(map[ship.bow.y + segment][ship.bow.x] != 0)
               return true;
+      }
+      //check if surrounding fields are empty
+      if(force_gap){
+        //top
+        if(map[ship.bow.y - 1][ship.bow.x] != 0)
+          return true;
+        //bottom
+        if(map[ship.bow.y + ship.size][ship.bow.x] != 0)
+          return true;
+        //left side
+        for(var segment = -1; segment <= ship.size; segment++){
+          if(map[ship.bow.y + segment][ship.bow.x - 1] != 0)
+              return true;
+        }
+        //right side
+        for(var segment = -1; segment <= ship.size; segment++){
+          if(map[ship.bow.y + segment][ship.bow.x + 1] != 0)
+              return true;
+        }
       }
       return false;
   } else if(ship.course == 2){
@@ -205,6 +224,25 @@ function check_ship_interference(ship, map, map_size){
           if(map[ship.bow.y - segment][ship.bow.x] != 0)
               return true;
       }
+      //check if surrounding fields are empty
+      if(force_gap){
+        //bottom
+        if(map[ship.bow.y + 1][ship.bow.x] != 0)
+          return true;
+        //top
+        if(map[ship.bow.y - ship.size][ship.bow.x] != 0)
+          return true;
+        //left side
+        for(var segment = -1; segment <= ship.size; segment++){
+          if(map[ship.bow.y - segment][ship.bow.x - 1] != 0)
+              return true;
+        }
+        //right side
+        for(var segment = -1; segment <= ship.size; segment++){
+          if(map[ship.bow.y - segment][ship.bow.x + 1] != 0)
+              return true;
+        }
+      }
       return false;
   } else if(ship.course == 1){
       if((ship.bow.x - (ship.size - 1)) < 0 || (ship.bow.x - (ship.size - 1)) >= map_size)
@@ -213,6 +251,25 @@ function check_ship_interference(ship, map, map_size){
           if(map[ship.bow.y][ship.bow.x - segment] != 0)
               return true;
       }
+      //check if surrounding fields are empty
+      if(force_gap){
+        //right side
+        if(map[ship.bow.y][ship.bow.x + 1] != 0)
+          return true;
+        //left side
+        if(map[ship.bow.y][ship.bow.x - ship.size] != 0)
+          return true;
+        //top side
+        for(var segment = -1; segment <= ship.size; segment++){
+          if(map[ship.bow.y - 1][ship.bow.x - segment] != 0)
+              return true;
+        }
+        //bottom side
+        for(var segment = -1; segment <= ship.size; segment++){
+          if(map[ship.bow.y + 1][ship.bow.x - segment] != 0)
+              return true;
+        }
+      }
       return false;
   } else if(ship.course == 3){
       if((ship.bow.x + (ship.size - 1)) < 0 || (ship.bow.x + (ship.size - 1)) >= map_size)
@@ -220,6 +277,25 @@ function check_ship_interference(ship, map, map_size){
       for(var segment = 0; segment < ship.size; segment++){
           if(map[ship.bow.y][ship.bow.x + segment] != 0)
               return true;
+      }
+      //check if surrounding fields are empty
+      if(force_gap){
+        //left side
+        if(map[ship.bow.y][ship.bow.x - 1] != 0)
+          return true;
+        //right side
+        if(map[ship.bow.y][ship.bow.x + ship.size] != 0)
+          return true;
+        //top side
+        for(var segment = -1; segment <= ship.size; segment++){
+          if(map[ship.bow.y - 1][ship.bow.x + segment] != 0)
+              return true;
+        }
+        //bottom side
+        for(var segment = -1; segment <= ship.size; segment++){
+          if(map[ship.bow.y + 1][ship.bow.x + segment] != 0)
+              return true;
+        }
       }
       return false;
   }
@@ -256,10 +332,10 @@ function init_bot_map(game){
           ships[s].bow.y = getRandomInt(0, size)
           for(var i = 0; i < 4; i++){
               ships[s].course = getRandomInt(i, 4)
-              if(!check_ship_interference(ships[s], map, size))
+              if(!check_ship_interference(ships[s], map, size, game.force_gap))
                   break;
           }
-          if(check_ship_interference(ships[s], map, size))
+          if(check_ship_interference(ships[s], map, size, game.force_gap))
               bad_placement = true;
           else
               bad_placement = false;
