@@ -11,3 +11,371 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.buttonChoose:hover {
+  background-color: grey;
+  color: white;
+}
+
+.createButton:hover {
+  background-color: black;
+  color: white;
+}
+
+.logoutButton:hover {
+  background-color: black;
+  color: white;
+}
+
+.cancelButton:hover {
+  background-color: grey;
+  color: white;
+}
+
+.updateButton:hover {
+  background-color: black;
+  color: white;
+}
+
+.deleteAccountButton:hover {
+  background-color: black;
+  color: white;
+}
+
+.newRoomButton:hover {
+  background-color: black;
+  color: white;
+}
+
+.modalDelete {
+  position: fixed;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.modalDraw {
+  position: fixed;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.modalGiveUp {
+  position: fixed;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+
+.modalEnd {
+  position: fixed;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.modal_content {
+  background-color: white;
+  position: absolute;
+  top: 20%;
+  left: 30%;
+  width: 40%;
+  padding: 20px;
+  border-radius: 5px;
+  border: 2px solid black;
+}
+
+.close {
+  color: Black;
+  float: right;
+}
+
+.close:hover {
+  height: 5px;
+  width: 5px;
+  color: grey;
+  cursor: pointer;
+  float: right;
+}
+
+.submitButton:hover{
+  background-color: black;
+  color: white;
+}
+
+.joinButton:hover {
+  background-color: black;
+  color: white;
+}
+
+.playerTable tr {
+  width: 800px;
+  height: 80px;
+  border: 2px solid black;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.playerTable th {
+  width: 70px;
+  height: 70px;
+  /* border: 2px solid black; */
+  border-radius: 6px;
+  text-align: center;
+  background-color: grey;
+}
+
+.butPlayer {
+  margin-top: 10px;
+  width: 60px;
+  height: 60px;
+  border: 2px solid black;
+  border-radius: 6px;
+  text-align: center;
+  background-color: blue;
+  cursor: pointer;
+}
+
+.butPlayer:hover{
+  background-color: green;
+}
+
+.butEnemy {
+  margin-top: 10px;
+  width: 60px;
+  height: 60px;
+  border: 2px solid black;
+  border-radius: 6px;
+  text-align: center;
+  background-color: darkblue;
+  cursor: pointer;
+}
+
+.butEnemy:hover{
+  background-color: green;
+}
+
+
+/* .playerTable th:hover {
+  background-color: red;
+} */
+
+.enemyTable tr {
+  width: 800px;
+  height: 80px;
+  border: 2px solid black;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.enemyTable th {
+  width: 70px;
+  height: 70px;
+  /* border: 2px solid black; */
+  border-radius: 6px;
+  text-align: center;
+  background-color: grey;
+}
+
+/* .enemyTable th:hover {
+  background-color: red;
+} */
+
+.ship {
+  width: 250px;
+  height: 50px;
+  text-align: center;
+  background-color: grey;
+  /* margin-left: 30px; */
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: block;
+}
+
+.ship:hover{
+  background-color: black;
+  color: white;
+}
+
+.resetBoard {
+  width: 250px;
+  height: 100px;
+  text-align: center;
+  background-color: grey;
+  /* margin-left: 30px; */
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: block;
+}
+
+.resetBoard:hover{
+  background-color: black;
+  color: white;
+}
+
+.confirmShips {
+  width: 250px;
+  height: 100px;
+  text-align: center;
+  background-color: grey;
+  /* margin-left: 30px; */
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: block;
+}
+
+.confirmShips:hover{
+  background-color: black;
+  color: white;
+}
+
+.confirmShot {
+  width: 250px;
+  height: 50px;
+  text-align: center;
+  background-color: grey;
+  /* margin-left: 30px; */
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: block;
+}
+
+.confirmShot:hover{
+  background-color: black;
+  color: white;
+}
+
+.defeat {
+  width: 250px;
+  height: 50px;
+  text-align: center;
+  background-color: grey;
+  /* margin-left: 30px; */
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: block;
+}
+
+.defeat:hover{
+  background-color: black;
+  color: white;
+}
+
+.draw {
+  width: 250px;
+  height: 100px;
+  text-align: center;
+  background-color: grey;
+  /* margin-left: 30px; */
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: block;
+}
+
+.draw:hover{
+  background-color: black;
+  color: white;
+}
+
+.joinRoomButton {
+  text-align: center;
+  visibility: hidden;
+  margin-top: 20px;
+  /* margin-left: 50px; */
+  width: 600px;
+  height: 50px;
+  text-align: center;
+  background-color: grey;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.joinRoomButton:hover {
+  background-color: black;
+  color: white;
+}
+
+.torpedoShotVertical {
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  background-color: grey;
+  margin-left: 100px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: none;
+  vertical-align: top;
+}
+
+.torpedoShotVertical:hover{
+  background-color: black;
+  color: white;
+}
+
+.torpedoShotHorizontal {
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  background-color: grey;
+  margin-left: 100px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: none;
+  vertical-align: top;
+}
+
+.torpedoShotHorizontal:hover{
+  background-color: black;
+  color: white;
+}
+
+.clusterAttack {
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  background-color: grey;
+  margin-left: 100px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: none;
+  vertical-align: top;
+}
+
+.clusterAttack:hover{
+  background-color: black;
+  color: white;
+}
+
+.airStrike {
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  background-color: grey;
+  margin-left: 100px;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  display: none;
+  vertical-align: top;
+}
+
+.airStrike:hover{
+  background-color: black;
+  color: white;
+}
