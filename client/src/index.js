@@ -509,6 +509,8 @@ class Window extends React.Component {
 			shotText: '',
 
 			clusterAttackActive: false,
+
+			playerInRoom: '',
 		};
 
 		activeForRules = this;
@@ -912,7 +914,7 @@ class Window extends React.Component {
 						joinRoomHidden: 'hidden',
 						deleteRoomHidden: 'visible',
 						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Created Room', roomId: receivedRooms[i]._id })
-						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Created Room', roomId: receivedRooms[i]._id, customRules: custom })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Created room', roomId: receivedRooms[i]._id, customRules: custom })
 					});
 					if(that.state.rejoinCurrentGameHidden == 'visible'){
 						that.setState({
@@ -939,7 +941,7 @@ class Window extends React.Component {
 						joinRoomHidden: 'visible',
 						createButtonDisabled: true,
 						// rooms: that.state.rooms.concat({ room: 'Room ' + (i + 1).toString(), full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id })
-						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Joined Room', roomId: receivedRooms[i]._id, customRules: custom })
+						rooms: that.state.rooms.concat({ room: receivedRooms[i].player_1 + "'s room ", full: true, hover: 'none', text: 'Joined room', roomId: receivedRooms[i]._id, customRules: custom })
 					});
 					if(that.state.rejoinCurrentGameHidden == 'visible'){
 						that.setState({
