@@ -252,6 +252,8 @@ async function fetchGameState(that, enemy, player){
 							customRulesDisabled: true,
 							turnText: '',
 							turn: 0,
+							playerBoard: [],
+							enemyBoard: [],
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
@@ -290,6 +292,8 @@ async function fetchGameState(that, enemy, player){
 							customRulesDisabled: true,
 							turnText: '',
 							turn: 0,
+							playerBoard: [],
+							enemyBoard: [],
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
@@ -329,6 +333,8 @@ async function fetchGameState(that, enemy, player){
 							customRulesDisabled: true,
 							turnText: '',
 							turn: 0,
+							playerBoard: [],
+							enemyBoard: [],
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
