@@ -234,6 +234,7 @@ async function fetchGameState(that, enemy, player){
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
+						that.getRoomsList();
 					}
 					if(data.winner == that.state.gamePlayer){
 						that.setState({
@@ -248,6 +249,7 @@ async function fetchGameState(that, enemy, player){
 						console.log(that)
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
+						that.getRoomsList();
 					}
 					else if(data.winner != 0){
 						that.setState({
@@ -262,6 +264,7 @@ async function fetchGameState(that, enemy, player){
 						console.log(that)
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
+						that.getRoomsList();
 					}
 					if(data.turn == that.state.gamePlayer){
 						that.setState({
@@ -288,6 +291,9 @@ async function fetchGameState(that, enemy, player){
 								}
 								else if(that.state.enemyBoard[i][j] == 5){
 									enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
+								}
+								else if(that.state.enemyBoard[i][j] == 0 && j == that.state.shotX && i == that.state.shotY){
+									enemy[j + i * that.state.mapSize].style.backgroundColor = 'yellow'
 								}
 								else if(that.state.enemyBoard[i][j] == 0){
 									enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
@@ -1145,124 +1151,46 @@ class Window extends React.Component {
 
 		// console.log('Aktualizacja')
 
-		// const requestOptions = {
-		// 	method: 'POST',
-		// 	headers: { 'Content-Type': 'application/json' },
-		// 	body: JSON.stringify({ "game_id": that.state.game_id, "player_id": that.state.user_id })
-		// };
-		// var stat = 0
-		// var data
-		// while(stat != 200){
-		// 	await new Promise(r => setTimeout(r, 200));
-		// 	fetch('https://localhost:9000/games/fetch-state', requestOptions)
-		// 	.then(function(response){
-		// 		stat = response.status;
-		// 		if(stat == 200){
-		// 			data = response.json();
-		// 		}
-		// 		return data;
-		// 	})
-		// 	.then(function(data){
-		// 		if(stat == 200){
-		// 			console.log(data)
-		// 			that.setState({
-		// 				playerBoard: data.playerMap,
-		// 				enemyBoard: data.enemyMap,
-		// 				draw: data.draw,
-		// 				turn: data.turn,
-		// 				winner: data.winner,
-		// 				shipsLostGame: data.stats.ships_lost,
-		// 				shipsSunkGame: data.stats.ships_sunk,
-		// 				enemyBoardButtons: false,
-		// 				shipDeployed: true,
-		// 				mapSize: data.custom_rules.map_size,
-		// 				customRule1: data.custom_rules.cust_rule_1,
-		// 				customRule2: data.custom_rules.cust_rule_2,
-		// 				customRule3: data.custom_rules.cust_rule_3,
-		// 				gap: data.custom_rules.cust_rule_4
-		// 			})
-		// 			try{
-		// 				var confirmBut = document.getElementsByClassName('confirmShips');
-		// 				var resetBut = document.getElementsByClassName('resetBoard');
-		// 				confirmBut[0].style.backgroundColor = 'green';
-		// 				confirmBut[0].disabled = true;
-		// 				resetBut[0].style.backgroundColor = 'green';
-		// 				resetBut[0].disabled = true;
-		// 				var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
-		// 				confirmShotBut.style.backgroundColor = 'red'
-		// 				var shipsButtons = document.getElementsByClassName('ship');
-		// 				for(var i = 0; i < shipsButtons.length; i++){
-		// 					shipsButtons[i].style.backgroundColor = 'green';
-		// 					shipsButtons[i].disabled = true;
-		// 				}
-		// 				if(data.turn == data.player){
-		// 					that.setState({
-		// 						turnText: 'Your turn.'
-		// 					})
-		// 				}
-		// 				else{
-		// 					that.setState({
-		// 						turnText: 'Enemy turn.'
-		// 					})
-		// 				}
-		// 			}
-		// 			catch(error){
+		const requestOptions = {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ "game_id": that.state.game_id, "player_id": that.state.user_id })
+		};
+		var stat = 0
+		var data
+		while(stat != 200){
+			await new Promise(r => setTimeout(r, 200));
+			fetch('https://localhost:9000/games/fetch-state', requestOptions)
+			.then(function(response){
+				stat = response.status;
+				if(stat == 200){
+					data = response.json();
+				}
+				return data;
+			})
+			.then(function(data){
+				if(stat == 200){
+					try{
+						var confirmBut = document.getElementsByClassName('confirmShips');
+						var resetBut = document.getElementsByClassName('resetBoard');
+						confirmBut[0].style.backgroundColor = 'green';
+						confirmBut[0].disabled = true;
+						resetBut[0].style.backgroundColor = 'green';
+						resetBut[0].disabled = true;
+						var confirmShotBut = document.getElementsByClassName('confirmShot')[0]
+						confirmShotBut.style.backgroundColor = 'red'
+						var shipsButtons = document.getElementsByClassName('ship');
+						for(var i = 0; i < shipsButtons.length; i++){
+							shipsButtons[i].style.backgroundColor = 'green';
+							shipsButtons[i].disabled = true;
+						}
+					}
+					catch(error){
 
-		// 			}
-		// 		}
-		// 	})
-		// 	.then(function(){
-		// 		if(stat == 200){
-		// 			try{
-		// 				var enemy = document.getElementsByClassName('butEnemy');
-		// 				for(var i = 0; i < that.state.mapSize; i++){
-		// 					for(var j = 0; j < that.state.mapSize; j++){
-		// 						if(that.state.enemyBoard[i][j] == 1){
-		// 							enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
-		// 						}
-		// 						else if(that.state.enemyBoard[i][j] == 2){
-		// 							enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
-		// 						}
-		// 						else if(that.state.enemyBoard[i][j] == 5){
-		// 							enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
-		// 						}
-		// 						else if(that.state.enemyBoard[i][j] == 0){
-		// 							enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
-		// 						}
-		// 					}
-		// 				}
-		// 				var player = document.getElementsByClassName('butPlayer');
-		// 				for(var i = 0; i < that.state.mapSize; i++){
-		// 					for(var j = 0; j < that.state.mapSize; j++){
-		// 						if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
-		// 							// trafienie
-		// 							player[j + i * that.state.mapSize].style.backgroundColor = 'red'
-		// 						}
-		// 						else if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
-		// 							// zatopienie
-		// 							player[j + i * that.state.mapSize].style.backgroundColor = 'black'
-		// 						}
-		// 						else if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
-		// 							// pudlo
-		// 							player[j + i * that.state.mapSize].style.backgroundColor = 'white'
-		// 						}
-		// 						else if(parseInt(that.state.playerBoard[i][j]) != 0){
-		// 							// statek
-		// 							player[j + i * that.state.mapSize].style.backgroundColor = '#383838'
-		// 						}
-		// 						else {
-		// 							// puste
-		// 							player[j + i * that.state.mapSize].style.backgroundColor = 'blue'
-		// 						}
-		// 					}
-		// 				}
-		// 			}
-		// 			catch(error){
-
-		// 			}
-		// 		}
-		// 	})
-		// }
+					}
+				}
+			})
+		}
 		var enemy = document.getElementsByClassName('butEnemy');
 		var player = document.getElementsByClassName('butPlayer');
 		fetchGameState(that, enemy, player);
