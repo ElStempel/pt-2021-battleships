@@ -2423,15 +2423,15 @@ class Window extends React.Component {
 
 								<div id='gameButtons' class='gameButtons' style={{ display: 'inline-block', verticalAlign: 'top', marginLeft: '50px', marginTop: '20px', }}>
 									<br></br>
-									<button id='dreadnought' class="ship" disabled={!this.state.dreadnoughtEnabled} onClick={this.handleShipButtonClick}>Dreadnought</button>
+									<button id='dreadnought' class="ship" disabled={!this.state.dreadnoughtEnabled} onClick={this.handleShipButtonClick}>Dreadnought {this.state.dreadnoughtFields}</button>
 									<br></br>
-									<button id='cruiser' class="ship" disabled={!this.state.cruiserEnabled} onClick={this.handleShipButtonClick}>Cruiser</button>
+									<button id='cruiser' class="ship" disabled={!this.state.cruiserEnabled} onClick={this.handleShipButtonClick}>Cruiser {this.state.cruiserFields}</button>
 									<br></br>
-									<button id='submarine' class="ship" disabled={!this.state.submarineEnabled} onClick={this.handleShipButtonClick}>Submarine</button>
+									<button id='submarine' class="ship" disabled={!this.state.submarineEnabled} onClick={this.handleShipButtonClick}>Submarine {this.state.submarineFields}</button>
 									<br></br>
-									<button id='destroyer' class="ship" disabled={!this.state.destroyerEnabled} onClick={this.handleShipButtonClick}>Destroyer</button>
+									<button id='destroyer' class="ship" disabled={!this.state.destroyerEnabled} onClick={this.handleShipButtonClick}>Destroyer {this.state.destroyerFields}</button>
 									<br></br>
-									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon</button>
+									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon {this.state.reconFields}</button>
 									<br></br>
 									<br></br>
 									<button id='resetBoard' class="resetBoard" onClick={this.handleResetBoardClick} >Reset board</button>
