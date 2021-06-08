@@ -144,9 +144,9 @@ router.post('/shot', async function(req, res, next) {
                                     //Check if it's a ship or not
                                     if(parseInt(game.p1_map[bot_y][bot_x]/10) > 0){
                                         game.p1_map[bot_y][bot_x]+=1;
-                                        snd_info = await search_and_destroy(game.p1_map, game.p1_map[bot_y][bot_x], game.map_size)
-                                        game.p1_map = snd_info[0];
-                                        if(snd_info[1] == true){
+                                        bot_snd_info = await search_and_destroy(game.p1_map, game.p1_map[bot_y][bot_x], game.map_size)
+                                        game.p1_map = bot_snd_info[0];
+                                        if(bot_snd_info[1] == true){
                                             game.p2.ships_sunk += 1;
                                             game.p1.ships_lost += 1;
                                             if(game.p2.ships_sunk == 5){
@@ -155,7 +155,7 @@ router.post('/shot', async function(req, res, next) {
                                         }
                                     } else {
                                         game.p2.shots_missed += 1;
-                                        game.p1_map[x][y]=5;
+                                        game.p1_map[bot_y][bot_x]=5;
                                         game.turn = 1;
                                         can_shoot = false;
                                     }
