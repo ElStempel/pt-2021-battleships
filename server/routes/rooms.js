@@ -149,6 +149,23 @@ router.post('/fetch-game', async function(req, res, next) {
   }
 });
 
+// FETCH PLAYERS
+router.post('/fetch-players', async function(req, res, next) {
+  let room_check = await Room.findOne({_id: req.body.room_id, $or: [{player_1: req.body.player_id}, {player_2: req.body.player_id}]});
+  if(room_check){
+    let player1 = await User.findById(room_check.player_1);
+    let player2 = await User.findById(room_check.player_2);
+    var data = {player_1: "", player_2: ""}
+    if(player1)
+      data.player_1 = player1.user_name;
+    if(player2)
+      data.player_2 = player2.user_name;
+    res.status(200).send(data)
+  } else {
+    res.status(400).send("Bad data")
+  }
+});
+
 // FETCH END OF GAME
 router.post('/fetch-end', async function(req, res, next) {
   let user_in_room_check = await Room.findOne({_id: req.body.room_id, player_2: req.body.player_2_id});
