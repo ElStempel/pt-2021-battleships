@@ -1939,7 +1939,8 @@ class Window extends React.Component {
 			if(this.state.dreadnoughtEnabled == true){
 				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.dreadnoughtCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#00cc66'
 					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -1950,7 +1951,8 @@ class Window extends React.Component {
 			else if(this.state.cruiserEnabled == true){
 				if(this.checkCoords('cruiser', this.state.cruiserCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.cruiserCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#804000'
 					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -1961,7 +1963,8 @@ class Window extends React.Component {
 			else if(this.state.submarineEnabled == true){
 				if(this.checkCoords('submarine', this.state.submarineCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.submarineCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#ff9933'
 					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -1972,7 +1975,8 @@ class Window extends React.Component {
 			else if(this.state.destroyerEnabled == true){
 				if(this.checkCoords('destroyer', this.state.destroyerCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.destroyerCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#990099'
 					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -1983,7 +1987,8 @@ class Window extends React.Component {
 			else if(this.state.reconEnabled == true){
 				if(this.checkCoords('recon', this.state.reconCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.reconCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#b3003b'
 					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
@@ -2211,7 +2216,22 @@ class Window extends React.Component {
 			event.target.style.backgroundColor = 'green';
 		}
 		else{
-			event.target.style.backgroundColor = 'red';
+			if(buttonEnabled == 'dreadnoughtEnabled'){
+				event.target.style.backgroundColor = '#00cc66'
+			}
+			else if(buttonEnabled == 'cruiserEnabled'){
+				event.target.style.backgroundColor = '#804000'
+			}
+			else if(buttonEnabled == 'submarineEnabled'){
+				event.target.style.backgroundColor = '#ff9933'
+			}
+			else if(buttonEnabled == 'destroyerEnabled'){
+				event.target.style.backgroundColor = '#990099'
+			}
+			else if(buttonEnabled == 'reconEnabled'){
+				event.target.style.backgroundColor = '#b3003b'
+			}
+			// event.target.style.backgroundColor = 'red';
 		}
 	}
 
