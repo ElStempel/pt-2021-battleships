@@ -109,7 +109,7 @@ router.patch('/init-map', async function(req, res, next) {
                     game.p1_map = req.body.map;
                     game.p1_ready = true;
                     //BOT
-                    if(game.player_2 == "bot"){
+                    if(game.player_2 == null){
                         game.p2_map = init_bot_map(game);
                         game.p2_ready = true;
                     }
