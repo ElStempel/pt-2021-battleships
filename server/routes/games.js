@@ -132,7 +132,7 @@ router.post('/shot', async function(req, res, next) {
                         }
 
                         //BOT
-                        if(game.player_2 == null){
+                        if(game.player_2 == null && game.turn == 2){
                             var bot_x;
                             var bot_y;
                             var can_shoot = true;
