@@ -242,10 +242,12 @@ async function fetchGameState(that, enemy, player){
 							submarineCoordsList: [],
 							destroyerCoordsList: [],
 							reconCoordsList: [],
+							draw: 0,
+							winner: 0,
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
-						that.getRoomsList();
+						that.updateRoomsList();
 					}
 					if(data.winner == that.state.gamePlayer){
 						that.setState({
@@ -270,11 +272,13 @@ async function fetchGameState(that, enemy, player){
 							submarineCoordsList: [],
 							destroyerCoordsList: [],
 							reconCoordsList: [],
+							draw: 0,
+							winner: 0,
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
-						that.getRoomsList();
+						that.updateRoomsList();
 					}
 					else if(data.winner != 0){
 						that.setState({
@@ -299,11 +303,13 @@ async function fetchGameState(that, enemy, player){
 							submarineCoordsList: [],
 							destroyerCoordsList: [],
 							reconCoordsList: [],
+							draw: 0,
+							winner: 0,
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
-						that.getRoomsList();
+						that.updateRoomsList();
 					}
 					if(data.turn == that.state.gamePlayer){
 						that.setState({
@@ -1431,7 +1437,7 @@ class Window extends React.Component {
 					deleteRoomHidden: 'hidden',
 					rejoinCurrentGameHidden: 'visible',
 				})
-				that.rejoinCurrentGame();
+				// that.rejoinCurrentGame();
 			}
 		})
 		.then(function(){
@@ -1480,9 +1486,9 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/games/give-up', requestOptions)
 		.then(function(response){
 			stat = response.status;
-			that.setState({
-				drawGiveUpPopupText: 'You gave up game',
-			})
+			// that.setState({
+			// 	drawGiveUpPopupText: 'You gave up game',
+			// })
 		})
 		.then(function(){
 			if(stat == 200){
@@ -1494,7 +1500,7 @@ class Window extends React.Component {
 					div2Shown: true,
 					gameShown: false,
 					rejoinCurrentGameHidden: 'hidden',
-					endGameDivText: 'You gave up a game.',
+					// endGameDivText: 'You gave up a game.',
 				})
 				document.getElementsByClassName('modalEnd')[0].hidden = false;
 				inGame = false;
@@ -2411,7 +2417,7 @@ class Window extends React.Component {
 		return (
 				this.state.div1Shown ?
 				(
-					<div id="startPage" style={{ width: '100%', height: '1200px', fontSize: '60px', background: '#222831', overflowX: 'hidden', }}>
+					<div id="startPage" style={{ width: '100%', height: '1400px', fontSize: '60px', background: '#222831', overflowY: 'hidden', }}>
 					<h1 style={startPageHeader}>Battleships Online</h1>
 					<p style={{ height: '50px', textAlign: 'center', fontSize: '60px', color: 'white', fontWeight: 'bold' }}>{this.state.startText}</p>
 					<div id='login' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
@@ -2439,7 +2445,7 @@ class Window extends React.Component {
 					(
 						this.state.gameShown ?
 						(
-							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '100%', display: 'inline-block', backgroundColor: '#09322E'}}>
+							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '110%', display: 'inline-block', backgroundColor: '#09322E'}}>
 								<div className="modalDraw" hidden='true'>
 									<div className="modal_content">
 									<span className="close" onClick={this.handleClickDrawPopup}>
@@ -2471,11 +2477,14 @@ class Window extends React.Component {
 								</div>
 
 								<div style={{}}>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships lost: {this.state.shipsLostGame}</p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
+									<p style={{fontSize: '25px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships lost: {this.state.shipsLostGame}</p>
+									<p style={{fontSize: '25px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
 									{/* <p class="coords" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '50px' }}>Current coords: column - {this.state.shotX + 1}, row - {this.state.shotY + 1} </p> */}
-									<p class="shotText" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '50px' }}> {this.state.shotText} </p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>{this.state.turnText}</p>
+									<p class="shotText" style={{ fontSize: '25px', color: 'white', display: "inline-block", marginLeft: '50px' }}> {this.state.shotText} </p>
+									<p style={{fontSize: '25px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>{this.state.turnText}</p>
+									<br></br>
+									<p class="shotText" style={{ fontSize: '25px', color: 'white', display: "inline-block", marginLeft: '50px' }}>Colors: white - shot missed, red - ship hit, black - ship sunk, grey - your ship, <br></br>
+									light blue - empty field on your board, dark blue - empty field on enemy board, yellow - aim point </p>
 								</div>
 								<div id='playerBoard' class='playerBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
 									<table class='playerTable'>{rowsPlayer}</table>
