@@ -438,7 +438,7 @@ router.post('/start-game', async function(req, res, next) {
       }
     })
     
-    if(new_game.player2 == null){
+    if(new_game.player_2 == null){
       res.status(201).send(new_game);
       //BOT
       new_game.p2_map = await init_bot_map(new_game);
@@ -469,7 +469,9 @@ router.post('/end-game', async function(req, res, next) {
   let game_to_end = await Game.findOne({_id: req.body.game_id, player_1: req.body.player_1_id});
   if (game_to_end){
     var p1 = await User.findOne({_id: req.body.player_1_id})
-    var p2 = await User.findOne({_id: game_to_end.player_2})
+    if(game_to_end.player_2 != null){
+      var p2 = await User.findOne({_id: game_to_end.player_2})
+    }
     if (p1 && p2){
       p1.stats.games_played += 1;
       p1.stats.ships_sunk += game_to_end.p1.ships_sunk;
