@@ -2358,6 +2358,8 @@ class Window extends React.Component {
 		var that = this;
 		var torpedoButton1 = document.getElementsByClassName('torpedoShotVertical')[0];
 		var torpedoButton2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
+		var airStrikeButton = document.getElementsByClassName('airStrike')[0];
+		var clusterButton = document.getElementsByClassName('clusterAttack')[0];
 		var stat = 0;
 		const requestOptions = {
 			method: 'POST',
@@ -2380,7 +2382,10 @@ class Window extends React.Component {
 
 	airStrike(){
 		var that = this;
+		var torpedoButton1 = document.getElementsByClassName('torpedoShotVertical')[0];
+		var torpedoButton2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
 		var airStrikeButton = document.getElementsByClassName('airStrike')[0];
+		var clusterButton = document.getElementsByClassName('clusterAttack')[0];
 		if(that.state.shotY > 0 && that.state.shotY < that.state.mapSize - 1 && that.state.shotX > 0 && that.state.shotX < that.state.mapSize - 1){
 			var stat = 0;
 			const requestOptions = {
@@ -2411,6 +2416,9 @@ class Window extends React.Component {
 
 	clusterAttack(){
 		var that = this;
+		var torpedoButton1 = document.getElementsByClassName('torpedoShotVertical')[0];
+		var torpedoButton2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
+		var airStrikeButton = document.getElementsByClassName('airStrike')[0];
 		var clusterButton = document.getElementsByClassName('clusterAttack')[0];
 		var normalShotButton = document.getElementsByClassName('confirmShot')[0];
 		if(that.state.enemyBoard[that.state.shotY][that.state.shotX] == 0){
@@ -2432,12 +2440,24 @@ class Window extends React.Component {
 					if(that.state.gamePlayer == that.state.turn && that.state.clusterAttackActive == true){
 						normalShotButton.disabled = true;
 						normalShotButton.style.backgroundColor = 'green';
+						torpedoButton1.disabled = true;
+						torpedoButton1.style.backgroundColor = 'green';
+						torpedoButton2.disabled = true;
+						torpedoButton2.style.backgroundColor = 'green';
+						airStrikeButton.disabled = true;
+						airStrikeButton.style.backgroundColor = 'green';
 					}
 					else{
 						clusterButton.disabled = true;
 						clusterButton.style.backgroundColor = 'green';
 						normalShotButton.disabled = false;
 						normalShotButton.style.backgroundColor = 'red';
+						torpedoButton1.disabled = false;
+						torpedoButton1.style.backgroundColor = 'red';
+						torpedoButton2.disabled = false;
+						torpedoButton2.style.backgroundColor = 'red';
+						airStrikeButton.disabled = false;
+						airStrikeButton.style.backgroundColor = 'red';
 						that.setState({
 							clusterAttackActive: false,
 						})
