@@ -1162,6 +1162,15 @@ class Window extends React.Component {
 
 	confirmRoomCreation(){
 		var that = this;
+
+		that.setState({
+			customRulesDisabledVisibility: 'none',
+			mapSizeVisibility: 'none',
+			customRule1Visibility: 'none',
+			customRule2Visibility: 'none',
+			customRule3Visibility: 'none',
+			customRule4Visibility: 'none',
+		})
 		var custom = {
 			enabled: !that.state.customRulesDisabled,
 			map_size: that.state.mapSize,
