@@ -1502,7 +1502,7 @@ class Window extends React.Component {
 					createButtonDisabled: true,
 					joinRoomHidden: 'hidden',
 					deleteRoomHidden: 'hidden',
-					rejoinCurrentGameHidden: 'visible',
+					// rejoinCurrentGameHidden: 'visible',
 				})
 				// that.rejoinCurrentGame();
 			}
