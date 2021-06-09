@@ -258,6 +258,7 @@ async function fetchGameState(that, enemy, player){
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.updateRoomsList();
+						getUserInYourRoom(that);
 					}
 					if(data.winner == that.state.gamePlayer){
 						that.setState({
@@ -299,6 +300,7 @@ async function fetchGameState(that, enemy, player){
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
 						that.updateRoomsList();
+						getUserInYourRoom(that);
 					}
 					else if(data.winner != 0){
 						that.setState({
@@ -340,6 +342,7 @@ async function fetchGameState(that, enemy, player){
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
 						that.updateRoomsList();
+						getUserInYourRoom(that);
 					}
 					if(data.turn == that.state.gamePlayer){
 						that.setState({
@@ -1707,7 +1710,6 @@ class Window extends React.Component {
 		.then(function(){
 			getUserInYourRoom(that);
 		})
-
 		that.fetchGameStart();
 	}
 
@@ -2440,24 +2442,18 @@ class Window extends React.Component {
 					if(that.state.gamePlayer == that.state.turn && that.state.clusterAttackActive == true){
 						normalShotButton.disabled = true;
 						normalShotButton.style.backgroundColor = 'green';
-						torpedoButton1.disabled = true;
-						torpedoButton1.style.backgroundColor = 'green';
-						torpedoButton2.disabled = true;
-						torpedoButton2.style.backgroundColor = 'green';
-						airStrikeButton.disabled = true;
-						airStrikeButton.style.backgroundColor = 'green';
+						// torpedoButton1.disabled = true;
+						// torpedoButton1.style.backgroundColor = 'green';
+						// torpedoButton2.disabled = true;
+						// torpedoButton2.style.backgroundColor = 'green';
+						// airStrikeButton.disabled = true;
+						// airStrikeButton.style.backgroundColor = 'green';
 					}
 					else{
 						clusterButton.disabled = true;
 						clusterButton.style.backgroundColor = 'green';
 						normalShotButton.disabled = false;
 						normalShotButton.style.backgroundColor = 'red';
-						torpedoButton1.disabled = false;
-						torpedoButton1.style.backgroundColor = 'red';
-						torpedoButton2.disabled = false;
-						torpedoButton2.style.backgroundColor = 'red';
-						airStrikeButton.disabled = false;
-						airStrikeButton.style.backgroundColor = 'red';
 						that.setState({
 							clusterAttackActive: false,
 						})
