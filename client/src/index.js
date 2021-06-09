@@ -1115,7 +1115,11 @@ class Window extends React.Component {
 		}).then(function(receivedPlayers){
 			for(var i = 0; i < receivedPlayers.length; i++){
 				for(var j = 0; j < receivedPlayers.length - 1; j++){
-					if(receivedPlayers[j].stats.wins < receivedPlayers[j + 1].stats.wins){
+					var divider = 1;
+					if(receivedPlayers[i].stats.defeats != 0){
+						divider = parseInt(receivedPlayers[i].stats.defeats)
+					}
+					if(receivedPlayers[j].stats.wins / divider < receivedPlayers[j + 1].stats.wins / divider){
 						var temp = receivedPlayers[j]
 						receivedPlayers[j] = receivedPlayers[j + 1];
 						receivedPlayers[j + 1] = temp;
@@ -1123,7 +1127,6 @@ class Window extends React.Component {
 				}
 			}
 			for(var i = 0; i < receivedPlayers.length; i++){
-				var divider = 1;
 				if(receivedPlayers[i].stats.loses != 0){
 					divider = divider = receivedPlayers[i].stats.loses;
 				}
