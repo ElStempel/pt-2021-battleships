@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var User = require('../models/user')
 var Room = require('../models/room')
+var bcrypt = require('bcryptjs');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -12,27 +13,30 @@ router.get('/', function(req, res, next) {
 router.post('/add', async function(req, res, next) {
   let user_check = await User.findOne({user_name: req.body.user_name});
   if (user_check) return res.status(400).send("Username taken");
-  var user = new User({
-    user_name: req.body.user_name,
-    pass_hash: req.body.pass_hash
-  })
   try {
+    const hashed_pass = await bcrypt.hash(req.body.pass_hash, 10)
+    var user = new User({
+      user_name: req.body.user_name,
+      pass_hash: hashed_pass
+    })
     await user.save()
     res.status(201).send(user);
   } catch (error) {
     res.status(400).send(error)
+    console.log(error)
   }
 });
 
 // UPDATE USER
 router.patch('/update', async function(req, res, next) {
-  let user_check = await User.findOne({_id: req.body._id, pass_hash: req.body.pass_hash});
-  if (user_check){
-    //console.log(user_check)
-    user_check.pass_hash = req.body.new_pass_hash;
+  let user = await User.findById(req.body._id);
+  const verify = await bcrypt.compare(req.body.pass_hash, user.pass_hash)
+  if (verify){
     try {
-      await user_check.save()
-      res.status(200).send(user_check);
+      const hashed_pass = await bcrypt.hash(req.body.new_pass_hash, 10)
+      user.pass_hash = hashed_pass
+      await user.save()
+      res.status(200).send(user);
     } catch (error) {
       res.status(400).send(error)
     }
@@ -43,9 +47,12 @@ router.patch('/update', async function(req, res, next) {
 
 // LOGIN USER
 router.post('/login', async function(req, res, next) {
-  let user_check = await User.findOne({user_name: req.body.user_name, pass_hash: req.body.pass_hash});
-  if (user_check){
-    return res.status(200).send(user_check) 
+  let user_check = await User.findOne({user_name: req.body.user_name});
+  if(user_check){
+    const verify = await bcrypt.compare(req.body.pass_hash, user_check.pass_hash)
+    if (verify){
+      return res.status(200).send(user_check)
+    }
   } else {
     res.status(400).send("User doesn't exist")
   }
@@ -62,11 +69,17 @@ router.post('/delete', async function(req, res, next) {
   if(inRoom){
     res.status(403).send("User is in a game room")
   } else {
-    let user_check = await User.deleteOne({ _id: req.body._id, pass_hash: req.body.pass_hash });
-    if (user_check.deletedCount == 1){
-      return res.status(200).send("User deleted") 
+    let user = await User.findById(req.body._id);
+    const verify = await bcrypt.compare(req.body.pass_hash, user.pass_hash)
+    if(verify){
+      let user_check = await User.deleteOne({ _id: req.body._id, pass_hash: user.pass_hash });
+      if (user_check.deletedCount == 1){
+        return res.status(200).send("User deleted") 
+      } else {
+        res.status(400).send("Bad data")
+      }
     } else {
-      res.status(400).send("Bad data")
+      res.status(400).send("Bad username or password")
     }
   }
 });
