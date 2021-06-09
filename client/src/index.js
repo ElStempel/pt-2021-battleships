@@ -1125,11 +1125,11 @@ class Window extends React.Component {
 					divider = divider = receivedPlayers[i].stats.loses;
 				}
 				var score;
-				if(receivedPlayers[i].stats.loses == undefined){
+				if(receivedPlayers[i].stats.defeats == 0){
 					score = parseInt(parseInt(receivedPlayers[i].stats.wins) / 1)
 				}
 				else{
-					score = parseInt(receivedPlayers[i].stats.wins) / parseInt(receivedPlayers[i].stats.loses)
+					score = parseInt(receivedPlayers[i].stats.wins) / parseInt(receivedPlayers[i].stats.defeats)
 				}
 				// console.log(parseInt(parseInt(receivedPlayers[i].stats.wins) / parseInt(receivedPlayers[i].stats.loses)))
 				// console.log(score)
@@ -2693,7 +2693,8 @@ class Window extends React.Component {
 									</div>
 
 									<div id="statistics" style={{display: 'inline-block', marginTop: '0px', marginRight: '50px', marginLeft: '70px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
-										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px',}}>My statistics</h2>
+										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px', display: 'inline-block'}}>My statistics</h2>
+										<h2 style={{ marginRight: '10px', color: 'white', minHeight: '50px', display: 'inline-block', float: 'right'}}>{this.state.username}</h2>
 										<hr></hr>
 										<p id="games_played" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
 											Games played: {this.state.games_played}
