@@ -212,7 +212,7 @@ async function fetchGameState(that, enemy, player){
 					}
 					if(data.draw == 1 && that.state.drawProposed == false){
 						that.setState({
-							drawDivText: 'Enemy Proposed a draw. Do you accept?'
+							drawDivText: 'Enemy offered a draw. Do you accept?'
 						})
 						try{
 							document.getElementsByClassName('modalDraw')[0].hidden = false;
@@ -680,7 +680,7 @@ class Window extends React.Component {
 			stat = response.status;
 			if(stat == 400){
 				that.setState({
-					startText: "User with such credentials doesn't exist.",
+					startText: "User with such credentials doesn't exist",
 				});
 			}
 			return response.json(); 
@@ -826,12 +826,12 @@ class Window extends React.Component {
 			stat = response.status;
 			if(stat == 201){
 				that.setState({
-					startText: 'New account created.',
+					startText: 'New account created',
 				});
 			}
 			else{
 				that.setState({
-					startText: 'There is account with specified username.',
+					startText: 'There is account with specified username',
 				});
 			}
 		});
@@ -2517,7 +2517,7 @@ class Window extends React.Component {
 		return (
 				this.state.div1Shown ?
 				(
-					<div id="startPage" style={{ width: '100%', height: '1400px', fontSize: '60px', background: '#222831', overflowY: 'hidden', }}>
+					<div id="startPage" style={{ width: '100%', height: '1600px', fontSize: '60px', background: '#222831', overflowY: 'hidden', }}>
 					<h1 style={startPageHeader}>Battleships Online</h1>
 					<p style={{ height: '50px', textAlign: 'center', fontSize: '60px', color: 'white', fontWeight: 'bold' }}>{this.state.startText}</p>
 					<div id='login' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
@@ -2545,7 +2545,7 @@ class Window extends React.Component {
 					(
 						this.state.gameShown ?
 						(
-							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '110%', display: 'inline-block', backgroundColor: '#09322E'}}>
+							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '1600px', display: 'inline-block', backgroundColor: '#09322E'}}>
 								<div className="modalDraw" hidden='true'>
 									<div className="modal_content">
 									<span className="close" onClick={this.handleClickDrawPopup}>
@@ -2636,14 +2636,16 @@ class Window extends React.Component {
 						)
 						:
 						(
-								<div id="startPage" style={{ backgroundImage: `url(${background})`, width: '100%', height: '1200px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
+								// <div id="startPage" style={{ backgroundImage: `url(${background})`, width: '100%', height: '1600px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
+								<div id="startPage" style={{ width: '100%', height: '1600px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
 							<br />
 								<div id="startHeader" style={{display: 'flex', flexDirection: 'row', marginLeft: '38%', }}>
-									<h1 style={startPageHeader}>Battleships Online</h1>
+									<h1 style={{margin: 0, padding: 0, marginLeft: '100px',	color: 'white',}}>Battleships Online</h1>
 									<button class='logoutButton' id='logoutButton' onClick={this.chooseLogout} style={logoutButtonStyle}>Logout</button>
 								</div>
 							<br />
-								<div id="pageAfterLogin" class="pageAfterLogin" style={{ backgroundImage: `url(${background})`, display: 'flex', flexDirection: 'row', }}>
+								{/* <div id="pageAfterLogin" class="pageAfterLogin" style={{ backgroundImage: `url(${background})`, display: 'flex', flexDirection: 'row', }}> */}
+								<div id="pageAfterLogin" class="pageAfterLogin" style={{ display: 'flex', flexDirection: 'row', }}>
 									<div className="modalDelete" hidden='true'>
 										<div className="modal_content">
 										<span className="close" onClick={this.handleClickCloseDeletePopup}>
@@ -2762,7 +2764,7 @@ class Window extends React.Component {
 					)
 					:
 					(
-						<div id="createRoomPage" style={{ backgroundImage: `url(${radar})`, width: '100%', height: '1200px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
+						<div id="createRoomPage" style={{ backgroundImage: `url(${radar})`, width: '100%', height: '1600px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
 						<br />
 							<div id="startHeader" style={{display: 'flex', flexDirection: 'row', marginLeft: '38%', }}>
 								<h1 style={startPageHeader}>Battleships Online</h1>
