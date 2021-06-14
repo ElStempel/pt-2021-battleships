@@ -212,7 +212,7 @@ async function fetchGameState(that, enemy, player){
 					}
 					if(data.draw == 1 && that.state.drawProposed == false){
 						that.setState({
-							drawDivText: 'Enemy Proposed a draw. Do you accept?'
+							drawDivText: 'Enemy offered a draw. Do you accept?'
 						})
 						try{
 							document.getElementsByClassName('modalDraw')[0].hidden = false;
@@ -227,10 +227,38 @@ async function fetchGameState(that, enemy, player){
 							endGameDivShown: true,
 							endGameDivText: 'Game ended with a draw.',
 							rejoinCurrentGameHidden: 'hidden',
+							dreadnoughtFields: 5,
+							cruiserFields: 4,
+							submarineFields: 3,
+							destroyerFields: 3,
+							reconFields: 2,
+							dreadnoughtEnabled: true,
+							cruiserEnabled: true,
+							submarineEnabled: true,
+							destroyerEnabled: true,
+							reconEnabled: true,
+							dreadnoughtCoordsList: [],
+							cruiserCoordsList: [],
+							submarineCoordsList: [],
+							destroyerCoordsList: [],
+							reconCoordsList: [],
+							draw: 0,
+							winner: 0,
+							customRule1: false,
+							customRule2: false,
+							customRule3: false,
+							customRule4: false,
+							mapSize: 10,
+							customRulesDisabled: true,
+							turnText: '',
+							turn: 0,
+							playerBoard: [],
+							enemyBoard: [],
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
-						that.getRoomsList();
+						that.updateRoomsList();
+						getUserInYourRoom(that);
 					}
 					if(data.winner == that.state.gamePlayer){
 						that.setState({
@@ -240,11 +268,39 @@ async function fetchGameState(that, enemy, player){
 							shipsLostGame: 0,
 							shipsSunkGame: 0,
 							rejoinCurrentGameHidden: 'hidden',
+							dreadnoughtFields: 5,
+							cruiserFields: 4,
+							submarineFields: 3,
+							destroyerFields: 3,
+							reconFields: 2,
+							dreadnoughtEnabled: true,
+							cruiserEnabled: true,
+							submarineEnabled: true,
+							destroyerEnabled: true,
+							reconEnabled: true,
+							dreadnoughtCoordsList: [],
+							cruiserCoordsList: [],
+							submarineCoordsList: [],
+							destroyerCoordsList: [],
+							reconCoordsList: [],
+							draw: 0,
+							winner: 0,
+							customRule1: false,
+							customRule2: false,
+							customRule3: false,
+							customRule4: false,
+							mapSize: 10,
+							customRulesDisabled: true,
+							turnText: '',
+							turn: 0,
+							playerBoard: [],
+							enemyBoard: [],
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
-						that.getRoomsList();
+						that.updateRoomsList();
+						getUserInYourRoom(that);
 					}
 					else if(data.winner != 0){
 						that.setState({
@@ -254,11 +310,39 @@ async function fetchGameState(that, enemy, player){
 							shipsLostGame: 0,
 							shipsSunkGame: 0,
 							rejoinCurrentGameHidden: 'hidden',
+							dreadnoughtFields: 5,
+							cruiserFields: 4,
+							submarineFields: 3,
+							destroyerFields: 3,
+							reconFields: 2,
+							dreadnoughtEnabled: true,
+							cruiserEnabled: true,
+							submarineEnabled: true,
+							destroyerEnabled: true,
+							reconEnabled: true,
+							dreadnoughtCoordsList: [],
+							cruiserCoordsList: [],
+							submarineCoordsList: [],
+							destroyerCoordsList: [],
+							reconCoordsList: [],
+							draw: 0,
+							winner: 0,
+							customRule1: false,
+							customRule2: false,
+							customRule3: false,
+							customRule4: false,
+							mapSize: 10,
+							customRulesDisabled: true,
+							turnText: '',
+							turn: 0,
+							playerBoard: [],
+							enemyBoard: [],
 						})
 						inGame = false;
 						document.getElementsByClassName('modalEnd')[0].hidden = false;
 						that.getMineStats();
-						that.getRoomsList();
+						that.updateRoomsList();
+						getUserInYourRoom(that);
 					}
 					if(data.turn == that.state.gamePlayer){
 						that.setState({
@@ -337,14 +421,12 @@ async function getUserInYourRoom(that){
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ room_id: that.state.room_id, player_id: that.state.user_id })
 	};
-	console.log(that.state.room_id)
 	var stat = 0;
 	var data;
 	while(that.state.room_id != 0){
 		await new Promise(r => setTimeout(r, 500));
 		fetch('https://localhost:9000/rooms/fetch-players', requestOptions)
 		.then(function(response){
-			console.log('wysyla')
 			stat = response.status;
 			if(stat == 200){
 				data = response.json();
@@ -352,7 +434,6 @@ async function getUserInYourRoom(that){
 			return data;
 		})
 		.then(function(data){
-			console.log(data)
 			if(stat == 200){
 				if(that.state.username == data.player_1){
 					that.setState({
@@ -599,7 +680,7 @@ class Window extends React.Component {
 			stat = response.status;
 			if(stat == 400){
 				that.setState({
-					startText: "User with such credentials doesn't exist.",
+					startText: "User with such credentials doesn't exist",
 				});
 			}
 			return response.json(); 
@@ -745,12 +826,12 @@ class Window extends React.Component {
 			stat = response.status;
 			if(stat == 201){
 				that.setState({
-					startText: 'New account created.',
+					startText: 'New account created',
 				});
 			}
 			else{
 				that.setState({
-					startText: 'There is account with specified username.',
+					startText: 'There is account with specified username',
 				});
 			}
 		});
@@ -1034,7 +1115,11 @@ class Window extends React.Component {
 		}).then(function(receivedPlayers){
 			for(var i = 0; i < receivedPlayers.length; i++){
 				for(var j = 0; j < receivedPlayers.length - 1; j++){
-					if(receivedPlayers[j].stats.wins < receivedPlayers[j + 1].stats.wins){
+					var divider = 1;
+					if(receivedPlayers[i].stats.defeats != 0){
+						divider = parseInt(receivedPlayers[i].stats.defeats)
+					}
+					if(receivedPlayers[j].stats.wins / divider < receivedPlayers[j + 1].stats.wins / divider){
 						var temp = receivedPlayers[j]
 						receivedPlayers[j] = receivedPlayers[j + 1];
 						receivedPlayers[j + 1] = temp;
@@ -1042,12 +1127,20 @@ class Window extends React.Component {
 				}
 			}
 			for(var i = 0; i < receivedPlayers.length; i++){
-				var divider = 1;
 				if(receivedPlayers[i].stats.loses != 0){
 					divider = divider = receivedPlayers[i].stats.loses;
 				}
+				var score;
+				if(receivedPlayers[i].stats.defeats == 0){
+					score = parseInt(parseInt(receivedPlayers[i].stats.wins) / 1)
+				}
+				else{
+					score = parseInt(receivedPlayers[i].stats.wins) / parseInt(receivedPlayers[i].stats.defeats)
+				}
+				// console.log(parseInt(parseInt(receivedPlayers[i].stats.wins) / parseInt(receivedPlayers[i].stats.loses)))
+				// console.log(score)
 				that.setState({
-					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: receivedPlayers[i].stats.wins })
+					playersList: that.state.playersList.concat({ player: receivedPlayers[i].user_name, score: score })
 				});
 			}
 		})
@@ -1075,6 +1168,15 @@ class Window extends React.Component {
 
 	confirmRoomCreation(){
 		var that = this;
+
+		that.setState({
+			customRulesDisabledVisibility: 'none',
+			mapSizeVisibility: 'none',
+			customRule1Visibility: 'none',
+			customRule2Visibility: 'none',
+			customRule3Visibility: 'none',
+			customRule4Visibility: 'none',
+		})
 		var custom = {
 			enabled: !that.state.customRulesDisabled,
 			map_size: that.state.mapSize,
@@ -1258,7 +1360,7 @@ class Window extends React.Component {
 			.then(function(data){
 				if(stat == 200){
 					that.setState({
-						gameShown: !that.state.gameShown,
+						gameShown: true,
 						game_id: data._id,
 						mapSize: data.map_size,
 						gap: data.force_gap
@@ -1379,6 +1481,34 @@ class Window extends React.Component {
 					joinRoomHidden: 'hidden',
 					deleteRoomHidden: 'hidden',
           			room_id: 0,
+					shipsLostGame: 0,
+					shipsSunkGame: 0,
+					rejoinCurrentGameHidden: 'hidden',
+					dreadnoughtFields: 5,
+					cruiserFields: 4,
+					submarineFields: 3,
+					destroyerFields: 3,
+					reconFields: 2,
+					dreadnoughtEnabled: true,
+					cruiserEnabled: true,
+					submarineEnabled: true,
+					destroyerEnabled: true,
+					reconEnabled: true,
+					dreadnoughtCoordsList: [],
+					cruiserCoordsList: [],
+					submarineCoordsList: [],
+					destroyerCoordsList: [],
+					reconCoordsList: [],
+					draw: 0,
+					winner: 0,
+					customRule1: false,
+					customRule2: false,
+					customRule3: false,
+					customRule4: false,
+					mapSize: 10,
+					customRulesDisabled: true,
+					turnText: '',
+					turn: 0,
 				})
 			}
 			if(stat == 403){
@@ -1387,9 +1517,9 @@ class Window extends React.Component {
 					createButtonDisabled: true,
 					joinRoomHidden: 'hidden',
 					deleteRoomHidden: 'hidden',
-					rejoinCurrentGameHidden: 'visible',
+					// rejoinCurrentGameHidden: 'visible',
 				})
-				that.rejoinCurrentGame();
+				// that.rejoinCurrentGame();
 			}
 		})
 		.then(function(){
@@ -1438,9 +1568,9 @@ class Window extends React.Component {
 		fetch('https://localhost:9000/games/give-up', requestOptions)
 		.then(function(response){
 			stat = response.status;
-			that.setState({
-				drawGiveUpPopupText: 'You gave up game',
-			})
+			// that.setState({
+			// 	drawGiveUpPopupText: 'You gave up game',
+			// })
 		})
 		.then(function(){
 			if(stat == 200){
@@ -1452,7 +1582,7 @@ class Window extends React.Component {
 					div2Shown: true,
 					gameShown: false,
 					rejoinCurrentGameHidden: 'hidden',
-					endGameDivText: 'You gave up a game.',
+					// endGameDivText: 'You gave up a game.',
 				})
 				document.getElementsByClassName('modalEnd')[0].hidden = false;
 				inGame = false;
@@ -1583,7 +1713,6 @@ class Window extends React.Component {
 		.then(function(){
 			getUserInYourRoom(that);
 		})
-
 		that.fetchGameStart();
 	}
 
@@ -1897,45 +2026,60 @@ class Window extends React.Component {
 			if(this.state.dreadnoughtEnabled == true){
 				if(this.checkCoords('dreadnought', this.state.dreadnoughtCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.dreadnoughtCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#00cc66'
+					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						dreadnoughtFields: this.state.dreadnoughtFields - 1,
 					})
 				}
 			}
 			else if(this.state.cruiserEnabled == true){
 				if(this.checkCoords('cruiser', this.state.cruiserCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.cruiserCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#804000'
+					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						cruiserFields: this.state.cruiserFields - 1,
 					})
 				}
 			}
 			else if(this.state.submarineEnabled == true){
 				if(this.checkCoords('submarine', this.state.submarineCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.submarineCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#ff9933'
+					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						submarineFields: this.state.submarineFields - 1,
 					})
 				}
 			}
 			else if(this.state.destroyerEnabled == true){
 				if(this.checkCoords('destroyer', this.state.destroyerCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.destroyerCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#990099'
+					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						destroyerFields: this.state.destroyerFields - 1,
 					})
 				}
 			}
 			else if(this.state.reconEnabled == true){
 				if(this.checkCoords('recon', this.state.reconCoordsList, {x: parseInt(idToCoords(event.target.id)[0]), y: parseInt(idToCoords(event.target.id)[1])})){
 					this.state.reconCoordsList.push({X: parseInt(idToCoords(event.target.id)[0]), Y: parseInt(idToCoords(event.target.id)[1])})
-					event.target.style.backgroundColor = '#383838'
+					// event.target.style.backgroundColor = '#383838'
+					event.target.style.backgroundColor = '#b3003b'
+					event.target.style.color = 'white'
 					this.setState({
 						availableFields: this.state.availableFields - 1,
+						reconFields: this.state.reconFields - 1,
 					})
 				}
 			}
@@ -1950,41 +2094,46 @@ class Window extends React.Component {
 				shotX: parseInt(idToCoords(event.target.id)[0]),
 				shotY: parseInt(idToCoords(event.target.id)[1]),
 			})
-			var enemy = document.getElementsByClassName('butEnemy');
-			for(var i = 0; i < that.state.mapSize; i++){
-				for(var j = 0; j < that.state.mapSize; j++){
-					if(that.state.enemyBoard[i][j] == 1){
-						enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
-					}
-					else if(that.state.enemyBoard[i][j] == 2){
-						enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
-					}
-					else if(that.state.enemyBoard[i][j] == 5){
-						enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
-					}
-					else if(that.state.enemyBoard[i][j] == 0){
-						enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
-					}
-				}
-			}
-			var player = document.getElementsByClassName('butPlayer');
-			for(var i = 0; i < that.state.mapSize; i++){
-				for(var j = 0; j < that.state.mapSize; j++){
-					if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
-						// trafienie
-						player[j + i * that.state.mapSize].style.backgroundColor = 'red'
-					}
-					if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
-						// zatopienie
-						player[j + i * that.state.mapSize].style.backgroundColor = 'black'
-					}
-					if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
-						// pudlo
-						player[j + i * that.state.mapSize].style.backgroundColor = 'white'
+			try{
+				var enemy = document.getElementsByClassName('butEnemy');
+				for(var i = 0; i < that.state.mapSize; i++){
+					for(var j = 0; j < that.state.mapSize; j++){
+						if(that.state.enemyBoard[i][j] == 1){
+							enemy[j + i * that.state.mapSize].style.backgroundColor = 'red'
+						}
+						else if(that.state.enemyBoard[i][j] == 2){
+							enemy[j + i * that.state.mapSize].style.backgroundColor = 'black'
+						}
+						else if(that.state.enemyBoard[i][j] == 5){
+							enemy[j + i * that.state.mapSize].style.backgroundColor = 'white'
+						}
+						else if(that.state.enemyBoard[i][j] == 0){
+							enemy[j + i * that.state.mapSize].style.backgroundColor = 'darkblue'
+						}
 					}
 				}
+				var player = document.getElementsByClassName('butPlayer');
+				for(var i = 0; i < that.state.mapSize; i++){
+					for(var j = 0; j < that.state.mapSize; j++){
+						if(parseInt(that.state.playerBoard[i][j] % 10) == 1){
+							// trafienie
+							player[j + i * that.state.mapSize].style.backgroundColor = 'red'
+						}
+						if(parseInt(that.state.playerBoard[i][j] % 10) == 2){
+							// zatopienie
+							player[j + i * that.state.mapSize].style.backgroundColor = 'black'
+						}
+						if(parseInt(that.state.playerBoard[i][j] % 10) == 5){
+							// pudlo
+							player[j + i * that.state.mapSize].style.backgroundColor = 'white'
+						}
+					}
+				}
+				event.target.style.backgroundColor = 'yellow'
 			}
-			event.target.style.backgroundColor = 'yellow'
+			catch(error){
+				
+			}
 		}
 		// that.fetchGameState();
 	}
@@ -2148,7 +2297,7 @@ class Window extends React.Component {
 			reconEnabled: !this.state.reconEnabled,
 			playerBoardEnabled: !this.state.playerBoardEnabled,
 			availableFields: this.state[shipDeployed],
-			[shipDeployed]: 0,
+			// [shipDeployed]: 0,
 		});
 
 		this.setState({
@@ -2159,7 +2308,22 @@ class Window extends React.Component {
 			event.target.style.backgroundColor = 'green';
 		}
 		else{
-			event.target.style.backgroundColor = 'red';
+			if(buttonEnabled == 'dreadnoughtEnabled'){
+				event.target.style.backgroundColor = '#00cc66'
+			}
+			else if(buttonEnabled == 'cruiserEnabled'){
+				event.target.style.backgroundColor = '#804000'
+			}
+			else if(buttonEnabled == 'submarineEnabled'){
+				event.target.style.backgroundColor = '#ff9933'
+			}
+			else if(buttonEnabled == 'destroyerEnabled'){
+				event.target.style.backgroundColor = '#990099'
+			}
+			else if(buttonEnabled == 'reconEnabled'){
+				event.target.style.backgroundColor = '#b3003b'
+			}
+			// event.target.style.backgroundColor = 'red';
 		}
 	}
 
@@ -2199,6 +2363,8 @@ class Window extends React.Component {
 		var that = this;
 		var torpedoButton1 = document.getElementsByClassName('torpedoShotVertical')[0];
 		var torpedoButton2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
+		var airStrikeButton = document.getElementsByClassName('airStrike')[0];
+		var clusterButton = document.getElementsByClassName('clusterAttack')[0];
 		var stat = 0;
 		const requestOptions = {
 			method: 'POST',
@@ -2221,7 +2387,10 @@ class Window extends React.Component {
 
 	airStrike(){
 		var that = this;
+		var torpedoButton1 = document.getElementsByClassName('torpedoShotVertical')[0];
+		var torpedoButton2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
 		var airStrikeButton = document.getElementsByClassName('airStrike')[0];
+		var clusterButton = document.getElementsByClassName('clusterAttack')[0];
 		if(that.state.shotY > 0 && that.state.shotY < that.state.mapSize - 1 && that.state.shotX > 0 && that.state.shotX < that.state.mapSize - 1){
 			var stat = 0;
 			const requestOptions = {
@@ -2252,6 +2421,9 @@ class Window extends React.Component {
 
 	clusterAttack(){
 		var that = this;
+		var torpedoButton1 = document.getElementsByClassName('torpedoShotVertical')[0];
+		var torpedoButton2 = document.getElementsByClassName('torpedoShotHorizontal')[0];
+		var airStrikeButton = document.getElementsByClassName('airStrike')[0];
 		var clusterButton = document.getElementsByClassName('clusterAttack')[0];
 		var normalShotButton = document.getElementsByClassName('confirmShot')[0];
 		if(that.state.enemyBoard[that.state.shotY][that.state.shotX] == 0){
@@ -2273,6 +2445,12 @@ class Window extends React.Component {
 					if(that.state.gamePlayer == that.state.turn && that.state.clusterAttackActive == true){
 						normalShotButton.disabled = true;
 						normalShotButton.style.backgroundColor = 'green';
+						// torpedoButton1.disabled = true;
+						// torpedoButton1.style.backgroundColor = 'green';
+						// torpedoButton2.disabled = true;
+						// torpedoButton2.style.backgroundColor = 'green';
+						// airStrikeButton.disabled = true;
+						// airStrikeButton.style.backgroundColor = 'green';
 					}
 					else{
 						clusterButton.disabled = true;
@@ -2339,7 +2517,7 @@ class Window extends React.Component {
 		return (
 				this.state.div1Shown ?
 				(
-					<div id="startPage" style={{ width: '100%', height: '1200px', fontSize: '60px', background: '#222831', overflowX: 'hidden', }}>
+					<div id="startPage" style={{ width: '100%', height: '1600px', fontSize: '60px', background: '#222831', overflowY: 'hidden', }}>
 					<h1 style={startPageHeader}>Battleships Online</h1>
 					<p style={{ height: '50px', textAlign: 'center', fontSize: '60px', color: 'white', fontWeight: 'bold' }}>{this.state.startText}</p>
 					<div id='login' style={{textAlign: 'center', color: 'white', fontSize: '40px',}}>
@@ -2367,7 +2545,7 @@ class Window extends React.Component {
 					(
 						this.state.gameShown ?
 						(
-							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '100%', display: 'inline-block', backgroundColor: '#09322E'}}>
+							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '1600px', display: 'inline-block', backgroundColor: '#09322E'}}>
 								<div className="modalDraw" hidden='true'>
 									<div className="modal_content">
 									<span className="close" onClick={this.handleClickDrawPopup}>
@@ -2399,11 +2577,14 @@ class Window extends React.Component {
 								</div>
 
 								<div style={{}}>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships lost: {this.state.shipsLostGame}</p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
+									<p style={{fontSize: '25px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships lost: {this.state.shipsLostGame}</p>
+									<p style={{fontSize: '25px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>Ships sunk: {this.state.shipsSunkGame}</p>
 									{/* <p class="coords" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '50px' }}>Current coords: column - {this.state.shotX + 1}, row - {this.state.shotY + 1} </p> */}
-									<p class="shotText" style={{ fontSize: '30px', color: 'white', display: "inline-block", marginLeft: '50px' }}> {this.state.shotText} </p>
-									<p style={{fontSize: '30px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>{this.state.turnText}</p>
+									<p class="shotText" style={{ fontSize: '25px', color: 'white', display: "inline-block", marginLeft: '50px' }}> {this.state.shotText} </p>
+									<p style={{fontSize: '25px', color: 'white', display: 'inline-block', marginLeft: '50px'}}>{this.state.turnText}</p>
+									<br></br>
+									<p class="shotText" style={{ fontSize: '25px', color: 'white', display: "inline-block", marginLeft: '50px' }}>Colors: white - shot missed, red - ship hit, black - ship sunk, grey - your ship, <br></br>
+									light blue - empty field on your board, dark blue - empty field on enemy board, yellow - aim point </p>
 								</div>
 								<div id='playerBoard' class='playerBoard' style={{ display: 'inline-block', fontSize: '60px', marginLeft: '50px', marginTop: '20px', }}>
 									<table class='playerTable'>{rowsPlayer}</table>
@@ -2416,15 +2597,15 @@ class Window extends React.Component {
 
 								<div id='gameButtons' class='gameButtons' style={{ display: 'inline-block', verticalAlign: 'top', marginLeft: '50px', marginTop: '20px', }}>
 									<br></br>
-									<button id='dreadnought' class="ship" disabled={!this.state.dreadnoughtEnabled} onClick={this.handleShipButtonClick}>Dreadnought</button>
+									<button id='dreadnought' class="ship" disabled={!this.state.dreadnoughtEnabled} onClick={this.handleShipButtonClick}>Dreadnought &#91;{this.state.dreadnoughtFields}&#93;</button>
 									<br></br>
-									<button id='cruiser' class="ship" disabled={!this.state.cruiserEnabled} onClick={this.handleShipButtonClick}>Cruiser</button>
+									<button id='cruiser' class="ship" disabled={!this.state.cruiserEnabled} onClick={this.handleShipButtonClick}>Cruiser &#91;{this.state.cruiserFields}&#93;</button>
 									<br></br>
-									<button id='submarine' class="ship" disabled={!this.state.submarineEnabled} onClick={this.handleShipButtonClick}>Submarine</button>
+									<button id='submarine' class="ship" disabled={!this.state.submarineEnabled} onClick={this.handleShipButtonClick}>Submarine &#91;{this.state.submarineFields}&#93;</button>
 									<br></br>
-									<button id='destroyer' class="ship" disabled={!this.state.destroyerEnabled} onClick={this.handleShipButtonClick}>Destroyer</button>
+									<button id='destroyer' class="ship" disabled={!this.state.destroyerEnabled} onClick={this.handleShipButtonClick}>Destroyer &#91;{this.state.destroyerFields}&#93;</button>
 									<br></br>
-									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon</button>
+									<button id='recon' class="ship" disabled={!this.state.reconEnabled} onClick={this.handleShipButtonClick}>Recon &#91;{this.state.reconFields}&#93;</button>
 									<br></br>
 									<br></br>
 									<button id='resetBoard' class="resetBoard" onClick={this.handleResetBoardClick} >Reset board</button>
@@ -2455,14 +2636,16 @@ class Window extends React.Component {
 						)
 						:
 						(
-								<div id="startPage" style={{ backgroundImage: `url(${background})`, width: '100%', height: '1200px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
+								// <div id="startPage" style={{ backgroundImage: `url(${background})`, width: '100%', height: '1600px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
+								<div id="startPage" style={{ width: '100%', height: '1600px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
 							<br />
 								<div id="startHeader" style={{display: 'flex', flexDirection: 'row', marginLeft: '38%', }}>
-									<h1 style={startPageHeader}>Battleships Online</h1>
+									<h1 style={{margin: 0, padding: 0, marginLeft: '100px',	color: 'white',}}>Battleships Online</h1>
 									<button class='logoutButton' id='logoutButton' onClick={this.chooseLogout} style={logoutButtonStyle}>Logout</button>
 								</div>
 							<br />
-								<div id="pageAfterLogin" class="pageAfterLogin" style={{ backgroundImage: `url(${background})`, display: 'flex', flexDirection: 'row', }}>
+								{/* <div id="pageAfterLogin" class="pageAfterLogin" style={{ backgroundImage: `url(${background})`, display: 'flex', flexDirection: 'row', }}> */}
+								<div id="pageAfterLogin" class="pageAfterLogin" style={{ display: 'flex', flexDirection: 'row', }}>
 									<div className="modalDelete" hidden='true'>
 										<div className="modal_content">
 										<span className="close" onClick={this.handleClickCloseDeletePopup}>
@@ -2531,7 +2714,8 @@ class Window extends React.Component {
 									</div>
 
 									<div id="statistics" style={{display: 'inline-block', marginTop: '0px', marginRight: '50px', marginLeft: '70px', backgroundColor: 'grey', width: '600px', height: '750px', overflowX: 'hidden', overflowY: 'auto',}}>
-										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px',}}>My statistics</h2>
+										<h2 style={{ marginLeft: '10px', color: 'white', minHeight: '50px', display: 'inline-block'}}>My statistics</h2>
+										<h2 style={{ marginRight: '10px', color: 'white', minHeight: '50px', display: 'inline-block', float: 'right'}}>{this.state.username}</h2>
 										<hr></hr>
 										<p id="games_played" style={{textAlign: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold'}}>
 											Games played: {this.state.games_played}
@@ -2568,12 +2752,11 @@ class Window extends React.Component {
 									<button style={{ visibility: this.state.joinRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.leaveRoom} class='joinRoomButton'>Leave room</button>
 									<button style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px' }} onClick={this.deleteYourRoom} class='joinRoomButton'>Delete your room</button>
 									<br></br>
-									<button style={{ visibility: this.state.rejoinCurrentGameHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='joinRoomButton'>Rejoin your game</button>
-									<div style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white' }}>
-										<div style={{ display: this.state.customRulesDisabledVisibility }}> Map size: {this.state.mapSize}, custom rules enabled: <p style={{ display: this.state.customRule1Visibility, }}>one field of space,&nbsp;</p><p style={{ display: this.state.customRule2Visibility, }}>torpedo attack,&nbsp;</p><p style={{ display: this.state.customRule3Visibility, }}>cluster attack,&nbsp;</p><p style={{ display: this.state.customRule4Visibility, }}>airstrike</p></div>
-									</div>
-									<br></br>
 									<p style={{ display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white', textAlign: 'center' }}> {this.state.playerInRoom} </p>
+									<button style={{ visibility: this.state.rejoinCurrentGameHidden, marginLeft: '50px' }} onClick={this.rejoinGame} class='rejoinGameButton'>Rejoin your game</button>
+									<div style={{ visibility: this.state.deleteRoomHidden, display: 'inline-block', marginLeft: '70px', fontSize: '30px', color: 'white' }}>
+										<div style={{ display: this.state.customRulesDisabledVisibility }}> Map size: {this.state.mapSize}, custom rules enabled: <p style={{ display: this.state.customRule4Visibility, }}>one field of space,&nbsp;</p><p style={{ display: this.state.customRule1Visibility, }}>torpedo attack,&nbsp;</p><p style={{ display: this.state.customRule2Visibility, }}>cluster attack,&nbsp;</p><p style={{ display: this.state.customRule3Visibility, }}>airstrike</p></div>
+									</div>
 
 								</div>
 							</div>
@@ -2581,7 +2764,7 @@ class Window extends React.Component {
 					)
 					:
 					(
-						<div id="createRoomPage" style={{ backgroundImage: `url(${radar})`, width: '100%', height: '1200px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
+						<div id="createRoomPage" style={{ backgroundImage: `url(${radar})`, width: '100%', height: '1600px', fontSize: '20px', background: '#222831', overflowX: 'hidden', }}>
 						<br />
 							<div id="startHeader" style={{display: 'flex', flexDirection: 'row', marginLeft: '38%', }}>
 								<h1 style={startPageHeader}>Battleships Online</h1>

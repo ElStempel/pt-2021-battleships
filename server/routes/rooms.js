@@ -181,13 +181,209 @@ router.post('/fetch-end', async function(req, res, next) {
   }
 });
 
+//BOT
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function check_ship_interference(ship, map, map_size, force_gap){
+//true to interferencja
+  if(ship.course == 0){
+      if((ship.bow.y + (ship.size - 1)) < 0 || (ship.bow.y + (ship.size - 1)) >= map_size)
+          return true;
+      for(var segment = 0; segment < ship.size; segment++){
+          if(map[ship.bow.y + segment][ship.bow.x] != 0)
+              return true;
+      }
+      //check if surrounding fields are empty
+      if(force_gap){
+        //top
+        try{
+          if(map[ship.bow.y - 1][ship.bow.x] != 0)
+            return true;
+        } catch(e){}
+        //bottom
+        try{
+          if(map[ship.bow.y + ship.size][ship.bow.x] != 0)
+            return true;
+        } catch(e){}
+        //left side
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y + segment][ship.bow.x - 1] != 0)
+                return true;
+          }
+        } catch(e){}
+        //right side
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y + segment][ship.bow.x + 1] != 0)
+                return true;
+          }
+        } catch(e){}
+      }
+      return false;
+  } else if(ship.course == 2){
+      if((ship.bow.y - (ship.size - 1)) < 0 || (ship.bow.y - (ship.size - 1)) >= map_size)
+          return true;
+      for(var segment = 0; segment < ship.size; segment++){
+          if(map[ship.bow.y - segment][ship.bow.x] != 0)
+              return true;
+      }
+      //check if surrounding fields are empty
+      if(force_gap){
+        //bottom
+        try{
+          if(map[ship.bow.y + 1][ship.bow.x] != 0)
+            return true;
+        } catch(e){}
+        //top
+        try{
+          if(map[ship.bow.y - ship.size][ship.bow.x] != 0)
+            return true;
+        } catch(e){}
+        //left side
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y - segment][ship.bow.x - 1] != 0)
+                return true;
+          }
+        } catch(e){}
+        //right side
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y - segment][ship.bow.x + 1] != 0)
+                return true;
+          }
+        } catch(e){}
+      }
+      return false;
+  } else if(ship.course == 1){
+      if((ship.bow.x - (ship.size - 1)) < 0 || (ship.bow.x - (ship.size - 1)) >= map_size)
+          return true;
+      for(var segment = 0; segment < ship.size; segment++){
+          if(map[ship.bow.y][ship.bow.x - segment] != 0)
+              return true;
+      }
+      //check if surrounding fields are empty
+      if(force_gap){
+        //right side
+        try{
+          if(map[ship.bow.y][ship.bow.x + 1] != 0)
+            return true;
+        } catch(e){}
+        //left side
+        try{
+          if(map[ship.bow.y][ship.bow.x - ship.size] != 0)
+            return true;
+        } catch(e){}
+        //top side
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y - 1][ship.bow.x - segment] != 0)
+                return true;
+          }
+        } catch(e){}
+
+        //bottom side
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y + 1][ship.bow.x - segment] != 0)
+                return true;
+          }
+        } catch(e){}
+      }
+      return false;
+  } else if(ship.course == 3){
+      if((ship.bow.x + (ship.size - 1)) < 0 || (ship.bow.x + (ship.size - 1)) >= map_size)
+          return true;
+      for(var segment = 0; segment < ship.size; segment++){
+          if(map[ship.bow.y][ship.bow.x + segment] != 0)
+              return true;
+      }
+      //check if surrounding fields are empty
+      if(force_gap){
+        //left side
+        try{
+          if(map[ship.bow.y][ship.bow.x - 1] != 0)
+            return true;
+        } catch(e){}
+        //right side
+        try{
+          if(map[ship.bow.y][ship.bow.x + ship.size] != 0)
+            return true;
+        } catch(e){}
+        //top side
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y - 1][ship.bow.x + segment] != 0)
+                return true;
+          }
+        } catch(e){}
+        //bottom side
+        try{
+          for(var segment = -1; segment <= ship.size; segment++){
+            if(map[ship.bow.y + 1][ship.bow.x + segment] != 0)
+                return true;
+          }
+        } catch(e){}
+      }
+      return false;
+  }
+}
+
+function add_ship(ship, map){
+  for(var segment = 0; segment < ship.size; segment++){
+      if(ship.course == 0){
+          map[ship.bow.y + segment][ship.bow.x] = ship.symbol
+      } else if(ship.course == 2){
+          map[ship.bow.y - segment][ship.bow.x] = ship.symbol
+      } else if(ship.course == 1){
+          map[ship.bow.y][ship.bow.x - segment] = ship.symbol
+      } else if(ship.course == 3){
+          map[ship.bow.y][ship.bow.x + segment] = ship.symbol
+      }
+  }
+  return map;
+}
+
+function init_bot_map(game){
+  var map = game.p2_map;
+  const size = game.map_size;
+  var ships = { s1:{size: 5, symbol: 10, bow: {}},
+                s2:{size: 4, symbol: 20, bow: {}},
+                s3:{size: 3, symbol: 30, bow: {}},
+                s4:{size: 3, symbol: 40, bow: {}},
+                s5:{size: 2, symbol: 50, bow: {}}
+              };
+  var bad_placement = false;
+  for(s in ships){
+      do{
+          ships[s].bow.x = getRandomInt(0, size)
+          ships[s].bow.y = getRandomInt(0, size)
+          for(var i = 0; i < 4; i++){
+              ships[s].course = getRandomInt(i, 4)
+              if(!check_ship_interference(ships[s], map, size, game.force_gap))
+                  break;
+          }
+          if(check_ship_interference(ships[s], map, size, game.force_gap))
+              bad_placement = true;
+          else
+              bad_placement = false;
+      } while(bad_placement)
+      
+      map = add_ship(ships[s], map)       
+  }
+
+  return map;
+}
+
 // START A GAME
 router.post('/start-game', async function(req, res, next) {
   let user_in_room_check = await Room.findOne({_id: req.body.room_id, player_1: req.body.player_1_id});
   if (user_in_room_check){
-    if(user_in_room_check.player_2 == null){
-      return res.status(405).send("There is ony one player in room");
-    }
     //ważne zmienne
     let size = 10;
     if (user_in_room_check.custom_rules.enabled == true && user_in_room_check.custom_rules.map_size != 10){
@@ -241,11 +437,27 @@ router.post('/start-game', async function(req, res, next) {
         attack3: shot_3
       }
     })
-    try {
-      await new_game.save()
+    
+    if(new_game.player_2 == null){
       res.status(201).send(new_game);
-    } catch (error) {
-      res.status(400).send(error)
+      //BOT
+      new_game.p2_map = await init_bot_map(new_game);
+      new_game.turn = 1;
+      new_game.p2_ready = true;
+      try{
+        await new_game.save()
+      } catch (error) {
+        console.log(error)
+        res.status(400).send(error)
+      }
+    } else {
+      try {
+        await new_game.save()
+        res.status(201).send(new_game);
+      } catch (error) {
+        console.log(error)
+        res.status(400).send(error)
+      }
     }
   } else {
     return res.status(400).send("Bad data");
@@ -257,7 +469,9 @@ router.post('/end-game', async function(req, res, next) {
   let game_to_end = await Game.findOne({_id: req.body.game_id, player_1: req.body.player_1_id});
   if (game_to_end){
     var p1 = await User.findOne({_id: req.body.player_1_id})
-    var p2 = await User.findOne({_id: game_to_end.player_2._id})
+    if(game_to_end.player_2 != null){
+      var p2 = await User.findOne({_id: game_to_end.player_2})
+    }
     if (p1 && p2){
       p1.stats.games_played += 1;
       p1.stats.ships_sunk += game_to_end.p1.ships_sunk;
