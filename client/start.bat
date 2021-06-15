@@ -1,0 +1,1 @@
+set HTTPS=true&&set SSL_CRT_FILE=certs\selfsigned.crt&&set SSL_KEY_FILE=certs\selfsigned.key&&npm start
