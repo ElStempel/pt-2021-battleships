@@ -2545,7 +2545,7 @@ class Window extends React.Component {
 					(
 						this.state.gameShown ?
 						(
-							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '1600px', display: 'inline-block', backgroundColor: '#09322E'}}>
+							<div id='gamePage' class='gamePage' style={{ width: '100%', height: '1900px', display: 'inline-block', backgroundColor: '#09322E'}}>
 								<div className="modalDraw" hidden='true'>
 									<div className="modal_content">
 									<span className="close" onClick={this.handleClickDrawPopup}>
